@@ -21,11 +21,11 @@ public class HM
 
   static final String DATA_PATH = "data/";
   static final String PROPERTIES_FN = "hm.properties";
-  static final String LOG_FN = "log.txt";
+  private static final String LOG_FN = "log.txt";
 
   static String version = "2016.10.21e";
   static Properties properties = null;
-  static TempMonProcess tempMonProcess;
+  private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
 
