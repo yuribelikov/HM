@@ -1,0 +1,10 @@
+#rm /opt/hm/hm.iml
+
+./update.sh
+
+#cp /opt/hm/log* /opt/yandex.disk/hm/
+
+/sbin/reboot
+
+
+
