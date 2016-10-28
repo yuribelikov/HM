@@ -10,7 +10,7 @@ import java.util.Map;
 public class YDSaveProcess extends Thread
 {
   private Map<String, List<String>> dataMap = new LinkedHashMap<>();
-  private long lastSync = System.currentTimeMillis();
+  private long lastSync = -1;
   private long syncDelay = 300;
   boolean isAlive = true;
 
@@ -41,7 +41,7 @@ public class YDSaveProcess extends Thread
         {
         }
 
-        if (dataMap.isEmpty() || (System.currentTimeMillis() < lastSync + syncDelay * 1000))   // sync once per X (syncDelay) seconds
+        if (dataMap.isEmpty() || (lastSync != -1 && System.currentTimeMillis() < lastSync + syncDelay * 1000))   // sync once per X (syncDelay) minutes
         {
           sleep(1000);
           continue;
@@ -55,7 +55,7 @@ public class YDSaveProcess extends Thread
         if (!Files.exists(Paths.get(HM.YD_DATA_PATH)))
         {
           HM.log("YDSP, " + HM.YD_DATA_PATH + " is unavailable");
-          sleep(60000);
+          sleep(5000);
           continue;
         }
 
@@ -69,10 +69,10 @@ public class YDSaveProcess extends Thread
       }
       catch (Exception e)
       {
-        HM.log("YDSP, error: " + e.getMessage());
+        HM.log("YDSP, " + e.getMessage());
         try
         {
-          sleep(60000);
+          sleep(5000);
         }
         catch (InterruptedException e1)
         {
