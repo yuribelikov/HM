@@ -10,10 +10,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-public class TempMonProcess extends Thread
+class TempMonProcess extends Thread
 {
-  static final String STATUS_FN = "status.txt";
-  static final String RECENT_FN = "recent.csv";
+  private static final String STATUS_FN = "status.txt";
+  private static final String RECENT_FN = "recent.csv";
 
   boolean isAlive = true;
   long lastSuccess = System.currentTimeMillis();
@@ -24,11 +24,10 @@ public class TempMonProcess extends Thread
   private static List<DataRow> monthlyData = new ArrayList<>();   // per 4 hours for 1 month (100 * 6 * 30  =  18000)
 
 
-  public TempMonProcess()
+  TempMonProcess()
   {
     start();
   }
-
 
   public void run()
   {
