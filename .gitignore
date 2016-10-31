@@ -1,3 +1,7 @@
 .idea/*
 HM.iml
 out/*
+cmd.sh.done
+cmd0.sh
+data/*
+log*
