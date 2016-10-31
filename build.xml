@@ -9,6 +9,8 @@
             <fileset dir="." includes="hm.jar"/>
             <fileset dir="." includes="build.xml"/>
             <fileset dir="." includes="src/**/*"/>
+            <fileset dir="." includes="js/**/*"/>
+            <fileset dir="." includes="*.html"/>
         </copy>
 
     </target>

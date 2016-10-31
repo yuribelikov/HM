@@ -13,10 +13,14 @@ function main()
  */
 function HMClient()
 {
+  this.version = "1.03";
+
   /** @type {HTMLCanvasElement} */
   this.canvas;
   /** @type {number} */
   this.updated = 0;
+  /** @type {number} */
+  this.dataUpdated = 0;
 
   /** @type {Array<number>} */
   this.dataTimes;
@@ -25,10 +29,12 @@ function HMClient()
   /** @type {Array<Array<number>>} */
   this.data;
 
+  /** @type {Number} */
+  this.lastDataTime = 0;
   /** @type {Object} */
   this.lastValues = {};
 
-  this.started = new Date().getTime();
+  //this.started = new Date().getTime();
   this.start();
 }
 
@@ -112,11 +118,15 @@ HMClient.prototype.dataReceived = function (csv)
       this.data[i - 1][j - 1] = this.parseNumber(cells[j]);
   }
 
+  this.lastDataTime = this.dataTimes[this.dataTimes.length - 1];
+  log(this.lastDataTime);
   this.lastValues = {};
-  for (var i = 0; i < this.dataHeaders.length; i++)
+  for (i = 0; i < this.dataHeaders.length; i++)
     this.lastValues[this.dataHeaders[i]] = this.data[this.data.length - 1][i];
 
+  log(this.lastValues);
   //this.dataTimes[this.dataTimes.length - 1] = this.started;
+  this.dataUpdated = new Date().getTime();
   this.redraw(true);
 };
 
@@ -149,24 +159,26 @@ HMClient.prototype.drawHeader = function ()
   ctx.font = "30pt Calibri";
   var dy = HMClient.HEADER_H - 10;
   var now = new Date().getTime();
-  var updatedAgo = Math.floor((now - this.updated) / 1000);
+  var updatedAgo = Math.floor((now - this.dataUpdated) / 1000);
+  ctx.fillStyle = "pink";
+  ctx.fillText(this.formatTime(this.dataUpdated), this.canvas.width - 390, dy);
   ctx.fillStyle = "white";
-  ctx.fillText(this.formatTime(this.updated), this.canvas.width - 390, dy);
   ctx.fillText(this.formatTime(now), this.canvas.width - 156, dy);
   ctx.fillStyle = this.colorFromValue((updatedAgo - HMClient.REFRESH_PERIOD * 0.7) / HMClient.REFRESH_PERIOD);
   ctx.fillText(this.formatNumber(updatedAgo), this.canvas.width - 220, dy);
 
   if (this.dataTimes)
   {
-    var lastDataTime = this.dataTimes[this.dataTimes.length - 1];
-    updatedAgo = Math.floor((now - lastDataTime) / 1000);
-    ctx.fillStyle = "white";
-    ctx.fillText(this.formatTime(lastDataTime, true), 2, dy);
+    updatedAgo = Math.floor((now - this.lastDataTime) / 1000);
+    ctx.fillStyle = "yellow";
+    ctx.fillText(this.formatTime(this.lastDataTime, true), 2, dy);
     ctx.fillStyle = this.colorFromValue((updatedAgo - HMClient.DATA_UPDATE_TIMEOUT * 0.7) / HMClient.DATA_UPDATE_TIMEOUT);
-    ctx.fillText(this.formatNumber(Math.floor((now - lastDataTime) / 1000)), 400, dy);
+    ctx.fillText(this.formatNumber(Math.floor((now - this.lastDataTime) / 1000)), 420, dy);
   }
 
   ctx.clearRect(0, this.canvas.height - 20, this.canvas.width, 20);
+  ctx.fillStyle = "white";
+  ctx.fillText(this.version, 2, this.canvas.height - 2);
   //noinspection JSUnresolvedVariable
   var text = this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 2);
@@ -179,47 +191,59 @@ HMClient.prototype.drawHeader = function ()
 HMClient.prototype.drawData = function ()
 {
   var ctx = this.canvas.getContext("2d");
+  ctx.beginPath();
+
   ctx.clearRect(0, HMClient.HEADER_H, this.canvas.width, this.canvas.height - HMClient.HEADER_H);
   var x2 = this.canvas.width / 2;
   var dy = HMClient.HEADER_H + 420;
 
-  log(this.lastValues);
   ctx.font = "400pt Calibri";
   var t = this.lastValues["warmOut.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
-  ctx.fillText(t, 10, dy);
+  ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.fillText(t.toFixed(0), 10, dy);
 
   ctx.font = "180pt Calibri";
   t = this.lastValues["warm.floor.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
-  ctx.fillText(t.toFixed(0), x2 + 170, dy - 200);
+  ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.fillText(t.toFixed(0), x2 + 170, dy - 220);
 
   ctx.font = "180pt Calibri";
   t = this.lastValues["warmIn.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
-  ctx.fillText(t, x2 + 170, dy);
+  ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.fillText(t.toFixed(0), x2 + 170, dy + 20);
 
   dy += 500;
   ctx.font = "300pt Calibri";
   t = this.lastValues["inside.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
+  ctx.fillStyle = this.tempColorFromValue(t);
   ctx.fillText(t.toFixed(0), 40, dy);
 
-  ctx.font = "200pt Calibri";
+  ctx.font = "300pt Calibri";
   t = this.lastValues["outside.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
+  ctx.fillStyle = this.tempColorFromValue(t);
   ctx.fillText(t.toFixed(0), x2 + 100, dy);
 
   dy += 400;
   ctx.font = "200pt Calibri";
   t = this.lastValues["room.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
-  ctx.fillText(t.toFixed(1), 40, dy);
+  ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.fillText(t.toFixed(0), 40, dy);
 
-  ctx.font = "150pt Calibri";
+  ctx.font = "200 Calibri";
   t = this.lastValues["bedroom.t"];
-  ctx.fillStyle = this.tempColorFromValue(t );
-  ctx.fillText(t.toFixed(1), x2 + 100, dy);
+  ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.fillText(t.toFixed(0), x2 + 100, dy);
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "red";
+  ctx.rect(1, HMClient.HEADER_H - 2, this.canvas.width, 480);
+  ctx.rect(620, HMClient.HEADER_H - 2, this.canvas.width - 621, 240);
+  ctx.rect(620, HMClient.HEADER_H - 2, this.canvas.width - 621, 480);
+
+  ctx.rect(1, HMClient.HEADER_H - 2 + 480, this.canvas.width - 2, 501);
+  ctx.rect(1, HMClient.HEADER_H - 2 + 981, this.canvas.width - 2, 401);
+  ctx.rect(1, HMClient.HEADER_H - 2 + 480, 500, 902);
+  ctx.stroke();
 
   ctx.closePath();
 };
