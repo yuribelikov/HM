@@ -13,7 +13,7 @@ function main()
  */
 function HMClient()
 {
-  this.version = "1.03";
+  this.version = "1.04";
 
   /** @type {HTMLCanvasElement} */
   this.canvas;
@@ -33,6 +33,9 @@ function HMClient()
   this.lastDataTime = 0;
   /** @type {Object} */
   this.lastValues = {};
+
+  /** @type {Boolean} */
+  this.drawLabels = false;
 
   //this.started = new Date().getTime();
   this.start();
@@ -91,6 +94,13 @@ HMClient.prototype.run = function ()
   }
   else
     this.redraw(false);
+
+  var drawLabels = (now / 1000) % 10 >= 6;
+  if (drawLabels != this.drawLabels)
+  {
+    this.drawLabels = drawLabels;
+    this.redraw(true);
+  }
 
   window.requestAnimationFrame(this.run.bind(this));
 };
@@ -190,6 +200,7 @@ HMClient.prototype.drawHeader = function ()
  */
 HMClient.prototype.drawData = function ()
 {
+  log("this.drawLabels: " + this.drawLabels);
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
 
@@ -197,42 +208,85 @@ HMClient.prototype.drawData = function ()
   var x2 = this.canvas.width / 2;
   var dy = HMClient.HEADER_H + 420;
 
-  ctx.font = "400pt Calibri";
-  var t = this.lastValues["warmOut.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), 10, dy);
+  if (this.drawLabels)
+  {
+    ctx.font = "120pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Выход", 10, dy - 290);
+    ctx.fillText("из печи", 10, dy - 170);
+  }
+  else
+    ctx.font = "400pt Calibri";
+  this.printTemp(ctx, "warmOut.t", 10, dy);
 
-  ctx.font = "180pt Calibri";
-  t = this.lastValues["warm.floor.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), x2 + 170, dy - 220);
+  if (this.drawLabels)
+  {
+    ctx.font = "60pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Пол в ванной", x2 + 50, dy - 330);
+    ctx.font = "80pt Calibri";
+  }
+  else
+    ctx.font = "180pt Calibri";
+  this.printTemp(ctx, "warm.floor.t", x2 + 170, dy - 220);
 
-  ctx.font = "180pt Calibri";
-  t = this.lastValues["warmIn.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), x2 + 170, dy + 20);
+  if (this.drawLabels)
+  {
+    ctx.font = "60pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Вход в печь", x2 + 50, dy - 100);
+    ctx.font = "80pt Calibri";
+  }
+  else
+    ctx.font = "180pt Calibri";
+  this.printTemp(ctx, "warmIn.t", x2 + 170, dy + 20);
 
   dy += 500;
-  ctx.font = "300pt Calibri";
-  t = this.lastValues["inside.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), 40, dy);
+  if (this.drawLabels)
+  {
+    ctx.font = "80pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Гостиная", 10, dy - 280);
+    ctx.font = "200pt Calibri";
+  }
+  else
+    ctx.font = "300pt Calibri";
+  this.printTemp(ctx, "inside.t", 40, dy);
 
-  ctx.font = "300pt Calibri";
-  t = this.lastValues["outside.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), x2 + 100, dy);
+  if (this.drawLabels)
+  {
+    ctx.font = "80pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Улица", x2 - 50, dy - 270);
+    ctx.font = "200pt Calibri";
+  }
+  else
+    ctx.font = "300pt Calibri";
+  this.printTemp(ctx, "outside.t", x2 + 100, dy);
 
   dy += 400;
-  ctx.font = "200pt Calibri";
-  t = this.lastValues["room.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), 40, dy);
+  if (this.drawLabels)
+  {
+    ctx.font = "90pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Кабинет", 10, dy - 240);
+    ctx.font = "160pt Calibri";
+  }
+  else
+    ctx.font = "200pt Calibri";
+  this.printTemp(ctx, "room.t", 40, dy);
 
-  ctx.font = "200 Calibri";
-  t = this.lastValues["bedroom.t"];
-  ctx.fillStyle = this.tempColorFromValue(t);
-  ctx.fillText(t.toFixed(0), x2 + 100, dy);
+  if (this.drawLabels)
+  {
+    ctx.font = "90pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Спальня", x2 - 50, dy - 240);
+    ctx.font = "160pt Calibri";
+  }
+  else
+    ctx.font = "200 Calibri";
+  this.printTemp(ctx, "bedroom.t", x2 + 100, dy);
+
 
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
@@ -249,6 +303,23 @@ HMClient.prototype.drawData = function ()
 };
 
 /**
+ * @this {HMClient}
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} key
+ * @param {number} x
+ * @param {number} y
+ */
+HMClient.prototype.printTemp = function (ctx, key, x, y)
+{
+  var t = this.lastValues[key];
+  if (t)
+    ctx.fillStyle = this.tempColorFromValue(t);
+
+  ctx.fillText(t ? t.toFixed() : "?", x, y);
+};
+
+/**
+ }
  * @this {HMClient}
  * @param {number} value
  * @return {string}
