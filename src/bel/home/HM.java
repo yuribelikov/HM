@@ -14,7 +14,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.10.22";
+  static String version = "2016.10.23";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -30,9 +30,6 @@ public class HM
 
       log("--------------------------------------------------------------");
       log("version: " + version);
-
-      log(new Date());
-      log(Calendar.getInstance().getTimeZone());
 
       reloadProperties();
 
