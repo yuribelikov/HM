@@ -7,23 +7,15 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
-import java.util.TimeZone;
 
 public class HM
 {
-  static final TimeZone TZ = TimeZone.getTimeZone("Europe/Moscow");
   static final SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
-
-  static
-  {
-    DF.setTimeZone(TZ);
-  }
-
   static final String DATA_PATH = "data/";
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.10.21e";
+  static String version = "2016.10.22";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -75,11 +67,10 @@ public class HM
           String[] sa = rebootOn.split(":");
           rebootHour = Integer.parseInt(sa[0]);
           rebootMinute = Integer.parseInt(sa[1]);
-        }
-        else
+        } else
           rebootMinute = Integer.parseInt(rebootOn);
 
-        Calendar c = Calendar.getInstance(TZ);
+        Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
         log("hour: " + hour + ", minute: " + minute + ", rebootOn: " + rebootOn);
