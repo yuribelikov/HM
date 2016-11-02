@@ -5,8 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Properties;
+import java.util.*;
 
 public class HM
 {
@@ -31,6 +30,9 @@ public class HM
 
       log("--------------------------------------------------------------");
       log("version: " + version);
+
+      log(new Date());
+      log(Calendar.getInstance().getTimeZone());
 
       reloadProperties();
 
