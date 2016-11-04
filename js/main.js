@@ -13,21 +13,21 @@ function main()
  */
 function HMClient()
 {
-  this.version = "1.04";
+  this.version = "1.1";
 
   /** @type {HTMLCanvasElement} */
-  this.canvas;
+  this.canvas = null;
   /** @type {number} */
   this.updated = 0;
   /** @type {number} */
   this.dataUpdated = 0;
 
   /** @type {Array<number>} */
-  this.dataTimes;
+  this.dataTimes = null;
   /** @type {Array<string>} */
-  this.dataHeaders;
+  this.dataHeaders = null;
   /** @type {Array<Array<number>>} */
-  this.data;
+  this.data = null;
 
   /** @type {Number} */
   this.lastDataTime = 0;
@@ -46,7 +46,7 @@ HMClient.GRAPH_W = 300;
 HMClient.GRAPH_T_H = 60;
 HMClient.GRAPH_H_H = 100;
 HMClient.REFRESH_PERIOD = 10;
-HMClient.DATA_UPDATE_TIMEOUT = 60;
+HMClient.DATA_UPDATE_TIMEOUT = 80;
 
 /**
  * @this {HMClient}
@@ -163,7 +163,7 @@ HMClient.prototype.drawHeader = function ()
   ctx.clearRect(0, 0, this.canvas.width, HMClient.HEADER_H);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  ctx.rect(1, 1, this.canvas.width - 2, HMClient.HEADER_H - 2);
+  ctx.rect(20, 1, this.canvas.width - 20, HMClient.HEADER_H - 2);
   ctx.stroke();
 
   ctx.font = "30pt Calibri";
@@ -181,17 +181,17 @@ HMClient.prototype.drawHeader = function ()
   {
     updatedAgo = Math.floor((now - this.lastDataTime) / 1000);
     ctx.fillStyle = "yellow";
-    ctx.fillText(this.formatTime(this.lastDataTime, true), 2, dy);
+    ctx.fillText(this.formatTime(this.lastDataTime, true), 20, dy);
     ctx.fillStyle = this.colorFromValue((updatedAgo - HMClient.DATA_UPDATE_TIMEOUT * 0.7) / HMClient.DATA_UPDATE_TIMEOUT);
-    ctx.fillText(this.formatNumber(Math.floor((now - this.lastDataTime) / 1000)), 420, dy);
+    ctx.fillText(this.formatNumber(Math.floor((now - this.lastDataTime) / 1000)), 440, dy);
   }
 
   ctx.clearRect(0, this.canvas.height - 20, this.canvas.width, 20);
   ctx.fillStyle = "white";
-  ctx.fillText(this.version, 2, this.canvas.height - 2);
+  ctx.fillText(this.version, 20, this.canvas.height - 40);
   //noinspection JSUnresolvedVariable
   var text = this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
-  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 2);
+  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 40);
   ctx.closePath();
 };
 
@@ -217,7 +217,7 @@ HMClient.prototype.drawData = function ()
   }
   else
     ctx.font = "360pt Calibri";
-  this.printTemp(ctx, "warmOut.t", 10, dy);
+  this.printTemp(ctx, "warmOut.t", 20, dy);
 
   if (this.drawLabels)
   {
@@ -287,12 +287,12 @@ HMClient.prototype.drawData = function ()
     ctx.font = "240 Calibri";
   this.printTemp(ctx, "bedroom.t", x2 + 100, dy);
 
-  dy += 280;
+  dy += 300;
   if (this.drawLabels)
   {
     ctx.font = "70pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Зим. сад", 30, dy - 150);
+    ctx.fillText("Зим. сад", 30, dy - 170);
     ctx.font = "140pt Calibri";
   }
   else
@@ -303,7 +303,7 @@ HMClient.prototype.drawData = function ()
   {
     ctx.font = "70pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("2й этаж", x2 + 50, dy - 150);
+    ctx.fillText("2й этаж", x2 + 50, dy - 170);
     ctx.font = "140pt Calibri";
   }
   else
@@ -319,8 +319,8 @@ HMClient.prototype.drawData = function ()
 
   ctx.rect(20, HMClient.HEADER_H - 2 + 480, this.canvas.width - 20, 401);
   ctx.rect(20, HMClient.HEADER_H - 2 + 881, this.canvas.width - 20, 321);
-  ctx.rect(20, HMClient.HEADER_H - 2 + 1202, this.canvas.width - 20, 261);
-  ctx.rect(20, HMClient.HEADER_H - 2 + 480, 500, 983);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 1202, this.canvas.width - 20, 281);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 480, 500, 1003);
   ctx.stroke();
 
   ctx.closePath();
