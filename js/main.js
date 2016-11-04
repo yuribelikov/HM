@@ -210,43 +210,43 @@ HMClient.prototype.drawData = function ()
 
   if (this.drawLabels)
   {
-    ctx.font = "120pt Calibri";
+    ctx.font = "110pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Выход", 10, dy - 290);
-    ctx.fillText("из печи", 10, dy - 170);
+    ctx.fillText("Выход", 20, dy - 290);
+    ctx.fillText("из печи", 20, dy - 170);
   }
   else
-    ctx.font = "400pt Calibri";
+    ctx.font = "360pt Calibri";
   this.printTemp(ctx, "warmOut.t", 10, dy);
 
   if (this.drawLabels)
   {
-    ctx.font = "60pt Calibri";
+    ctx.font = "46pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Пол в ванной", x2 + 50, dy - 330);
+    ctx.fillText("Пол в ванной", x2 + 90, dy - 340);
     ctx.font = "80pt Calibri";
   }
   else
     ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "warm.floor.t", x2 + 170, dy - 220);
+  this.printTemp(ctx, "warm.floor.t", x2 + 160, dy - 220);
 
   if (this.drawLabels)
   {
-    ctx.font = "60pt Calibri";
+    ctx.font = "50pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Вход в печь", x2 + 50, dy - 100);
+    ctx.fillText("Вход в печь", x2 + 90, dy - 100);
     ctx.font = "80pt Calibri";
   }
   else
     ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "warmIn.t", x2 + 170, dy + 20);
+  this.printTemp(ctx, "warmIn.t", x2 + 160, dy + 20);
 
-  dy += 500;
+  dy += 410;
   if (this.drawLabels)
   {
-    ctx.font = "80pt Calibri";
+    ctx.font = "75pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Гостиная", 10, dy - 280);
+    ctx.fillText("Гостиная", 30, dy - 260);
     ctx.font = "200pt Calibri";
   }
   else
@@ -255,48 +255,72 @@ HMClient.prototype.drawData = function ()
 
   if (this.drawLabels)
   {
-    ctx.font = "80pt Calibri";
+    ctx.font = "75pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Улица", x2 - 50, dy - 270);
+    ctx.fillText("Улица", x2 + 50, dy - 260);
     ctx.font = "200pt Calibri";
   }
   else
     ctx.font = "300pt Calibri";
   this.printTemp(ctx, "outside.t", x2 + 100, dy);
 
-  dy += 400;
+  dy += 320;
   if (this.drawLabels)
   {
-    ctx.font = "90pt Calibri";
+    ctx.font = "75pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Кабинет", 10, dy - 240);
+    ctx.fillText("Кабинет", 30, dy - 190);
     ctx.font = "160pt Calibri";
   }
   else
-    ctx.font = "200pt Calibri";
+    ctx.font = "240pt Calibri";
   this.printTemp(ctx, "room.t", 40, dy);
 
   if (this.drawLabels)
   {
-    ctx.font = "90pt Calibri";
+    ctx.font = "75pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText("Спальня", x2 - 50, dy - 240);
+    ctx.fillText("Спальня", x2 + 50, dy - 190);
     ctx.font = "160pt Calibri";
   }
   else
-    ctx.font = "200 Calibri";
+    ctx.font = "240 Calibri";
   this.printTemp(ctx, "bedroom.t", x2 + 100, dy);
+
+  dy += 280;
+  if (this.drawLabels)
+  {
+    ctx.font = "70pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("Зим. сад", 30, dy - 150);
+    ctx.font = "140pt Calibri";
+  }
+  else
+    ctx.font = "200pt Calibri";
+  this.printTemp(ctx, "winter.garden.t", 40, dy);
+
+  if (this.drawLabels)
+  {
+    ctx.font = "70pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText("2й этаж", x2 + 50, dy - 150);
+    ctx.font = "140pt Calibri";
+  }
+  else
+    ctx.font = "200 Calibri";
+  this.printTemp(ctx, "second.floor.t", x2 + 100, dy);
 
 
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  ctx.rect(1, HMClient.HEADER_H - 2, this.canvas.width, 480);
-  ctx.rect(620, HMClient.HEADER_H - 2, this.canvas.width - 621, 240);
-  ctx.rect(620, HMClient.HEADER_H - 2, this.canvas.width - 621, 480);
+  ctx.rect(20, HMClient.HEADER_H - 2, this.canvas.width, 480);
+  ctx.rect(560, HMClient.HEADER_H - 2, this.canvas.width - 561, 240);
+  ctx.rect(560, HMClient.HEADER_H - 2, this.canvas.width - 561, 480);
 
-  ctx.rect(1, HMClient.HEADER_H - 2 + 480, this.canvas.width - 2, 501);
-  ctx.rect(1, HMClient.HEADER_H - 2 + 981, this.canvas.width - 2, 401);
-  ctx.rect(1, HMClient.HEADER_H - 2 + 480, 500, 902);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 480, this.canvas.width - 20, 401);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 881, this.canvas.width - 20, 321);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 1202, this.canvas.width - 20, 261);
+  ctx.rect(20, HMClient.HEADER_H - 2 + 480, 500, 983);
   ctx.stroke();
 
   ctx.closePath();
