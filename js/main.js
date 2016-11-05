@@ -34,9 +34,6 @@ function HMClient()
   /** @type {Object} */
   this.lastValues = {};
 
-  /** @type {Boolean} */
-  this.drawLabels = false;
-
   //this.started = new Date().getTime();
   this.start();
 }
@@ -94,13 +91,6 @@ HMClient.prototype.run = function ()
   }
   else
     this.redraw(false);
-
-  var drawLabels = (now / 1000) % 10 >= 6;
-  if (drawLabels != this.drawLabels)
-  {
-    this.drawLabels = drawLabels;
-    this.redraw(true);
-  }
 
   window.requestAnimationFrame(this.run.bind(this));
 };
@@ -200,130 +190,46 @@ HMClient.prototype.drawHeader = function ()
  */
 HMClient.prototype.drawData = function ()
 {
-  log("this.drawLabels: " + this.drawLabels);
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
-
   ctx.clearRect(0, HMClient.HEADER_H, this.canvas.width, this.canvas.height - HMClient.HEADER_H);
-  var x2 = this.canvas.width / 2;
-  var dy = HMClient.HEADER_H + 420;
 
-  if (this.drawLabels)
-  {
-    ctx.font = "110pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Выход", 20, dy - 290);
-    ctx.fillText("из печи", 20, dy - 170);
-  }
-  else
-    ctx.font = "360pt Calibri";
-  this.printTemp(ctx, "warmOut.t", 20, dy);
-
-  if (this.drawLabels)
-  {
-    ctx.font = "46pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Пол в ванной", x2 + 90, dy - 340);
-    ctx.font = "80pt Calibri";
-  }
-  else
-    ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "warm.floor.t", x2 + 160, dy - 220);
-
-  if (this.drawLabels)
-  {
-    ctx.font = "50pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Вход в печь", x2 + 90, dy - 100);
-    ctx.font = "80pt Calibri";
-  }
-  else
-    ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "warmIn.t", x2 + 160, dy + 20);
-
-  dy += 410;
-  if (this.drawLabels)
-  {
-    ctx.font = "75pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Гостиная", 30, dy - 260);
-    ctx.font = "200pt Calibri";
-  }
-  else
-    ctx.font = "300pt Calibri";
-  this.printTemp(ctx, "inside.t", 40, dy);
-
-  if (this.drawLabels)
-  {
-    ctx.font = "75pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Улица", x2 + 50, dy - 260);
-    ctx.font = "200pt Calibri";
-  }
-  else
-    ctx.font = "300pt Calibri";
-  this.printTemp(ctx, "outside.t", x2 + 100, dy);
-
-  dy += 320;
-  if (this.drawLabels)
-  {
-    ctx.font = "75pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Кабинет", 30, dy - 190);
-    ctx.font = "160pt Calibri";
-  }
-  else
-    ctx.font = "240pt Calibri";
-  this.printTemp(ctx, "room.t", 40, dy);
-
-  if (this.drawLabels)
-  {
-    ctx.font = "75pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Спальня", x2 + 50, dy - 190);
-    ctx.font = "160pt Calibri";
-  }
-  else
-    ctx.font = "240 Calibri";
-  this.printTemp(ctx, "bedroom.t", x2 + 100, dy);
-
-  dy += 300;
-  if (this.drawLabels)
-  {
-    ctx.font = "70pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("Зим. сад", 30, dy - 170);
-    ctx.font = "140pt Calibri";
-  }
-  else
-    ctx.font = "200pt Calibri";
-  this.printTemp(ctx, "winter.garden.t", 40, dy);
-
-  if (this.drawLabels)
-  {
-    ctx.font = "70pt Calibri";
-    ctx.fillStyle = "#00FF00";
-    ctx.fillText("2й этаж", x2 + 50, dy - 170);
-    ctx.font = "140pt Calibri";
-  }
-  else
-    ctx.font = "200 Calibri";
-  this.printTemp(ctx, "second.floor.t", x2 + 100, dy);
-
-
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "red";
-  ctx.rect(20, HMClient.HEADER_H - 2, this.canvas.width, 480);
-  ctx.rect(560, HMClient.HEADER_H - 2, this.canvas.width - 561, 240);
-  ctx.rect(560, HMClient.HEADER_H - 2, this.canvas.width - 561, 480);
-
-  ctx.rect(20, HMClient.HEADER_H - 2 + 480, this.canvas.width - 20, 401);
-  ctx.rect(20, HMClient.HEADER_H - 2 + 881, this.canvas.width - 20, 321);
-  ctx.rect(20, HMClient.HEADER_H - 2 + 1202, this.canvas.width - 20, 281);
-  ctx.rect(20, HMClient.HEADER_H - 2 + 480, 500, 1003);
-  ctx.stroke();
+  var n = 0;
+  this.drawSensorRow(ctx, "warmOut.t", "Выход из печи", n++);
+  this.drawSensorRow(ctx, "warm.floor.t", "Пол в ванной", n++);
+  this.drawSensorRow(ctx, "warmIn.t", "Вход в печь", n++);
+  this.drawSensorRow(ctx, "inside.t", "Гостиная", n++);
+  this.drawSensorRow(ctx, "room.t", "Кабинет", n++);
+  this.drawSensorRow(ctx, "bedroom.t", "Спальня", n++);
+  this.drawSensorRow(ctx, "second.floor.t", "2й этаж", n++);
+  this.drawSensorRow(ctx, "outside.t", "Улица", n++);
+  this.drawSensorRow(ctx, "winter.garden.t", "Зимний сад", n++);
 
   ctx.closePath();
+};
+
+/**
+ * @this {HMClient}
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} key
+ * @param {string} label
+ * @param {number} n
+ */
+HMClient.prototype.drawSensorRow = function (ctx, key, label, n)
+{
+  var h = 160;
+  var dx = 30;
+  var dy = HMClient.HEADER_H + h * n;
+  ctx.font = "70pt Calibri";
+  ctx.fillStyle = "#CCCCCC";
+  ctx.fillText(label + ":", dx, dy + h - 20);
+  ctx.font = "110pt Calibri";
+  this.printSensorValue(ctx, key, this.canvas.width - 180, dy + h - 20);
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "gray";
+  ctx.fillRect(0, dy + h, this.canvas.width, (n == 2 || n == 5 ? 8 : 3)) ;
+  ctx.stroke();
 };
 
 /**
@@ -333,11 +239,14 @@ HMClient.prototype.drawData = function ()
  * @param {number} x
  * @param {number} y
  */
-HMClient.prototype.printTemp = function (ctx, key, x, y)
+HMClient.prototype.printSensorValue = function (ctx, key, x, y)
 {
   var t = this.lastValues[key];
   if (t)
     ctx.fillStyle = this.tempColorFromValue(t);
+
+  if (t >= 0 && t < 10)
+    x += 85;
 
   ctx.fillText(t ? t.toFixed() : "?", x, y);
 };
@@ -367,7 +276,7 @@ HMClient.prototype.colorFromValue = function (value)       // <0 is white, 0-1 i
  */
 HMClient.prototype.tempColorFromValue = function (t)
 {
-  var c = "CCCCCC";
+  var c = "FFFFFF";
   if (t >= 80)
     c = "FF0000";
   else if (t >= 60)
