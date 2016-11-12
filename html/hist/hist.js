@@ -4,8 +4,8 @@ $(document).ready(hist);
 
 function hist()
 {
-  var client = new HMHist();
-  $(window).resize(client.onResize.bind(client));
+  var hmhist = new HMHist();
+  $(window).resize(hmhist.onResize.bind(hmhist));
 }
 
 /**
@@ -49,14 +49,13 @@ HMHist.prototype.start = function ()
 {
   log("start");
 
-  $.get("/data/recent.csv", this.recentDataReceived.bind(this));
-  $.get("/data/", this.dataDirListReceived.bind(this));
-
   this.canvas = document.createElement("canvas");
   document.body.appendChild(this.canvas);
 
+  $.get("/data/recent.csv", this.recentDataReceived.bind(this));
+  $.get("/data/", this.dataDirListReceived.bind(this));
+
   this.onResize();
-  //window.requestAnimationFrame(this.run.bind(this));
 };
 
 /**
@@ -101,6 +100,7 @@ HMHist.prototype.recentDataReceived = function (csv)
  */
 HMHist.prototype.makeDataFromCSV = function (csv, times, data)
 {
+  var csvData = [];
   var rows = csv.split("\n");
   for (var i = 1; i < rows.length; i++)
   {
@@ -109,10 +109,17 @@ HMHist.prototype.makeDataFromCSV = function (csv, times, data)
 
     var cells = rows[i].split(";");
     times[i - 1] = this.parseDateTime(cells[0]);
-    data[i - 1] = [];
+    csvData[i - 1] = [];
     for (var j = 1; j < cells.length; j++)
-      data[i - 1][j - 1] = this.parseNumber(cells[j]);
+      csvData[i - 1][j - 1] = this.parseNumber(cells[j]);
   }
+
+  for (i = 0; i < this.sensors.length; i++)
+    data[i] = [];
+
+  for (i = 0; i < this.sensors.length; i++)
+    for (j = 0; j < csvData.length; j++)
+      data[i][j] = csvData[j][i];
 };
 
 /**
@@ -151,7 +158,11 @@ HMHist.prototype.loadDailyFiles = function (files, csv)
     var data = [];
     this.makeDataFromCSV(csv, times, data);
     this.histTimes = this.histTimes.concat(times);
-    this.histData = this.histData.concat(data);
+    if (this.histData.length == 0)
+      this.histData = data;
+    else
+      for (var i = 0; i < this.sensors.length; i++)
+        this.histData[i] = this.histData[i].concat(data[i]);
   }
 
   if (files.length > 0)   // load next file
@@ -173,16 +184,26 @@ HMHist.prototype.loadDailyFiles = function (files, csv)
  */
 HMHist.prototype.redraw = function ()
 {
-  this.drawHeader();
+  var ctx = this.canvas.getContext("2d");
+  ctx.beginPath();
+  ctx.clearRect(0, 0, this.canvas.width, HMHist.HEADER_H);
+  ctx.closePath();
 
+  if (!this.sensors)
+    return;
 
+  for (var i = 0; i < this.sensors.length; i++)
+    this.drawSensorGraph(i);
 };
 
 /**
  * @this {HMHist}
+ * @param {number} i
  */
-HMHist.prototype.drawHeader = function ()
+HMHist.prototype.drawSensorGraph = function (i)
 {
+
+
   var ctx = this.canvas.getContext("2d");
   ctx.setLineDash([]);
   ctx.beginPath();
