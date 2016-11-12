@@ -1,49 +1,56 @@
 /*global log*/
 
-$(document).ready(main);
+$(document).ready(hist);
 
-function main()
+function hist()
 {
-  var client = new HMClient();
+  var client = new HMHist();
   $(window).resize(client.onResize.bind(client));
 }
 
 /**
  * @constructor
  */
-function HMClient()
+function HMHist()
 {
   this.version = "0.1";
 
   /** @type {HTMLCanvasElement} */
   this.canvas = null;
 
-  /** @type {Array<Object>} */
-  this.recentData = null;
-  /** @type {Array<Object>} */
+  /** @type {Array<String>} */
+  this.sensors = null;
+
+  /** @type {Array<Number>} */
+  this.selectedData = {};
+
+  /** @type {Array<Number>} */
+  this.recentTimes = null;
+  /** @type {Array<Array<Number>>} */
   this.recentData = null;
 
-  /** @type {Object} */
-  this.lastData = {};
+  /** @type {Array<Number>} */
+  this.histTimes = null;
+  /** @type {Array<Object>} */
+  this.histData = null;
 
   this.start();
 }
 
-HMClient.HEADER_H = 50;
-HMClient.GRAPH_W = 300;
-HMClient.GRAPH_T_H = 60;
-HMClient.GRAPH_H_H = 100;
-HMClient.REFRESH_PERIOD = 10;
-HMClient.DATA_UPDATE_TIMEOUT = 80;
+HMHist.HEADER_H = 50;
+HMHist.GRAPH_W = 300;
+HMHist.GRAPH_T_H = 60;
+HMHist.GRAPH_H_H = 100;
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  */
-HMClient.prototype.start = function ()
+HMHist.prototype.start = function ()
 {
   log("start");
 
-  $.get("/data/recent.csv", this.dataReceived.bind(this, "aa"));
+  $.get("/data/recent.csv", this.recentDataReceived.bind(this));
+  $.get("/data/", this.dataDirListReceived.bind(this));
 
   this.canvas = document.createElement("canvas");
   document.body.appendChild(this.canvas);
@@ -53,9 +60,9 @@ HMClient.prototype.start = function ()
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  */
-HMClient.prototype.onResize = function ()
+HMHist.prototype.onResize = function ()
 {
   log("onResize");
   if (this.canvas)
@@ -64,67 +71,107 @@ HMClient.prototype.onResize = function ()
     this.canvas.height = window.innerHeight;
   }
 
-  this.redraw(true);
+  this.redraw();
 };
 
 /**
- * @this {HMClient}
- */
-HMClient.prototype.run = function ()
-{
-  var now = new Date().getTime();
-  //log("run, now: " + now + ", this.updated: " + this.updated + ", diff: " + (now - this.updated));
-  if (now - this.updated >= HMClient.REFRESH_PERIOD * 1000)
-  {
-    $.get("data/recent.csv", this.dataReceived.bind(this));
-    this.updated = now;
-  }
-  else
-    this.redraw(false);
-
-  window.requestAnimationFrame(this.run.bind(this));
-};
-
-/**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {string} csv
  */
-HMClient.prototype.dataReceived = function (ss, csv)
+HMHist.prototype.recentDataReceived = function (csv)
 {
-  log("dataReceived: ", csv.length, ss);
+  log("recentDataReceived:", csv.length, "bytes");
   var rows = csv.split("\n");
-  this.dataHeaders = rows[0].split(";").slice(1);
-  this.dataTimes = [];
-  this.data = [];
+  this.sensors = rows[0].split(";").slice(1);
+  log("sensors:", this.sensors);
+  this.recentTimes = [];
+  this.recentData = [];
+  this.makeDataFromCSV(csv, this.recentTimes, this.recentData);
+  log("recentTimes:", this.recentTimes.length);
+  log("recentData:", this.recentData[0].length + "x" + this.recentData.length);
+
+  this.redraw();
+};
+
+/**
+ * @this {HMHist}
+ * @param {string} csv
+ * @param {Array<Number>} times
+ * @param {Array<Array<Number>>} data
+ */
+HMHist.prototype.makeDataFromCSV = function (csv, times, data)
+{
+  var rows = csv.split("\n");
   for (var i = 1; i < rows.length; i++)
   {
     if (rows[i].length == 0)
       break;
 
     var cells = rows[i].split(";");
-    this.dataTimes[i - 1] = this.parseDateTime(cells[0]);
-    this.data[i - 1] = [];
+    times[i - 1] = this.parseDateTime(cells[0]);
+    data[i - 1] = [];
     for (var j = 1; j < cells.length; j++)
-      this.data[i - 1][j - 1] = this.parseNumber(cells[j]);
+      data[i - 1][j - 1] = this.parseNumber(cells[j]);
   }
-
-  this.lastDataTime = this.dataTimes[this.dataTimes.length - 1];
-  log(this.formatTime(this.lastDataTime, true));
-  this.lastValues = {};
-  for (i = 0; i < this.dataHeaders.length; i++)
-    this.lastValues[this.dataHeaders[i]] = this.data[this.data.length - 1][i];
-
-  log(this.lastValues);
-  //this.dataTimes[this.dataTimes.length - 1] = this.started;
-  this.dataUpdated = new Date().getTime();
-  this.redraw(true);
 };
 
 /**
- * @this {HMClient}
- * @param {boolean} redrawData
+ * @this {HMHist}
+ * @param {string} html
  */
-HMClient.prototype.redraw = function (redrawData)
+HMHist.prototype.dataDirListReceived = function (html)
+{
+  //log("dataDirListReceived: ", html);
+  var lines = html.split("\n");
+  var files = [];
+  for (var i = 0; i < lines.length; i++)
+    if (lines[i].indexOf("daily_") != -1)
+      files.push(lines[i].substr(lines[i].indexOf("daily_"), 20));
+
+  if (files.length > 5)
+    files.splice(0, files.length - 5);
+
+  this.histTimes = [];
+  this.histData = [];
+  log("files to load:", files);
+  this.loadDailyFiles(files);
+};
+
+/**
+ * @this {HMHist}
+ * @param {Array<String>} files
+ * @param {=String} csv
+ */
+HMHist.prototype.loadDailyFiles = function (files, csv)
+{
+  if (csv)    // process csv from loaded file
+  {
+    log("loadDailyFiles:", csv.length, "bytes");
+    var times = [];
+    var data = [];
+    this.makeDataFromCSV(csv, times, data);
+    this.histTimes = this.histTimes.concat(times);
+    this.histData = this.histData.concat(data);
+  }
+
+  if (files.length > 0)   // load next file
+  {
+    var file = files.shift();
+    log("loadDailyFiles: ", file);
+    $.get("/data/" + file, this.loadDailyFiles.bind(this, files));
+  }
+  else    // all files loaded
+  {
+    log("histTimes:", this.histTimes.length);
+    log("histData:", this.histData[0].length + "x" + this.histData.length);
+    this.redraw();
+  }
+};
+
+/**
+ * @this {HMHist}
+ */
+HMHist.prototype.redraw = function ()
 {
   this.drawHeader();
 
@@ -132,14 +179,14 @@ HMClient.prototype.redraw = function (redrawData)
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  */
-HMClient.prototype.drawHeader = function ()
+HMHist.prototype.drawHeader = function ()
 {
   var ctx = this.canvas.getContext("2d");
   ctx.setLineDash([]);
   ctx.beginPath();
-  ctx.clearRect(0, 0, this.canvas.width, HMClient.HEADER_H);
+  ctx.clearRect(0, 0, this.canvas.width, HMHist.HEADER_H);
   ctx.lineWidth = 1;
   ctx.strokeStyle = "#00FF00";
   ctx.rect(0, 0, this.canvas.width, this.canvas.height);
@@ -149,13 +196,13 @@ HMClient.prototype.drawHeader = function ()
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} key
  * @param {number} x
  * @param {number} y
  */
-HMClient.prototype.printTemp = function (ctx, key, x, y)
+HMHist.prototype.printTemp = function (ctx, key, x, y)
 {
   var t = this.lastValues[key];
   if (t)
@@ -166,11 +213,11 @@ HMClient.prototype.printTemp = function (ctx, key, x, y)
 
 /**
  }
- * @this {HMClient}
+ * @this {HMHist}
  * @param {number} value
  * @return {string}
  */
-HMClient.prototype.colorFromValue = function (value)       // <0 is white, 0-1 is yellow to red, >1 - red
+HMHist.prototype.colorFromValue = function (value)       // <0 is white, 0-1 is yellow to red, >1 - red
 {
   if (value > 1)
     value = 1;
@@ -183,11 +230,11 @@ HMClient.prototype.colorFromValue = function (value)       // <0 is white, 0-1 i
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {number} t
  * @return {string}
  */
-HMClient.prototype.tempColorFromValue = function (t)
+HMHist.prototype.tempColorFromValue = function (t)
 {
   var c = "CCCCCC";
   if (t >= 80)
@@ -209,12 +256,12 @@ HMClient.prototype.tempColorFromValue = function (t)
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {number} time
  * @param {boolean=} withDate
  * @return {string}
  */
-HMClient.prototype.formatTime = function (time, withDate)
+HMHist.prototype.formatTime = function (time, withDate)
 {
   var date = new Date();
   date.setTime(time);
@@ -223,21 +270,21 @@ HMClient.prototype.formatTime = function (time, withDate)
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {number} num
  * @return {string}
  */
-HMClient.prototype.formatNumber = function (num)
+HMHist.prototype.formatNumber = function (num)
 {
   return num < 10 ? "0" + num : "" + num;
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {string} dateTime in format "2016-04-04_06:23"
  * @return {number}
  */
-HMClient.prototype.parseDateTime = function (dateTime)
+HMHist.prototype.parseDateTime = function (dateTime)
 {
   var d = new Date(dateTime.replace("_", " "));
   //log(d);
@@ -245,11 +292,11 @@ HMClient.prototype.parseDateTime = function (dateTime)
 };
 
 /**
- * @this {HMClient}
+ * @this {HMHist}
  * @param {string} value in format 22.937
  * @return {number}
  */
-HMClient.prototype.parseNumber = function (value)
+HMHist.prototype.parseNumber = function (value)
 {
   try
   {
