@@ -14,7 +14,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.10.23";
+  static String version = "2016.11.19a";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -81,16 +81,16 @@ public class HM
         }
       }
 
-      if ((System.currentTimeMillis() - tempMonProcess.lastSuccess) > 1000 * 60 * 5)
+      if ((System.currentTimeMillis() - tempMonProcess.lastSuccess) > 1000 * 60 * 30)
       {
-        log("cannot get temperature data for more than 5 minutes, rebooting..");
+        log("cannot get temperature data for more than 30 minutes, rebooting..");
         reboot();
         return false;
       }
 
-      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 60 * 5)
+      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 60 * 30)
       {
-        log("cannot save status for more than 5 minutes, rebooting..");
+        log("cannot save status for more than 30 minutes, rebooting..");
         reboot();
         return false;
       }

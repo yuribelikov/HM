@@ -66,38 +66,31 @@ public class StatusSaveProcess extends Thread
         {
           data = null;
           lastSuccess = System.currentTimeMillis();
+          continue;
         }
-        else
-          restoreConnection();
+
+        restoreConnection();
       }
       catch (Exception e)
       {
-        HM.log("SSP, error: " + e.getMessage());
+        HM.log("SSP, error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
         restoreConnection();
       }
+
+      sleepBeforeRetry();
     }
   }
 
   private void restoreConnection()
   {
+    HM.log("SSP, restoreConnection(), failures: " + failures);
     failures++;
     if (checkRouter())
       return;
 
     while (System.currentTimeMillis() - lastWiFiReboot < 60000)
     {
-      int sleep = failures * 20;
-      if (sleep > 60)
-        sleep = 60;
-      HM.log("SSP, waiting for " + sleep + " seconds..");
-      try
-      {
-        sleep(1000 * sleep);
-      }
-      catch (InterruptedException ignored)
-      {
-      }
-
+      sleepBeforeRetry();
       if (checkRouter())
         return;
     }
@@ -139,5 +132,20 @@ public class StatusSaveProcess extends Thread
       HM.err(e);
     }
     return false;
+  }
+
+  private void sleepBeforeRetry()
+  {
+    int seconds = failures * 20;
+    if (seconds > 60)
+      seconds = 60;
+    HM.log("SSP, waiting for " + seconds + " seconds..");
+    try
+    {
+      sleep(1000 * seconds);
+    }
+    catch (InterruptedException ignored)
+    {
+    }
   }
 }
