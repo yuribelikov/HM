@@ -1,11 +1,13 @@
 package bel.home;
 
 import java.io.*;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Properties;
 
 public class HM
 {
@@ -14,7 +16,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.11.19a";
+  static String version = "2016.11.19h";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -37,8 +39,12 @@ public class HM
       statusSaveProcess = new StatusSaveProcess();
       ydProcess = new YDProcess();
 
-      //noinspection StatementWithEmptyBody
-      while (healthCheck()) ;
+      boolean heath = true;
+      while (heath)
+      {
+        sleepSec(10);
+        heath = healthCheck();
+      }
 
       tempMonProcess.isAlive = false;
       statusSaveProcess.isAlive = false;
@@ -56,6 +62,7 @@ public class HM
   {
     try
     {
+      log("healthCheck..");
       String rebootOn = properties.getProperty("reboot.on");    // 56 (minutes of every hour) OR 23:56
       if (rebootOn != null)
       {
@@ -66,7 +73,8 @@ public class HM
           String[] sa = rebootOn.split(":");
           rebootHour = Integer.parseInt(sa[0]);
           rebootMinute = Integer.parseInt(sa[1]);
-        } else
+        }
+        else
           rebootMinute = Integer.parseInt(rebootOn);
 
         Calendar c = Calendar.getInstance();
@@ -88,6 +96,13 @@ public class HM
         return false;
       }
 
+      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 90)
+      {
+        log("cannot save status for more than 90 seconds, restoring connection..");
+        restoreConnection();
+        return true;
+      }
+
       if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 60 * 30)
       {
         log("cannot save status for more than 30 minutes, rebooting..");
@@ -95,10 +110,7 @@ public class HM
         return false;
       }
 
-      long t = System.currentTimeMillis();
-      while (System.currentTimeMillis() - t < 30000)
-        Thread.sleep(100);
-
+      log("healthCheck - ok");
     }
     catch (Exception e)
     {
@@ -129,6 +141,76 @@ public class HM
     catch (Exception e)
     {
       err(e);
+    }
+  }
+
+  private static void restoreConnection()
+  {
+    HM.log("restoreConnection(), checking router..");
+    if (checkRouter())
+      return;
+
+    byte wifiReboots = 0;
+    while (true)
+    {
+      statusSaveProcess.killConnections();
+      rebootWiFi();
+      wifiReboots++;
+      if (checkRouter())
+        break;
+
+      sleepSec(60 * wifiReboots);
+    }
+
+    HM.log("restoreConnection(), wifiReboots: " + wifiReboots);
+  }
+
+  private static void rebootWiFi()
+  {
+    try
+    {
+      String cmd = "sudo /sbin/ifdown wlan0";
+      HM.log("turning down WiFi: " + cmd);
+      Runtime.getRuntime().exec(cmd).waitFor();
+      HM.log("waiting for 10 seconds..");
+      sleepSec(10);
+      cmd = "sudo /sbin/ifup --force wlan0";
+      HM.log("turning up WiFi: " + cmd);
+      Runtime.getRuntime().exec(cmd).waitFor();
+      HM.log("waiting for 20 seconds..");
+      sleepSec(20);
+    }
+    catch (Exception e)
+    {
+      HM.err(e);
+    }
+  }
+
+  static boolean checkRouter()
+  {
+    try
+    {
+      String router = "192.168.1.1";
+      HM.log("checking WiFi with router: " + router);
+      Socket s = new Socket(router, 80);
+      HM.log("WiFi is OK, router socket: " + s);
+      return true;
+    }
+    catch (Exception e)
+    {
+      HM.err(e);
+    }
+    return false;
+  }
+
+  private static void sleepSec(long seconds)
+  {
+    try
+    {
+      Thread.sleep(1000 * seconds);
+    }
+    catch (InterruptedException ignored)
+    {
     }
   }
 
