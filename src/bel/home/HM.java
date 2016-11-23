@@ -16,7 +16,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.11.19h";
+  static String version = "2016.11.19k";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -42,7 +42,7 @@ public class HM
       boolean heath = true;
       while (heath)
       {
-        sleepSec(20);
+        sleepSec(30);
         heath = healthCheck();
       }
 
