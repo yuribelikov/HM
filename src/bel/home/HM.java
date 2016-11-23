@@ -16,7 +16,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.11.19h";
+  static String version = "2016.11.19j";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -147,13 +147,13 @@ public class HM
   private static void restoreConnection()
   {
     HM.log("restoreConnection(), checking router..");
+    statusSaveProcess.killConnections();
     if (checkRouter())
       return;
 
     byte wifiReboots = 0;
     while (true)
     {
-      statusSaveProcess.killConnections();
       rebootWiFi();
       wifiReboots++;
       if (checkRouter())

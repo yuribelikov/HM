@@ -54,16 +54,17 @@ public class StatusSaveProcess extends Thread
         String statusSaveUrl = HM.properties.getProperty("status.save.url");
         HM.log("SSP, sending status data to: " + statusSaveUrl);
         URL u = new URL(statusSaveUrl);
-        HM.log("SSP, u: " + u);
         conn = (HttpURLConnection) u.openConnection();
         HM.log("SSP, conn: " + conn);
-        conn.setConnectTimeout(25000);
+        conn.setConnectTimeout(5000);
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", type);
         conn.setRequestProperty("Content-Length", String.valueOf(encodedData.length()));
+        conn.setReadTimeout(5000);
+        conn.connect();
+        HM.log("SSP, connected");
         os = conn.getOutputStream();
-        HM.log("os: " + os);
         final byte[] bytes = encodedData.getBytes();
         HM.log("SSP, bytes to send: " + bytes.length);
         os.write(bytes);
@@ -71,11 +72,22 @@ public class StatusSaveProcess extends Thread
         HM.log("SSP, server response: " + responseCode + ", " + conn.getResponseMessage());
         os.close();
 
+        try
+        {
+          conn.disconnect();
+        }
+        catch (Exception e)
+        {
+          HM.log("SSP, error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
+        }
+
         if (responseCode == 200)
         {
           data = null;
           lastSuccess = System.currentTimeMillis();
         }
+
+        HM.log("SSP, done.");
       }
       catch (Exception e)
       {
@@ -98,17 +110,24 @@ public class StatusSaveProcess extends Thread
           HM.log("SSP, os: " + os);
           if (os != null)
             os.close();
-
-          HM.log("SSP, conn: " + conn);
-          if (conn != null)
-            conn.disconnect();
-
-          HM.log("SSP, killConnections() - done");
         }
         catch (Exception e)
         {
           HM.log("SSP, connection kill error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
         }
+
+        try
+        {
+          HM.log("SSP, conn: " + conn);
+          if (conn != null)
+            conn.disconnect();
+        }
+        catch (Exception e)
+        {
+          HM.log("SSP, connection kill error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
+        }
+
+        HM.log("SSP, killConnections() - done");
       }
     }.start();
   }
