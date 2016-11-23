@@ -194,6 +194,7 @@ public class HM
       HM.log("checking WiFi with router: " + router);
       Socket s = new Socket(router, 80);
       HM.log("WiFi is OK, router socket: " + s);
+      s.close();
       return true;
     }
     catch (Exception e)
