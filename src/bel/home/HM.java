@@ -42,7 +42,7 @@ public class HM
       boolean heath = true;
       while (heath)
       {
-        sleepSec(10);
+        sleepSec(20);
         heath = healthCheck();
       }
 
