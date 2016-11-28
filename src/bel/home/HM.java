@@ -16,7 +16,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.11.19k";
+  static String version = "2016.11.19l";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -96,18 +96,18 @@ public class HM
         return false;
       }
 
-      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 90)
-      {
-        log("cannot save status for more than 90 seconds, restoring connection..");
-        restoreConnection();
-        return true;
-      }
-
       if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 60 * 30)
       {
         log("cannot save status for more than 30 minutes, rebooting..");
         reboot();
         return false;
+      }
+
+      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 90)
+      {
+        log("cannot save status for more than 90 seconds, restoring connection..");
+        restoreConnection();
+        return true;
       }
 
       log("healthCheck - ok");
@@ -260,4 +260,3 @@ public class HM
   }
 
 }
-

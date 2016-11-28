@@ -56,12 +56,14 @@ public class StatusSaveProcess extends Thread
         URL u = new URL(statusSaveUrl);
         conn = (HttpURLConnection) u.openConnection();
         HM.log("SSP, conn: " + conn);
+        conn.setUseCaches(false);
         conn.setConnectTimeout(5000);
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", type);
         conn.setRequestProperty("Content-Length", String.valueOf(encodedData.length()));
         conn.setReadTimeout(5000);
+        HM.log("SSP, connecting..");
         conn.connect();
         HM.log("SSP, connected");
         os = conn.getOutputStream();
