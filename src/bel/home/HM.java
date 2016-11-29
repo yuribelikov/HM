@@ -16,7 +16,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.11.29a";
+  static String version = "2016.11.29b";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;

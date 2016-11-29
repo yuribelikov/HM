@@ -31,6 +31,7 @@ public class SensorProcess extends Thread
     {
       try
       {
+        HM.log("SP, try: " + tryN);
         boolean success = false;
         ArrayList<String> resultLines = exec();
         for (String line : resultLines)
