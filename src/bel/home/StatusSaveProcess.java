@@ -88,6 +88,8 @@ public class StatusSaveProcess extends Thread
           data = null;
           lastSuccess = System.currentTimeMillis();
         }
+        else
+          sleep(20000);
 
         HM.log("SSP, done.");
       }
