@@ -5,10 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class TempMonProcess extends Thread
 {
@@ -17,11 +14,13 @@ class TempMonProcess extends Thread
 
   boolean isAlive = true;
   long lastSuccess = System.currentTimeMillis();
-  private static int cycle = 0;
-  private static String header = "";
-  private static List<DataRow> recentData = new ArrayList<>();     // per 1 minute for 3 hours (100 * 60 * 3   =  18000)
-  private static List<DataRow> dailyData = new ArrayList<>();       // per 10 minutes for 24 hours (100 * 6 * 24  =  14400)
-  private static List<DataRow> monthlyData = new ArrayList<>();   // per 4 hours for 1 month (100 * 6 * 30  =  18000)
+  private int cycle = 0;
+  private String header = "";
+  private List<DataRow> recentData = new ArrayList<>();     // per 1 minute for 3 hours (100 * 60 * 3   =  18000)
+  private List<DataRow> dailyData = new ArrayList<>();       // per 10 minutes for 24 hours (100 * 6 * 24  =  14400)
+  private List<DataRow> monthlyData = new ArrayList<>();   // per 4 hours for 1 month (100 * 6 * 30  =  18000)
+  private HashMap<String, float[]> lastSuccessfulValues = new HashMap<>();
+  private HashMap<String, Integer> sensorFailures = new HashMap<>();
 
 
   TempMonProcess()
@@ -156,6 +155,19 @@ class TempMonProcess extends Thread
     catch (Exception e)
     {
       HM.err(e);
+    }
+
+    if (sp.finished && sp.result[0] != Float.NaN)   // saving last successful result
+    {
+      lastSuccessfulValues.put(sensor, sp.result);
+      sensorFailures.put(sensor, 0);
+    }
+    else
+    {
+      Integer failures = sensorFailures.get(sensor);
+      if (failures < 3)   // using last successful value if number of failures is not big
+        sp.result = lastSuccessfulValues.get(sensor);
+      sensorFailures.put(sensor, failures + 1);
     }
 
     header += (";" + sensor + ".t" + (sp.result.length > 1 ? (";" + sensor + ".h") : ""));
