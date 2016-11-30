@@ -6,7 +6,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 
-public class StatusSaveProcess extends Thread
+class StatusSaveProcess extends Thread
 {
   private String data = null;
   boolean isAlive = true;
@@ -15,7 +15,7 @@ public class StatusSaveProcess extends Thread
   private OutputStream os = null;
 
 
-  public StatusSaveProcess()
+  StatusSaveProcess()
   {
     start();
   }
