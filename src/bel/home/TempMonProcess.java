@@ -127,7 +127,7 @@ class TempMonProcess extends Thread
       }
       HM.log(sensor + " -> " + cmd);
       result += ";" + callSensor(sensor, cmd);
-      Thread.sleep(100);
+      Thread.sleep(500);
     }
 
     header = header.substring(1);
@@ -136,15 +136,21 @@ class TempMonProcess extends Thread
 
   private String callSensor(String sensor, String cmd)
   {
-    long started = System.currentTimeMillis();
-    SensorProcess sp = new SensorProcess(sensor, cmd);
+    SensorProcess sp = new SensorProcess(cmd);
     try
     {
       while (!sp.finished)
       {
-        Thread.sleep(100);
-        if (System.currentTimeMillis() - started > 10000)
+        int tryN = sp.tryN;
+        while (!sp.finished && tryN == sp.tryN)   // sensor hangs check
+        {
+          Thread.sleep(100);
+          if (System.currentTimeMillis() < sp.started + SensorProcess.TIMEOUT / 2)
+            continue;
+
           sp.kill();
+          break;
+        }
       }
     }
     catch (Exception e)
