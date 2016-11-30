@@ -141,14 +141,14 @@ class TempMonProcess extends Thread
     {
       while (!sp.finished)
       {
-        int tryN = sp.tryN;
-        while (!sp.finished && tryN == sp.tryN)   // sensor hangs check
+        while (!sp.finished)   // sensor hangs check
         {
           Thread.sleep(100);
-          if (System.currentTimeMillis() < sp.started + SensorProcess.TIMEOUT / 2)
+          if (System.currentTimeMillis() < sp.tryStarted + SensorProcess.TRY_TIMEOUT)
             continue;
 
           sp.kill();
+          Thread.sleep(200);
           break;
         }
       }

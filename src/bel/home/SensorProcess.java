@@ -7,15 +7,15 @@ import java.util.Arrays;
 
 public class SensorProcess extends Thread
 {
-  final static long TIMEOUT = 10000;
+  private final static long TIMEOUT = 10000;
+  final static long TRY_TIMEOUT = 5000;
 
   private String cmd;
   private Process p = null;
   private BufferedReader br = null;
   boolean finished = false;
   float[] result = null;
-  long started;
-  int tryN = 0;
+  long tryStarted;
 
 
   public SensorProcess(String cmd)
@@ -26,14 +26,16 @@ public class SensorProcess extends Thread
 
   public void run()
   {
-    started = System.currentTimeMillis();
+    long started = System.currentTimeMillis();
     boolean dht22 = cmd.contains("dht22");     // DHT22 (with Humidity) or DS18B20
     result = (dht22 ? new float[]{Float.NaN, Float.NaN} : new float[]{Float.NaN});
+    int tryN = 0;
     while (System.currentTimeMillis() < started + TIMEOUT)
     {
       try
       {
         HM.log("SP, try: " + tryN);
+        tryStarted = System.currentTimeMillis();
         boolean success = dht22 ? processResultLinesDHT22() : processResultLinesDS18B20();
         HM.log("SP, success: " + success + ", result: " + Arrays.toString(result));
         if (success)
