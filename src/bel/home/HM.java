@@ -149,9 +149,8 @@ public class HM
     HM.log("restoreConnection(), checking router..");
     statusSaveProcess.killConnections();
 
-
     HM.log("SSP, thread.isAlive: " + statusSaveProcess.isAlive());
-    HM.log("SSP, thread.interrupted: " + statusSaveProcess.isInterrupted());
+    HM.log("SSP, thread.isInterrupted: " + statusSaveProcess.isInterrupted());
     try
     {
       statusSaveProcess.isAlive = false;
@@ -162,7 +161,7 @@ public class HM
       HM.log("SSP, thread interruption error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
     }
     HM.log("SSP, thread.isAlive: " + statusSaveProcess.isAlive());
-    HM.log("SSP, thread.interrupted: " + statusSaveProcess.isInterrupted());
+    HM.log("SSP, thread.isInterrupted: " + statusSaveProcess.isInterrupted());
 
     if (statusSaveProcess.isInterrupted())
       statusSaveProcess = new StatusSaveProcess();
