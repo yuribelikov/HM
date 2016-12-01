@@ -65,6 +65,8 @@ class TempMonProcess extends Thread
         HM.log("header: " + header);
         HM.log("dataRow: " + dataRow);
 
+        HM.log("lastSuccessfulValues: " + lastSuccessfulValues);
+
         saveStatus(cycle, dataRow);
 
         if (dataRow.equalsMinute())
@@ -164,9 +166,12 @@ class TempMonProcess extends Thread
     }
     else
     {
+      HM.log("sp.result[0]: " + sp.result[0]);
       Integer failures = sensorFailures.get(sensor);
+      HM.log("failures: " + failures);
       if (failures < 3)   // using last successful value if number of failures is not big
         sp.result = lastSuccessfulValues.get(sensor);
+      HM.log("sp.result[0]: " + sp.result[0]);
       sensorFailures.put(sensor, failures + 1);
     }
 
