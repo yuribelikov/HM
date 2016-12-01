@@ -161,6 +161,7 @@ class TempMonProcess extends Thread
 
     if (sp.finished && sp.result[0] != Float.NaN)   // saving last successful result
     {
+      HM.log("success, sp.result[0]: " + sp.result[0]);
       lastSuccessfulValues.put(sensor, sp.result);
       sensorFailures.put(sensor, 0);
     }
