@@ -1,10 +1,9 @@
 <project name="Home Monitor">
 
-    <property name="yd.hm" value="C:/Users/ysb/YandexDisk/hm"/>
-
 
     <target name="copy to YD">
 
+        <property name="yd.hm" value="C:/Users/ysb/YandexDisk/hm"/>
         <copy todir="${yd.hm}">
             <fileset dir="." includes="hm.jar"/>
             <fileset dir="." includes="build.xml"/>
@@ -14,5 +13,19 @@
         </copy>
 
     </target>
+
+    <target name="copy to YD home">
+
+        <property name="yd.hm" value="D:/YandexDisk/hm"/>
+        <copy todir="${yd.hm}">
+            <fileset dir="." includes="hm.jar"/>
+            <fileset dir="." includes="build.xml"/>
+            <fileset dir="." includes="src/**/*"/>
+            <fileset dir="." includes="js/**/*"/>
+            <fileset dir="." includes="*.html"/>
+        </copy>
+
+    </target>
+
 
 </project>
