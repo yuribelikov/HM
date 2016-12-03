@@ -28,7 +28,7 @@ public class SensorProcess extends Thread
   {
     long started = System.currentTimeMillis();
     boolean dht22 = cmd.contains("dht22");     // DHT22 (with Humidity) or DS18B20
-    result = (dht22 ? new float[]{Float.NaN, Float.NaN} : new float[]{Float.NaN});
+//    result = (dht22 ? new float[]{Float.NaN, Float.NaN} : new float[]{Float.NaN});
     int tryN = 0;
     while (System.currentTimeMillis() < started + TIMEOUT)
     {
@@ -37,7 +37,7 @@ public class SensorProcess extends Thread
         HM.log("SP, try: " + tryN);
         tryStarted = System.currentTimeMillis();
         boolean success = dht22 ? processResultLinesDHT22() : processResultLinesDS18B20();
-        HM.log("SP, success: " + success + ", result: " + Arrays.toString(result));
+        HM.log("SP, success: " + success + ", result: " + (result != null ? Arrays.toString(result) : null));
         if (success)
           break;
 
@@ -62,6 +62,7 @@ public class SensorProcess extends Thread
       if (line.startsWith("Humidity"))   // Humidity = 20.30 % Temperature = 24.60 *C
       {
         String[] sa = line.split("=");
+        result = new float[]{Float.NaN, Float.NaN};
         result[1] = Float.parseFloat(sa[1].substring(0, sa[1].indexOf("%")));   // humidity
         result[0] = Float.parseFloat(sa[2].substring(0, sa[2].indexOf("*")));     // temperature
         return true;
@@ -82,6 +83,7 @@ public class SensorProcess extends Thread
       if (line.contains("t="))          // 8 01 4b 46 1f ff 0c 10 fa t=23500
       {
         String[] sa = line.split("=");
+        result = new float[]{Float.NaN};
         result[0] = Float.parseFloat(sa[1]) / 1000;
         return true;
       }

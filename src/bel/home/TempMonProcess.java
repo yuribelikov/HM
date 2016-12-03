@@ -159,20 +159,22 @@ class TempMonProcess extends Thread
       HM.err(e);
     }
 
-    if (sp.finished && sp.result[0] != Float.NaN)   // saving last successful result
+    HM.log("sp.finished: " + sp.finished);
+    HM.log("sp.result: " + (sp.result != null ? Arrays.toString(sp.result) : null));
+    if (sp.finished && sp.result != null && sp.result[0] > -50 && sp.result[0] < 150)   // saving last successful result
     {
-      HM.log("success, sp.result[0]: " + sp.result[0]);
+      HM.log("value is valid, sp.result[0]: " + sp.result[0]);
       lastSuccessfulValues.put(sensor, sp.result);
       sensorFailures.put(sensor, 0);
     }
     else
     {
-      HM.log("sp.result[0]: " + sp.result[0]);
+      HM.log("value is invalid, getting old value");
       Integer failures = sensorFailures.get(sensor);
       HM.log("failures: " + failures);
       if (failures < 3)   // using last successful value if number of failures is not big
         sp.result = lastSuccessfulValues.get(sensor);
-      HM.log("sp.result[0]: " + sp.result[0]);
+      HM.log("last valid value: " + sp.result[0]);
       sensorFailures.put(sensor, failures + 1);
     }
 

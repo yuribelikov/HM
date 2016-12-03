@@ -1,6 +1,7 @@
 package bel.home;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,11 +17,12 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.12.01";
+  static String version = "2016.12.03b";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
+  private static long started = System.currentTimeMillis();
 
 
   public static void main(String[] args)
@@ -38,12 +40,14 @@ public class HM
       tempMonProcess = new TempMonProcess();
       statusSaveProcess = new StatusSaveProcess();
       ydProcess = new YDProcess();
+      waitingForStopCommand();
 
       boolean heath = true;
       while (heath)
       {
         sleepSec(30);
-        heath = healthCheck();
+        if (System.currentTimeMillis() - started > 120000)
+          heath = healthCheck();
       }
 
       tempMonProcess.isAlive = false;
@@ -220,6 +224,31 @@ public class HM
       HM.err(e);
     }
     return false;
+  }
+
+  static void waitingForStopCommand()
+  {
+    new Thread()
+    {
+      public void run()
+      {
+        try
+        {
+          HM.log("waitingForStopCommand..");
+          ServerSocket s = new ServerSocket(61234);
+          s.accept();
+        }
+        catch (Exception e)
+        {
+          HM.log("SSP, waitingForStopCommand error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
+        }
+
+        tempMonProcess.isAlive = false;
+        statusSaveProcess.isAlive = false;
+        ydProcess.isAlive = false;
+        HM.log("stopped.");
+      }
+    }.start();
   }
 
   private static void sleepSec(long seconds)
