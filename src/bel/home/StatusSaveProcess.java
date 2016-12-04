@@ -38,7 +38,7 @@ class StatusSaveProcess extends Thread
       {
         if (data == null)
         {
-          sleep(1000);
+          sleep(100);
           continue;
         }
 
@@ -46,6 +46,7 @@ class StatusSaveProcess extends Thread
         {
           HM.log("SSP, router not available - skipping..");
           data = null;
+          sleep(100);
           continue;
         }
 
@@ -99,7 +100,7 @@ class StatusSaveProcess extends Thread
       }
     }
 
-    HM.log("SSP stopped");
+    HM.log("SSP finished.");
   }
 
   void killConnections()

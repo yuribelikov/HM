@@ -10,6 +10,7 @@ public class SensorProcess extends Thread
   private final static long TIMEOUT = 10000;
   final static long TRY_TIMEOUT = 5000;
 
+  boolean isAlive = true;
   private String cmd;
   private Process p = null;
   private BufferedReader br = null;
@@ -28,9 +29,8 @@ public class SensorProcess extends Thread
   {
     long started = System.currentTimeMillis();
     boolean dht22 = cmd.contains("dht22");     // DHT22 (with Humidity) or DS18B20
-//    result = (dht22 ? new float[]{Float.NaN, Float.NaN} : new float[]{Float.NaN});
     int tryN = 0;
-    while (System.currentTimeMillis() < started + TIMEOUT)
+    while (isAlive && System.currentTimeMillis() < started + TIMEOUT)
     {
       try
       {
@@ -42,7 +42,7 @@ public class SensorProcess extends Thread
           break;
 
         tryN++;
-        sleep(100 * tryN);
+        sleepMs(100 * tryN);
       }
       catch (Exception e)
       {
@@ -136,5 +136,18 @@ public class SensorProcess extends Thread
     }
 
     HM.log("SP, killed. cmd: " + cmd);
+  }
+
+  private void sleepMs(long ms)
+  {
+    try
+    {
+      long waitUntil = System.currentTimeMillis() + ms;
+      while (isAlive && System.currentTimeMillis() < waitUntil)
+        sleep(10);
+    }
+    catch (InterruptedException ignored)
+    {
+    }
   }
 }

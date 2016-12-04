@@ -10,21 +10,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class YDProcess extends Thread
+class YDProcess extends Thread
 {
-  static final String YD_PATH = "/opt/yandex.disk/hm/";
-  static final String YD_DATA_PATH = YD_PATH + "data/";
-  static final String CONNS_FN = "conns.txt";
+  private static final String YD_PATH = "/opt/yandex.disk/hm/";
+  private static final String YD_DATA_PATH = YD_PATH + "data/";
+  private static final String CONNS_FN = "conns.txt";
 
   private Map<String, List<String>> dataMap = new LinkedHashMap<>();
   private long lastSync = System.currentTimeMillis();
-  private long syncDelay = 300;
   boolean copyingProps = false;
   private static List<String> connChecks = new ArrayList<>();
   boolean isAlive = true;
 
 
-  public YDProcess()
+  YDProcess()
   {
     start();
   }
@@ -39,26 +38,29 @@ public class YDProcess extends Thread
     HM.log("YDP started");
     loadConnChecks();
 
+    long syncDelay;
     while (isAlive)
     {
       try
       {
         try
         {
+          syncDelay = 300;
           if (HM.properties != null)
             syncDelay = Long.parseLong(HM.properties.getProperty("yd.sync.delay"));
         }
         catch (NumberFormatException ignored)
         {
+          syncDelay = 300;
         }
 
         if (dataMap.isEmpty() || (System.currentTimeMillis() < lastSync + syncDelay * 1000))   // sync once per X (syncDelay) seconds
         {
-          sleep(1000);
+          sleepMs(1000);
           continue;
         }
 
-        sleep(1000);    // waiting for main HM thread is adding all data to the dataMap
+        sleepMs(1000);    // waiting for main HM thread is adding all data to the dataMap
         lastSync = System.currentTimeMillis();    // to avoid having connection channel always busy the lastSync time has to be updated even if sync is failed
         copyPropertiesFromYD();
         saveConnChecks();
@@ -66,7 +68,7 @@ public class YDProcess extends Thread
         if (!Files.exists(Paths.get(YD_DATA_PATH)))
         {
           HM.log("YDP, " + YD_DATA_PATH + " is unavailable");
-          sleep(60000);
+          sleepMs(60000);
           continue;
         }
 
@@ -81,17 +83,11 @@ public class YDProcess extends Thread
       catch (Exception e)
       {
         HM.log("YDP, error: " + e.getMessage());
-        try
-        {
-          sleep(60000);
-        }
-        catch (InterruptedException e1)
-        {
-          HM.err(e1);
-        }
+        sleepMs(60000);
       }
     }
 
+   HM.log("YDP finished.");
   }
 
   private void saveConnChecks()
@@ -155,7 +151,7 @@ public class YDProcess extends Thread
         }
 
         copyingProps = true;
-        Thread.sleep(100);    // file can be under reading now, so waiting
+        sleepMs(100);    // file can be under reading now, so waiting
         Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         copyingProps = false;
         HM.log(HM.PROPERTIES_FN + " has been copied from " + YD_PATH);
@@ -172,4 +168,16 @@ public class YDProcess extends Thread
     }
   }
 
+  private void sleepMs(long ms)
+  {
+    try
+    {
+      long waitUntil = System.currentTimeMillis() + ms;
+      while (isAlive && System.currentTimeMillis() < waitUntil)
+        sleep(10);
+    }
+    catch (InterruptedException ignored)
+    {
+    }
+  }
 }

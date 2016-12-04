@@ -17,11 +17,12 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.12.03b";
+  static String version = "2016.12.04d";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
+  private static boolean isAlive = true;
   private static long started = System.currentTimeMillis();
 
 
@@ -43,7 +44,7 @@ public class HM
       waitingForStopCommand();
 
       boolean heath = true;
-      while (heath)
+      while (isAlive && heath)
       {
         sleepSec(30);
         if (System.currentTimeMillis() - started > 120000)
@@ -226,7 +227,7 @@ public class HM
     return false;
   }
 
-  static void waitingForStopCommand()
+  private static void waitingForStopCommand()
   {
     new Thread()
     {
@@ -237,16 +238,20 @@ public class HM
           HM.log("waitingForStopCommand..");
           ServerSocket s = new ServerSocket(61234);
           s.accept();
+          HM.log("=========================================");
+          HM.log("stop command received, stopping threads..");
+          tempMonProcess.isAlive = false;
+          statusSaveProcess.isAlive = false;
+          ydProcess.isAlive = false;
+          isAlive = false;
+          sleepSec(1000);
+          HM.log("stopped.");
         }
         catch (Exception e)
         {
           HM.log("SSP, waitingForStopCommand error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
         }
 
-        tempMonProcess.isAlive = false;
-        statusSaveProcess.isAlive = false;
-        ydProcess.isAlive = false;
-        HM.log("stopped.");
       }
     }.start();
   }
@@ -255,7 +260,9 @@ public class HM
   {
     try
     {
-      Thread.sleep(1000 * seconds);
+      long waitUntil = System.currentTimeMillis() + 1000 * seconds;
+      while (isAlive && System.currentTimeMillis() < waitUntil)
+        Thread.sleep(100);
     }
     catch (InterruptedException ignored)
     {

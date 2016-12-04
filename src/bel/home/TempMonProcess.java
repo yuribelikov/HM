@@ -47,7 +47,7 @@ class TempMonProcess extends Thread
         HM.log("delay: " + delay);
 
         HM.log("waiting..");
-        while (true)
+        while (isAlive)
         {
           long currSec = System.currentTimeMillis() / 1000;
           long rounded = delay * (long) Math.floor(currSec / delay);
@@ -55,8 +55,11 @@ class TempMonProcess extends Thread
           if (currSec == rounded)
             break;
           else
-            Thread.sleep(10);
+            sleepMs(10);
         }
+
+        if (!isAlive)
+          break;
 
         HM.log("");
         long started = System.currentTimeMillis();
@@ -108,6 +111,8 @@ class TempMonProcess extends Thread
         HM.log("TMP, error: " + e.getMessage());
       }
     }
+
+    HM.log("TMP finished.");
   }
 
   private String requestSensors() throws Exception
@@ -128,7 +133,10 @@ class TempMonProcess extends Thread
       }
       HM.log(sensor + " -> " + cmd);
       result += ";" + callSensor(sensor, cmd);
-      Thread.sleep(500);
+      if (!isAlive)
+        break;
+
+      sleepMs(500);
     }
 
     header = header.substring(1);
@@ -140,16 +148,16 @@ class TempMonProcess extends Thread
     SensorProcess sp = new SensorProcess(cmd);
     try
     {
-      while (!sp.finished)
+      while (isAlive && !sp.finished)
       {
-        while (!sp.finished)   // sensor hangs check
+        while (isAlive && !sp.finished)   // sensor hangs check
         {
-          Thread.sleep(100);
+          sleepMs(100);
           if (System.currentTimeMillis() < sp.tryStarted + SensorProcess.TRY_TIMEOUT)
             continue;
 
           sp.kill();
-          Thread.sleep(200);
+          sleepMs(200);
           break;
         }
       }
@@ -158,6 +166,7 @@ class TempMonProcess extends Thread
     {
       HM.err(e);
     }
+    sp.isAlive = false;
 
     HM.log("sp.finished: " + sp.finished);
     HM.log("sp.result: " + (sp.result != null ? Arrays.toString(sp.result) : null));
@@ -281,5 +290,18 @@ class TempMonProcess extends Thread
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM");
     df.setTimeZone(HM.DF.getTimeZone());
     return "monthly_" + df.format(System.currentTimeMillis()) + ".csv";
+  }
+
+  private void sleepMs(long ms)
+  {
+    try
+    {
+      long waitUntil = System.currentTimeMillis() + ms;
+      while (isAlive && System.currentTimeMillis() < waitUntil)
+        sleep(10);
+    }
+    catch (InterruptedException ignored)
+    {
+    }
   }
 }
