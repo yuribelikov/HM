@@ -68,8 +68,6 @@ class TempMonProcess extends Thread
         HM.log("header: " + header);
         HM.log("dataRow: " + dataRow);
 
-        HM.log("lastSuccessfulValues: " + lastSuccessfulValues);
-
         saveStatus(cycle, dataRow);
 
         if (dataRow.equalsMinute())
@@ -131,7 +129,6 @@ class TempMonProcess extends Thread
         HM.log("WARNING: no sensor with id: " + sensor);
         continue;
       }
-      HM.log(sensor + " -> " + cmd);
       result += ";" + callSensor(sensor, cmd);
       if (!isAlive)
         break;
@@ -145,7 +142,7 @@ class TempMonProcess extends Thread
 
   private String callSensor(String sensor, String cmd)
   {
-    SensorProcess sp = new SensorProcess(cmd);
+    SensorProcess sp = new SensorProcess(sensor, cmd);
     try
     {
       while (isAlive && !sp.finished)
@@ -168,11 +165,8 @@ class TempMonProcess extends Thread
     }
     sp.isAlive = false;
 
-    HM.log("sp.finished: " + sp.finished);
-    HM.log("sp.result: " + (sp.result != null ? Arrays.toString(sp.result) : null));
     if (sp.finished && sp.result != null && sp.result[0] > -50 && sp.result[0] < 150)   // saving last successful result
     {
-      HM.log("value is valid, sp.result[0]: " + sp.result[0]);
       lastSuccessfulValues.put(sensor, sp.result);
       sensorFailures.put(sensor, 0);
     }

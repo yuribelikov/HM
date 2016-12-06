@@ -11,38 +11,50 @@ public class SensorProcess extends Thread
   final static long TRY_TIMEOUT = 5000;
 
   boolean isAlive = true;
-  private String cmd;
+  private final String id;
+  private final String cmd;
+  private final boolean dht22;     // DHT22 (with Humidity) or DS18B20
   private Process p = null;
   private BufferedReader br = null;
   boolean finished = false;
+  private boolean killed = false;
+  private ArrayList<String> execResult = null;
   float[] result = null;
   long tryStarted;
 
 
-  public SensorProcess(String cmd)
+  public SensorProcess(String sensor, String cmd)
   {
     this.cmd = cmd;
+    dht22 = cmd.contains("dht22");
+    if (dht22)
+      id = sensor + " (" + cmd.substring(cmd.lastIndexOf('/') + 1) + ")";
+    else
+      id = sensor + " (" + cmd.substring(cmd.indexOf("devices") + 8, cmd.lastIndexOf('/')) + ")";
+
     start();
   }
 
   public void run()
   {
     long started = System.currentTimeMillis();
-    boolean dht22 = cmd.contains("dht22");     // DHT22 (with Humidity) or DS18B20
     int tryN = 0;
-    while (isAlive && System.currentTimeMillis() < started + TIMEOUT)
+    while (isAlive)
     {
       try
       {
-        HM.log("SP, try: " + tryN);
         tryStarted = System.currentTimeMillis();
-        boolean success = dht22 ? processResultLinesDHT22() : processResultLinesDS18B20();
-        HM.log("SP, success: " + success + ", result: " + (result != null ? Arrays.toString(result) : null));
-        if (success)
+        exec();
+        if (execResult != null)
+          if (dht22 ? processResultLinesDHT22() : processResultLinesDS18B20())
+            break;
+
+        HM.log("SP, " + id + ": failed, try: " + tryN + ", exec: " + execResult + (killed ? " - killed" : ""));
+        if (System.currentTimeMillis() >= started + TIMEOUT)
           break;
 
         tryN++;
-        sleepMs(100 * tryN);
+        sleepMs(300 * tryN);
       }
       catch (Exception e)
       {
@@ -51,14 +63,14 @@ public class SensorProcess extends Thread
     }
 
     finished = true;
-    HM.log("SP, finished, cmd: " + cmd);
+    HM.log("SP, " + id + ": " + (System.currentTimeMillis() < started + TIMEOUT ? "done" : "timeout") + ", exec: " + execResult +
+      ", result: " + Arrays.toString(result) + " (" + (tryN > 0 ? "tries: " + (tryN + 1) + ", " : "") + (System.currentTimeMillis() - started) + " ms)");
   }
 
   private boolean processResultLinesDHT22()
   {
-    for (String line : exec())
+    for (String line : execResult)
     {
-      HM.log("SP, line: " + line);
       if (line.startsWith("Humidity"))   // Humidity = 20.30 % Temperature = 24.60 *C
       {
         String[] sa = line.split("=");
@@ -74,9 +86,8 @@ public class SensorProcess extends Thread
 
   private boolean processResultLinesDS18B20()
   {
-    for (String line : exec())
+    for (String line : execResult)
     {
-      HM.log("SP, line: " + line);
       if (line.contains("crc=") && !line.endsWith("YES"))   // 78 01 4b 46 1f ff 0c 10 fa : crc=fa YES
         return false;                       // Read failed CRC check
 
@@ -92,35 +103,64 @@ public class SensorProcess extends Thread
     return false;
   }
 
-  private ArrayList<String> exec()
+  private void exec()
   {
-    ArrayList<String> result = new ArrayList<>();
     try
     {
+      killed = false;
       p = Runtime.getRuntime().exec(cmd);
-      br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      String line;
-      while ((line = br.readLine()) != null)
-        result.add(line);
+      ArrayList<String> result = read(false);
+      if (killed)
+        return;
 
-      br.close();
+      boolean error = (result.size() == 0);
+      if (error)
+      {
+        HM.log("SP, " + id + ": " + " failed, getting error info..");
+        result = read(true);
+      }
+
       p.waitFor();  // wait for process to complete
+      execResult = result;
+      if (error)
+        HM.log("SP, " + id + ": " + " p.exitValue: " + p.exitValue());
     }
     catch (Exception e)
     {
       HM.err(e);
     }
+  }
 
+  private ArrayList<String> read(boolean error)
+  {
+    ArrayList<String> result = new ArrayList<>();
+    try
+    {
+      br = new BufferedReader(new InputStreamReader(error ? p.getErrorStream() : p.getInputStream()));
+      if (killed)
+        return result;
+
+      if (error)
+        result.add("error:");
+      String line;
+      while ((line = br.readLine()) != null)
+        result.add(line);
+      br.close();
+    }
+    catch (Exception e)
+    {
+      HM.err(e);
+    }
     return result;
   }
 
   void kill()
   {
-    HM.log("SP, killing.. cmd: " + cmd);
-
+    killed = true;
     try
     {
-      p.destroy();
+      if (p != null)
+        p.destroy();
     }
     catch (Exception e)
     {
@@ -128,14 +168,15 @@ public class SensorProcess extends Thread
     }
     try
     {
-      br.close();
+      if (br != null)
+        br.close();
     }
     catch (Exception e)
     {
       HM.err(e);
     }
 
-    HM.log("SP, killed. cmd: " + cmd);
+    HM.log("SP, " + id + ", killed.");
   }
 
   private void sleepMs(long ms)

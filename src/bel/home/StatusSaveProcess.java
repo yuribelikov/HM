@@ -53,7 +53,6 @@ class StatusSaveProcess extends Thread
         String encodedData = URLEncoder.encode(data, "UTF-8");
         String type = "application/x-www-form-urlencoded";
         String statusSaveUrl = HM.properties.getProperty("status.save.url");
-        HM.log("SSP, sending status data to: " + statusSaveUrl);
         URL u = new URL(statusSaveUrl);
         conn = (HttpURLConnection) u.openConnection();
         HM.log("SSP, conn: " + conn);
@@ -69,10 +68,9 @@ class StatusSaveProcess extends Thread
         HM.log("SSP, connected");
         os = conn.getOutputStream();
         final byte[] bytes = encodedData.getBytes();
-        HM.log("SSP, bytes to send: " + bytes.length);
         os.write(bytes);
         int responseCode = conn.getResponseCode();
-        HM.log("SSP, server response: " + responseCode + ", " + conn.getResponseMessage());
+        HM.log("SSP, server response: " + responseCode + ", " + conn.getResponseMessage() + " (" + bytes.length + " bytes)");
         os.close();
 
         try
@@ -92,7 +90,6 @@ class StatusSaveProcess extends Thread
         else
           sleep(20000);
 
-        HM.log("SSP, done.");
       }
       catch (Exception e)
       {
@@ -103,13 +100,25 @@ class StatusSaveProcess extends Thread
     HM.log("SSP finished.");
   }
 
-  void killConnections()
+  void killProcess()
   {
-    HM.log("SSP, killConnections()");
+    HM.log("SSP, killProcess()");
     new Thread()
     {
       public void run()
       {
+        try
+        {
+          isAlive = false;
+          sleep(200);
+          interrupt();
+          sleep(200);
+        }
+        catch (Exception e)
+        {
+          HM.err(e);
+        }
+
         try
         {
           HM.log("SSP, os: " + os);
@@ -118,7 +127,7 @@ class StatusSaveProcess extends Thread
         }
         catch (Exception e)
         {
-          HM.log("SSP, connection kill error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
+          HM.err(e);
         }
 
         try
@@ -129,10 +138,10 @@ class StatusSaveProcess extends Thread
         }
         catch (Exception e)
         {
-          HM.log("SSP, connection kill error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
+          HM.err(e);
         }
 
-        HM.log("SSP, killConnections() - done");
+        HM.log("SSP, killProcess() - done");
       }
     }.start();
   }

@@ -17,7 +17,7 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.12.04d";
+  static String version = "2016.12.06e";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
@@ -108,9 +108,9 @@ public class HM
         return false;
       }
 
-      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 90)
+      if ((System.currentTimeMillis() - statusSaveProcess.lastSuccess) > 1000 * 150)
       {
-        log("cannot save status for more than 90 seconds, restoring connection..");
+        log("cannot save status for more than 150 seconds, restoring connection..");
         restoreConnection();
         return true;
       }
@@ -152,23 +152,8 @@ public class HM
   private static void restoreConnection()
   {
     HM.log("restoreConnection(), checking router..");
-    statusSaveProcess.killConnections();
-
-    HM.log("SSP, thread.isAlive: " + statusSaveProcess.isAlive());
-    HM.log("SSP, thread.isInterrupted: " + statusSaveProcess.isInterrupted());
-    try
-    {
-      statusSaveProcess.isAlive = false;
-      statusSaveProcess.interrupt();
-    }
-    catch (Exception e)
-    {
-      HM.log("SSP, thread interruption error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
-    }
-    HM.log("SSP, thread.isAlive: " + statusSaveProcess.isAlive());
-    HM.log("SSP, thread.isInterrupted: " + statusSaveProcess.isInterrupted());
-
-    if (statusSaveProcess.isInterrupted())
+    statusSaveProcess.killProcess();
+    if (!statusSaveProcess.isAlive())
       statusSaveProcess = new StatusSaveProcess();
 
     if (checkRouter())
