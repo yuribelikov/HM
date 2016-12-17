@@ -227,8 +227,8 @@ HMClient.prototype.drawData = function ()
   ctx.font = "75pt Calibri";
   ctx.fillStyle = "#00FF00";
   ctx.fillText("Улица", x2 + 50, dy - 270);
-  ctx.font = "240pt Calibri";
-  this.printTemp(ctx, "outside.t", x2 + 100, dy);
+  ctx.font = "210pt Calibri";
+  this.printTemp(ctx, "outside.t", x2 + 40, dy);
 
   dy += 320;
   ctx.font = "60pt Calibri";
