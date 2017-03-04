@@ -32,10 +32,7 @@ public class HM
     try
     {
       if (args.length == 1 && args[0].equals("-s"))
-      {
         logsEnabled = false;
-        System.out.println("logs are disabled");
-      }
 
       if (!Files.exists(Paths.get(LOG_FN)))
         Files.write(Paths.get(LOG_FN), "".getBytes(), StandardOpenOption.CREATE_NEW);
