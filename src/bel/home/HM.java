@@ -17,12 +17,13 @@ public class HM
   static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2016.12.06e";
+  static String version = "2017.03.04";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
   private static boolean isAlive = true;
+  private static boolean logsEnabled = true;
   private static long started = System.currentTimeMillis();
 
 
@@ -30,6 +31,12 @@ public class HM
   {
     try
     {
+      if (args.length == 1 && args[0].equals("-s"))
+      {
+        logsEnabled = false;
+        System.out.println("logs are disabled");
+      }
+
       if (!Files.exists(Paths.get(LOG_FN)))
         Files.write(Paths.get(LOG_FN), "".getBytes(), StandardOpenOption.CREATE_NEW);
 
@@ -270,6 +277,9 @@ public class HM
 
   static void log(Object obj)
   {
+    if (!logsEnabled)
+      return;
+
     String msg = DF.format(System.currentTimeMillis()) + ": " + obj;
     System.out.println(msg);
     try
