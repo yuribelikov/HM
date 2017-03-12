@@ -64,7 +64,7 @@ public class SensorProcess extends Thread
 
     finished = true;
     HM.log("SP, " + id + ": " + (System.currentTimeMillis() < started + TIMEOUT ? "done" : "timeout") + ", exec: " + execResult +
-      ", result: " + Arrays.toString(result) + " (" + (tryN > 0 ? "tries: " + (tryN + 1) + ", " : "") + (System.currentTimeMillis() - started) + " ms)");
+            ", result: " + Arrays.toString(result) + " (" + (tryN > 0 ? "tries: " + (tryN + 1) + ", " : "") + (System.currentTimeMillis() - started) + " ms)");
   }
 
   private boolean processResultLinesDHT22()
@@ -108,8 +108,25 @@ public class SensorProcess extends Thread
     try
     {
       killed = false;
-      p = Runtime.getRuntime().exec(cmd);
-      ArrayList<String> result = read(false);
+      ArrayList<String> result;
+      if (HM.emulationMode)
+      {
+        result = new ArrayList<>();
+        result.add("emulation fake string..");
+        if (dht22)
+          result.add("Humidity = 20.30 % Temperature = 24.60 *C");
+        else
+        {
+          result.add("78 01 4b 46 1f ff 0c 10 fa : crc=fa YES");
+          result.add("8 01 4b 46 1f ff 0c 10 fa t=23500");
+        }
+      }
+      else
+      {
+        p = Runtime.getRuntime().exec(cmd);
+        result = read(false);
+      }
+
       if (killed)
         return;
 
@@ -120,7 +137,9 @@ public class SensorProcess extends Thread
         result = read(true);
       }
 
-      p.waitFor();  // wait for process to complete
+      if (!HM.emulationMode)
+        p.waitFor();  // wait for process to complete
+
       execResult = result;
       if (error)
         HM.log("SP, " + id + ": " + " p.exitValue: " + p.exitValue());
