@@ -12,8 +12,8 @@ import java.util.Map;
 
 class YDProcess extends Thread
 {
-  private static final String YD_PATH = "/opt/yandex.disk/hm/";
-  private static final String YD_DATA_PATH = YD_PATH + "data/";
+  private final String YD_PATH;
+  private final String YD_DATA_PATH;
   private static final String CONNS_FN = "conns.txt";
 
   private Map<String, List<String>> dataMap = new LinkedHashMap<>();
@@ -25,6 +25,8 @@ class YDProcess extends Thread
 
   YDProcess()
   {
+    YD_PATH = HM.properties.getProperty("yd.path");
+    YD_DATA_PATH = YD_PATH + "data/";
     start();
   }
 
@@ -35,7 +37,7 @@ class YDProcess extends Thread
 
   public void run()
   {
-    HM.log("YDP started");
+    HM.log("YDP started, YD_PATH: " + YD_PATH);
     loadConnChecks();
 
     long syncDelay;
