@@ -38,9 +38,9 @@ class DataRow
     return equals(60);
   }
 
-  boolean equals10minutes()
+  boolean equals5minutes()
   {
-    return equals(600);
+    return equals(300);
   }
 
   boolean equals4hours()

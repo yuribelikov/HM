@@ -26,7 +26,7 @@ class YDProcess extends Thread
   YDProcess()
   {
     YD_PATH = HM.properties.getProperty("yd.path");
-    YD_DATA_PATH = YD_PATH + "data/";
+    YD_DATA_PATH = YD_PATH + HM.DATA_PATH;
     start();
   }
 

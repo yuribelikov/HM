@@ -16,9 +16,9 @@ class TempMonProcess extends Thread
   long lastSuccess = System.currentTimeMillis();
   private int cycle = 0;
   private String header = "";
-  private List<DataRow> recentData = new ArrayList<>();     // per 1 minute for 3 hours (100 * 60 * 3   =  18000)
-  private List<DataRow> dailyData = new ArrayList<>();       // per 10 minutes for 24 hours (100 * 6 * 24  =  14400)
-  private List<DataRow> monthlyData = new ArrayList<>();   // per 4 hours for 1 month (100 * 6 * 30  =  18000)
+  private List<DataRow> recentData = new ArrayList<>();
+  private List<DataRow> dailyData = new ArrayList<>();
+  private List<DataRow> yearData = new ArrayList<>();
   private HashMap<String, float[]> lastSuccessfulValues = new HashMap<>();
   private HashMap<String, Integer> sensorFailures = new HashMap<>();
 
@@ -33,7 +33,7 @@ class TempMonProcess extends Thread
     HM.log("TMP started");
     loadData(RECENT_FN, recentData);
     loadData(getDailyFileName(), dailyData);
-    loadData(getMonthlyFileName(), monthlyData);
+    loadData(getYearFileName(), yearData);
 
     while (isAlive)
     {
@@ -73,33 +73,30 @@ class TempMonProcess extends Thread
         if (dataRow.equalsMinute())
         {
           recentData.add(dataRow);
-          if (dataRow.time - recentData.get(0).time > 1000 * 60 * 60 * 3)    // store only data for last 3 hours
+          if (dataRow.time - recentData.get(0).time > 1000 * 60 * 60 * 6)    // store only data for last 6 hours
             recentData.remove(0);
-          HM.log("recentData.size: " + recentData.size());
           saveData(RECENT_FN, recentData);
         }
 
         boolean save = false;
-        if (dataRow.equals10minutes() || dataRow.time - lastDataTime(dailyData) > 1000 * 60 * 11)
+        if (dataRow.equals5minutes() || dataRow.time - lastDataTime(dailyData) > 1000 * 60 * 5)
         {
           checkAndClear(dailyData, dataRow, Calendar.DAY_OF_MONTH);
           dailyData.add(dataRow);
-          HM.log("dailyData.size: " + dailyData.size());
           save = true;
         }
 
-        if (dataRow.equals4hours() || dataRow.time - lastDataTime(monthlyData) > 1000 * (60 * 60 * 4 + 60 * 5))
+        if (dataRow.equals4hours() || dataRow.time - lastDataTime(yearData) > 1000 * (60 * 60 * 4 + 60 * 5))
         {
-          checkAndClear(monthlyData, dataRow, Calendar.MONTH);
-          monthlyData.add(dataRow);
-          HM.log("monthlyData.size: " + monthlyData.size());
+          checkAndClear(yearData, dataRow, Calendar.YEAR);
+          yearData.add(dataRow);
           save = true;
         }
 
         if (save)
         {
           saveData(getDailyFileName(), dailyData);
-          saveData(getMonthlyFileName(), monthlyData);
+          saveData(getYearFileName(), yearData);
         }
 
         lastSuccess = System.currentTimeMillis();
@@ -185,9 +182,15 @@ class TempMonProcess extends Thread
     return sp.result[0] + (sp.result.length > 1 ? (";" + sp.result[1]) : "");
   }
 
-  private void checkAndClear(List<DataRow> data, DataRow lastRow, int dayOrMonth)
+  private void checkAndClear(List<DataRow> data, DataRow newRow, int dayOrYearConst)
   {
-    if (data.size() > 0 && data.get(data.size() - 1).get(dayOrMonth) != lastRow.get(dayOrMonth))     // new day or month
+    if (data.size() == 0)
+      return;
+
+    DataRow lastRow = data.get(data.size() - 1);
+    int lastDayOrYear = lastRow.get(dayOrYearConst);    // getting day or year value from data row
+    int newDayOrYear = newRow.get(dayOrYearConst);
+    if (lastDayOrYear != newDayOrYear)    // new day or new year begins
       data.clear();
   }
 
@@ -279,11 +282,11 @@ class TempMonProcess extends Thread
     return "daily_" + df.format(System.currentTimeMillis()) + ".csv";
   }
 
-  private String getMonthlyFileName()
+  private String getYearFileName()
   {
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM");
+    SimpleDateFormat df = new SimpleDateFormat("yyyy");
     df.setTimeZone(HM.DF.getTimeZone());
-    return "monthly_" + df.format(System.currentTimeMillis()) + ".csv";
+    return "year_" + df.format(System.currentTimeMillis()) + ".csv";
   }
 
   private void sleepMs(long ms)
