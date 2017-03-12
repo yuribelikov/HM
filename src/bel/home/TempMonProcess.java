@@ -70,7 +70,7 @@ class TempMonProcess extends Thread
 
         saveStatus(cycle, dataRow);
 
-        if (dataRow.equalsMinute())
+        if (dataRow.equalsMinute() || dataRow.time - lastDataTime(dailyData) > 1000 * 60)
         {
           recentData.add(dataRow);
           if (dataRow.time - recentData.get(0).time > 1000 * 60 * 60 * 6)    // store only data for last 6 hours
