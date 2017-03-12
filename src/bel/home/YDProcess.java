@@ -64,7 +64,7 @@ class YDProcess extends Thread
 
         sleepMs(1000);    // waiting for main HM thread is adding all data to the dataMap
         lastSync = System.currentTimeMillis();    // to avoid having connection channel always busy the lastSync time has to be updated even if sync is failed
-        copyPropertiesFromYD();
+//        copyPropertiesFromYD();
         saveConnChecks();
         HM.log("YDP, has data for saving, dataMap.size: " + dataMap.size());
         if (!Files.exists(Paths.get(YD_DATA_PATH)))
