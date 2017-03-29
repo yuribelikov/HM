@@ -14,10 +14,10 @@ public class HM
 {
   static final SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
   static final String DATA_PATH = "data/";
-  static final String PROPERTIES_FN = "hm.properties";
+  private static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2017.03.12";
+  static String version = "2017.03.29";
   static Properties properties = null;
   private static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
