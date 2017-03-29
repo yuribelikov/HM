@@ -19,7 +19,7 @@ public class HM
 
   static String version = "2017.03.29";
   static Properties properties = null;
-  private static TempMonProcess tempMonProcess;
+  static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
   private static boolean isAlive = true;

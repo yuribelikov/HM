@@ -59,7 +59,9 @@ class YDProcess extends Thread
           continue;
         }
 
-        sleepMs(1000);    // waiting for main HM thread is adding all data to the dataMap
+        while (HM.tempMonProcess.isMeasuring)
+          sleepMs(100);
+
         lastSync = System.currentTimeMillis();    // to avoid having connection channel always busy the lastSync time has to be updated even if sync is failed
 //        copyPropertiesFromYD();
 //        saveConnChecks();

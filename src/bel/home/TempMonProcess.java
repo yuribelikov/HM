@@ -21,6 +21,7 @@ class TempMonProcess extends Thread
   private List<DataRow> yearData = new ArrayList<>();
   private HashMap<String, float[]> lastSuccessfulValues = new HashMap<>();
   private HashMap<String, Integer> sensorFailures = new HashMap<>();
+  boolean isMeasuring = false;
 
 
   TempMonProcess()
@@ -62,6 +63,7 @@ class TempMonProcess extends Thread
           break;
 
         HM.log("");
+        isMeasuring = true;
         long started = System.currentTimeMillis();
         String data = requestSensors();
         DataRow dataRow = new DataRow(started, data);
@@ -100,6 +102,7 @@ class TempMonProcess extends Thread
         }
 
         lastSuccess = System.currentTimeMillis();
+        isMeasuring = false;
       }
       catch (Exception e)
       {
