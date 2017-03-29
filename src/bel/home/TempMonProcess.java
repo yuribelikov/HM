@@ -44,7 +44,6 @@ class TempMonProcess extends Thread
         long delay = Long.parseLong(HM.properties.getProperty("delay"));
         HM.log("delay: " + delay);
         HM.log("waiting..");
-        HM.log("");
         while (isAlive)
         {
           long currSec = System.currentTimeMillis() / 1000;
@@ -59,6 +58,7 @@ class TempMonProcess extends Thread
         if (!isAlive)
           break;
 
+        HM.log("");
         HM.log("cycle: " + (++cycle));
         isMeasuring = true;
         long started = System.currentTimeMillis();
