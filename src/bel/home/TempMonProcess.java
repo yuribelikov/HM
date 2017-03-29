@@ -60,7 +60,6 @@ class TempMonProcess extends Thread
         if (!isAlive)
           break;
 
-        HM.log("");
         isMeasuring = true;
         long started = System.currentTimeMillis();
         String data = requestSensors();
