@@ -14,7 +14,7 @@ function main()
  */
 function HMClient()
 {
-  this.version = "1.12a";
+  this.version = "1.12";
 
   /** @type {HTMLCanvasElement} */
   this.canvas = null;
