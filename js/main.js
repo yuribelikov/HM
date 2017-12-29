@@ -4,6 +4,7 @@ $(document).ready(main);
 
 function main()
 {
+  $.ajaxSetup({cache: false});
   var client = new HMClient();
   $(window).resize(client.onResize.bind(client));
 }
@@ -13,7 +14,7 @@ function main()
  */
 function HMClient()
 {
-  this.version = "1.11";
+  this.version = "1.12";
 
   /** @type {HTMLCanvasElement} */
   this.canvas = null;
@@ -85,7 +86,8 @@ HMClient.prototype.run = function ()
   //log("run, now: " + now + ", this.updated: " + this.updated + ", diff: " + (now - this.updated));
   if (now - this.updated >= HMClient.REFRESH_PERIOD * 1000)
   {
-    $.get("data/recent.csv", this.dataReceived.bind(this));
+    // $.get("data/recent.csv", this.dataReceived.bind(this));
+    $.get("data/recent.csv", {"_": $.now()}, this.dataReceived.bind(this));
     this.updated = now;
   }
   else
