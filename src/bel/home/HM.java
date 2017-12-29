@@ -14,12 +14,12 @@ public class HM
 {
   static final SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
   static final String DATA_PATH = "data/";
-  static final String PROPERTIES_FN = "hm.properties";
+  private static final String PROPERTIES_FN = "hm.properties";
   private static final String LOG_FN = "log.txt";
 
-  static String version = "2017.03.12";
+  static String version = "2017.03.29c";
   static Properties properties = null;
-  private static TempMonProcess tempMonProcess;
+  static TempMonProcess tempMonProcess;
   static StatusSaveProcess statusSaveProcess;
   static YDProcess ydProcess;
   private static boolean isAlive = true;
@@ -57,8 +57,13 @@ public class HM
       while (isAlive && heath)
       {
         sleepSec(30);
-        if (System.currentTimeMillis() - started > 120000)
-          heath = healthCheck();
+        if (System.currentTimeMillis() - started < 120000)
+          continue;
+
+        while (tempMonProcess.isMeasuring)
+          sleepSec(1);
+
+        heath = healthCheck();
       }
 
       tempMonProcess.isAlive = false;
@@ -66,7 +71,8 @@ public class HM
       ydProcess.isAlive = false;
 
       log("finished.");
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       err(e);
     }
@@ -87,7 +93,8 @@ public class HM
           String[] sa = rebootOn.split(":");
           rebootHour = Integer.parseInt(sa[0]);
           rebootMinute = Integer.parseInt(sa[1]);
-        } else
+        }
+        else
           rebootMinute = Integer.parseInt(rebootOn);
 
         Calendar c = Calendar.getInstance();
@@ -124,7 +131,8 @@ public class HM
       }
 
       log("healthCheck - ok");
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       err(e);
       return false;
@@ -149,7 +157,8 @@ public class HM
       properties = p;
       log("properties reloaded");
 
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       err(e);
     }
@@ -193,7 +202,8 @@ public class HM
       Runtime.getRuntime().exec(cmd).waitFor();
       HM.log("waiting for 20 seconds..");
       sleepSec(20);
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       HM.err(e);
     }
@@ -209,7 +219,8 @@ public class HM
       HM.log("WiFi is OK, router socket: " + s);
       s.close();
       return true;
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       HM.err(e);
     }
@@ -235,7 +246,8 @@ public class HM
           isAlive = false;
           sleepSec(1000);
           HM.log("stopped.");
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
           HM.log("SSP, waitingForStopCommand error: " + e.getMessage() + ", cause: " + e.getCause().getMessage());
         }
@@ -251,7 +263,8 @@ public class HM
       long waitUntil = System.currentTimeMillis() + 1000 * seconds;
       while (isAlive && System.currentTimeMillis() < waitUntil)
         Thread.sleep(100);
-    } catch (InterruptedException ignored)
+    }
+    catch (InterruptedException ignored)
     {
     }
   }
@@ -263,7 +276,8 @@ public class HM
       log("rebooting..");
       Runtime.getRuntime().exec("/sbin/reboot");
       log("reboot command sent.");
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       err(e);
     }
@@ -279,7 +293,8 @@ public class HM
     try
     {
       Files.write(Paths.get(LOG_FN), (msg + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
-    } catch (IOException e)
+    }
+    catch (IOException e)
     {
       err(e);
     }
@@ -294,7 +309,8 @@ public class HM
       StringWriter sw = new StringWriter();
       e.printStackTrace(new PrintWriter(sw));
       log(sw.toString());
-    } catch (Exception e1)
+    }
+    catch (Exception e1)
     {
       e1.printStackTrace();
     }

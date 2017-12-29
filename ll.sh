@@ -1,0 +1,1 @@
+less log.txt
