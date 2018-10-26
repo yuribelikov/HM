@@ -22,12 +22,19 @@ function Dashboard()
   this.data = null;
 
   /** @type {Number} */
-  this.lastDataTime = 0;
-  /** @type {Object} */
-  this.lastValues = {};
+  this.currentDataIndex = -1;
+  /** @type {Number} */
+  this.currentDataTime = 0;
+  /** @type {Array<number>} */
+  this.currentDataRow = {};
+  /** @type {Number} */
+  this.currentDataIndexUpdated = 0;
 
   /** @type CurrentValuesPanel */
   this.currentValuesPanel = new CurrentValuesPanel();
+
+  /** @type ChartPanel */
+  this.chartPanel = new ChartPanel();
 
   /** @type {Boolean} */
   this.chartMode = false;
@@ -126,15 +133,12 @@ Dashboard.prototype.dataReceived = function (csv)
       this.data[i - 1][j - 1] = this.parseNumber(cells[j]);
   }
 
-  this.lastDataTime = this.dataTimes[this.dataTimes.length - 1];
-  log(this.formatTime(this.lastDataTime, true));
-  this.lastValues = {};
-  for (i = 0; i < this.dataHeaders.length; i++)
-    this.lastValues[this.dataHeaders[i]] = this.data[this.data.length - 1][i];
+  var now = new Date().getTime();
+  log("diff: " + (now - this.currentDataIndexUpdated));
+  this.updateDataIndex(now - this.currentDataIndexUpdated > 3 * 60000 ? 0 : this.currentDataIndex);   // reset after 3 minutes
 
-  log(this.lastValues);
   //this.dataTimes[this.dataTimes.length - 1] = this.started;
-  this.dataUpdated = new Date().getTime();
+  this.dataUpdated = now;
   this.redraw(true);
 };
 
@@ -149,7 +153,9 @@ Dashboard.prototype.redraw = function (redrawData)
   if (redrawData)
   {
     if (!this.chartMode)
-      this.currentValuesPanel.draw(this.canvas, this.lastValues);
+      this.currentValuesPanel.draw(this.canvas, this.currentDataRow);
+    else
+      this.chartPanel.draw(this.canvas, this.data);
   }
 };
 
@@ -181,11 +187,11 @@ Dashboard.prototype.drawHeader = function (canvas)
 
   if (this.dataTimes)
   {
-    updatedAgo = Math.floor((now - this.lastDataTime) / 1000);
+    updatedAgo = Math.floor((now - this.currentDataTime) / 1000);
     ctx.fillStyle = "yellow";
-    ctx.fillText(this.formatTime(this.lastDataTime, true), 20, dy);
+    ctx.fillText(this.formatTime(this.currentDataTime, true), 20, dy);
     ctx.fillStyle = this.colorFromValue((updatedAgo - Dashboard.DATA_UPDATE_TIMEOUT * 0.7) / Dashboard.DATA_UPDATE_TIMEOUT);
-    ctx.fillText(this.formatNumber(Math.floor((now - this.lastDataTime) / 1000)), 440, dy);
+    ctx.fillText(this.formatNumber(Math.floor((now - this.currentDataTime) / 1000)), 440, dy);
   }
 
   ctx.clearRect(0, this.canvas.height - 20, this.canvas.width, 20);
@@ -288,10 +294,65 @@ Dashboard.prototype.formatNumber = function (num)
 Dashboard.prototype.onPointer = function (evt)
 {
   // log(evt.type, evt.clientX, evt.clientY);
+  var minMove = 20;
+  var slideDist = 70;
   if (evt.type === "pointerdown")
     this.downEvent = evt;
   else if (evt.type === "pointerup")
     this.downEvent = null;
+  else if (evt.type === "pointermove" && this.downEvent != null)
+  {
+    // log(evt.type, evt.clientX, evt.clientY);
+    var dy = evt.clientY - this.downEvent.clientY;
+    var dx = evt.clientX - this.downEvent.clientX;
+    if (dy > minMove && Math.abs(dx) < minMove)   // down
+    {
+      if (dy > slideDist && !this.chartMode)
+      {
+        this.chartMode = true;
+        this.redraw(true);
+      }
+    }
+    else if (-dy > minMove && Math.abs(dx) < minMove)   // up
+    {
+      if (-dy > slideDist && this.chartMode)
+      {
+        this.chartMode = false;
+        this.redraw(true);
+      }
+    }
+    else if (dx > minMove && Math.abs(dy) < minMove)   // right
+    {
+      this.updateDataIndex(this.currentDataIndex + Math.round(dx / minMove));
+    }
+    else if (-dx > minMove && Math.abs(dy) < minMove)   // left
+    {
 
+    }
 
+  }
+
+};
+
+/**
+ * @this {Dashboard}
+ * @param {Number} newDataIndex
+ */
+Dashboard.prototype.updateDataIndex = function (newDataIndex)
+{
+  log("updateDataIndex: " + newDataIndex);
+  if (newDataIndex !== this.currentDataIndex && newDataIndex < this.data.length)
+  {
+    this.currentDataIndex = newDataIndex;
+    log(this.currentDataIndex);
+    this.currentDataTime = this.dataTimes[this.dataTimes.length - 1 - this.currentDataIndex];
+    this.currentDataIndexUpdated = new Date().getTime();
+    log(this.formatTime(this.currentDataTime, true));
+    this.currentDataRow = {};
+    for (i = 0; i < this.dataHeaders.length; i++)
+      this.currentDataRow[this.dataHeaders[i]] = this.data[this.data.length - 1 - this.currentDataIndex][i];
+
+    log(this.currentDataRow);
+    this.redraw(true);
+  }
 };
