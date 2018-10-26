@@ -32,6 +32,10 @@ function Dashboard()
   /** @type {Boolean} */
   this.chartMode = false;
 
+  /** @type {Object} */
+  this.downEvent = null;
+
+
   this.start();
 }
 
@@ -53,6 +57,12 @@ Dashboard.prototype.start = function ()
 
   this.canvas = document.createElement("canvas");
   document.body.appendChild(this.canvas);
+
+  this.canvas.addEventListener("pointerdown", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointermove", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointerup", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointercancel", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
 
   this.onResize();
   window.requestAnimationFrame(this.run.bind(this));
@@ -258,4 +268,30 @@ Dashboard.prototype.formatTime = function (time, withDate)
 Dashboard.prototype.formatNumber = function (num)
 {
   return num < 10 ? "0" + num : "" + num;
+};
+
+/**
+ Mouse types (pointerType = mouse):
+ pointermove - mouse move
+ pointerdown - mouse button pressing
+ pointerup
+
+ Touch types (pointerType = touch):
+ pointerdown - pressing
+ pointerup
+ pointermove - dragging
+ pointercancel - long touch
+
+ * @this {Dashboard}
+ * @param {Event} evt
+ */
+Dashboard.prototype.onPointer = function (evt)
+{
+  // log(evt.type, evt.clientX, evt.clientY);
+  if (evt.type === "pointerdown")
+    this.downEvent = evt;
+  else if (evt.type === "pointerup")
+    this.downEvent = null;
+
+
 };
