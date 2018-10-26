@@ -41,12 +41,15 @@ function Dashboard()
 
   /** @type {Object} */
   this.downEvent = null;
+  /** @type {Object} */
+  this.moveEvent = null;
 
 
   this.start();
 }
 
 Dashboard.HEADER_H = 50;
+Dashboard.HEADER_CURR_TIME_W = 156;
 Dashboard.GRAPH_W = 300;
 Dashboard.GRAPH_T_H = 60;
 Dashboard.GRAPH_H_H = 100;
@@ -181,7 +184,7 @@ Dashboard.prototype.drawHeader = function (canvas)
   ctx.fillStyle = "pink";
   ctx.fillText(this.formatTime(this.dataUpdated), this.canvas.width - 390, dy);
   ctx.fillStyle = "white";
-  ctx.fillText(this.formatTime(now), this.canvas.width - 156, dy);
+  ctx.fillText(this.formatTime(now), this.canvas.width - Dashboard.HEADER_CURR_TIME_W, dy);
   ctx.fillStyle = this.colorFromValue((updatedAgo - Dashboard.REFRESH_PERIOD * 0.7) / Dashboard.REFRESH_PERIOD);
   ctx.fillText(this.formatNumber(updatedAgo), this.canvas.width - 220, dy);
 
@@ -296,15 +299,25 @@ Dashboard.prototype.onPointer = function (evt)
   // log(evt.type, evt.clientX, evt.clientY);
   var minMove = 20;
   var slideDist = 70;
+  var dx = this.downEvent !== null ? evt.clientX - this.downEvent.clientX : 0;
+  var dy = this.downEvent !== null ? evt.clientY - this.downEvent.clientY : 0;
+  var mx = this.moveEvent !== null ? evt.clientX - this.moveEvent.clientX : 0;
+  var my = this.moveEvent !== null ? evt.clientY - this.moveEvent.clientY : 0;
   if (evt.type === "pointerdown")
+  {
     this.downEvent = evt;
+    this.moveEvent = evt;
+  }
   else if (evt.type === "pointerup")
+  {
+    if (dx < 3 && dy < 3)
+      this.click(evt.clientX, evt.clientY);
+
     this.downEvent = null;
+  }
   else if (evt.type === "pointermove" && this.downEvent != null)
   {
     // log(evt.type, evt.clientX, evt.clientY);
-    var dy = evt.clientY - this.downEvent.clientY;
-    var dx = evt.clientX - this.downEvent.clientX;
     if (dy > minMove && Math.abs(dx) < minMove)   // down
     {
       if (dy > slideDist && !this.chartMode)
@@ -321,15 +334,12 @@ Dashboard.prototype.onPointer = function (evt)
         this.redraw(true);
       }
     }
-    else if (dx > minMove && Math.abs(dy) < minMove)   // right
+    else if (evt.clientY > Dashboard.HEADER_H && Math.abs(my) < 10 && (mx > 2 || mx < -2))   // right / left
     {
-      this.updateDataIndex(this.currentDataIndex + Math.round(dx / minMove));
-    }
-    else if (-dx > minMove && Math.abs(dy) < minMove)   // left
-    {
-
+      this.updateDataIndex(this.currentDataIndex + Math.round(mx / 10));
     }
 
+    this.moveEvent = evt;
   }
 
 };
@@ -341,8 +351,12 @@ Dashboard.prototype.onPointer = function (evt)
 Dashboard.prototype.updateDataIndex = function (newDataIndex)
 {
   log("updateDataIndex: " + newDataIndex);
-  if (newDataIndex !== this.currentDataIndex && newDataIndex < this.data.length)
+  if (newDataIndex !== this.currentDataIndex)
   {
+    if (newDataIndex >= this.data.length - 1)
+      newDataIndex = this.data.length - 1;
+    if (newDataIndex < 0)
+      newDataIndex = 0;
     this.currentDataIndex = newDataIndex;
     log(this.currentDataIndex);
     this.currentDataTime = this.dataTimes[this.dataTimes.length - 1 - this.currentDataIndex];
@@ -354,5 +368,16 @@ Dashboard.prototype.updateDataIndex = function (newDataIndex)
 
     log(this.currentDataRow);
     this.redraw(true);
+  }
+
+  /**
+   * @this {Dashboard}
+   * @param {Number} x
+   * @param {Number} y
+   */
+  Dashboard.prototype.click = function (x, y)
+  {
+    if (y < Dashboard.HEADER_H && x > this.canvas.width - Dashboard.HEADER_CURR_TIME_W)
+      this.updateDataIndex(0);
   }
 };
