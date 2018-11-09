@@ -1,6 +1,5 @@
 package bel.home.tempmon;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -4,4 +4,4 @@ out/*
 cmd.sh.done
 cmd0.sh
 data/*
-log*
+log*.txt
