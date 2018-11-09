@@ -1,6 +1,8 @@
 package bel.home.tempmon;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +28,8 @@ public class TempMon
   {
     try
     {
+      PropertyConfigurator.configure("hm_log4j.properties");
+
       lgr.info("--------------------------------------------------------------");
       String jarFile = "hm.jar";
       File file = new File(jarFile);
@@ -33,6 +37,7 @@ public class TempMon
       emulationMode = (args.length == 1 && args[0].equals("-e"));
       lgr.info("emulationMode: " + emulationMode);
 
+      checkAndReloadProperties();
       waitingForStopCommand();
 
 //      tempMonProcess = new TempMonProcess();    // todo
