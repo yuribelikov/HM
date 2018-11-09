@@ -1,6 +1,5 @@
 package bel.home.tempmon;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -130,7 +129,7 @@ public class TempMon
   {
     try
     {
-      lgr.info("healthCheck..");
+      lgr.debug("checkAndReboot..");
       String rebootOn = properties.getProperty("reboot.on");    // 57 (minutes of every hour) OR 01:57
       if (rebootOn != null)
       {
@@ -148,7 +147,7 @@ public class TempMon
         Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
-        lgr.info("hour: " + hour + ", minute: " + minute + ", rebootOn: " + rebootOn);
+        lgr.debug("hour: " + hour + ", minute: " + minute + ", rebootOn: " + rebootOn);
         if ((rebootHour == hour || rebootHour == -1) && minute == rebootMinute)
         {
           lgr.info("time to reboot..");
@@ -157,7 +156,7 @@ public class TempMon
         }
       }
 
-      lgr.info("healthCheck - ok");
+      lgr.debug("checkAndReboot - ok");
     }
     catch (Exception e)
     {
