@@ -87,18 +87,38 @@ public class DataManager extends Thread
   public void run()
   {
     lgr.info("DataManager is started");
-    long lastSaved = 0;
+    long statusLastSaved = 0;
     while (!Thread.currentThread().isInterrupted())
     {
-      int dataSavePeriod = 1000 * Utils.parse(TempMon.properties.getProperty("data.save.period"), 10);
-      DataRow lastDataRow = lastDataRow();
-      if (Utils.now() > lastSaved + dataSavePeriod && sensorsOrder != null && lastDataRow != null)
+      if (sensorsOrder == null)
+      {
+        Utils.sleep(10);
+        continue;
+      }
+
+      int dataSavePeriod = 1000 * Utils.parse(TempMon.properties.getProperty("status.save.period"), 10);
+      if (Utils.now() > statusLastSaved + dataSavePeriod)
       {
         writing = true;
         saveStatus();
-        saveRecent(lastDataRow);
         writing = false;
-        lastSaved = Utils.now();
+        statusLastSaved = Utils.now();
+      }
+
+      String time = Utils.timeFormat(Utils.now(), Utils.DF_KEY);
+      DataRow lastDataRow = lastDataRow();
+      if (lastDataRow == null || !lastDataRow.time.equals(time))
+      {
+        if (lastDataRow != null)      // switch row once a minute
+        {
+          writing = true;
+          saveRecent();
+          appendToMonthly(lastDataRow);
+          writing = false;
+        }
+
+        lastDataRow = new DataRow(time);
+        data.add(lastDataRow);
       }
 
       Utils.sleep(100);
@@ -120,22 +140,10 @@ public class DataManager extends Thread
 
   void addSensorData(SensorData sensorData)
   {
-    synchronized (data)
-    {
-      lgr.info("addSensorData: " + sensorData);
-      String time = Utils.timeFormat(Utils.now(), Utils.DF_KEY);
-      DataRow lastDataRow = lastDataRow();
-      if (lastDataRow == null || !lastDataRow.time.equals(time))
-      {
-        if (lastDataRow != null)
-          appendToMonthly(lastDataRow);
-
-        lastDataRow = new DataRow(time);
-        data.add(lastDataRow);
-      }
-
+    lgr.info("addSensorData: " + sensorData);
+    DataRow lastDataRow = lastDataRow();
+    if (lastDataRow != null)
       lastDataRow.sensorsData.put(sensorData.sensor.uid, sensorData);
-    }
   }
 
   private DataRow lastDataRow()
@@ -190,15 +198,27 @@ public class DataManager extends Thread
         if (sensorData.sensor.isdht22())
           statusLines.add(sensorData.sensor.uid + ".h = " + Utils.numFormat(sensorData.h, 2));
       }
+      else
+      {
+        Sensor sensor = TempMon.sensors.get(sensorUID);
+        if (sensor != null)
+        {
+          statusLines.add(sensor.uid + ".t =");
+          if (sensor.isdht22())
+            statusLines.add(sensor.uid + ".h =");
+        }
+        else
+          statusLines.add(sensorUID + " ???");
+      }
     }
   }
 
-  private void saveRecent(DataRow lastDataRow)
+  private void saveRecent()
   {
     try
     {
       List<String> recentLines = new ArrayList<>();
-      recentLines.add(headerToCsv(lastDataRow));
+      recentLines.add(headerToCsv());
       for (DataRow dataRow : data)
         recentLines.add(dataRowToCsv(dataRow));
 
@@ -211,19 +231,21 @@ public class DataManager extends Thread
     }
   }
 
-  private String headerToCsv(DataRow lastDataRow)
+  private String headerToCsv()
   {
     StringBuilder header = new StringBuilder();
     header.append("time;");
     for (String sensorUID : sensorsOrder)
     {
-      SensorData sensorData = lastDataRow.sensorsData.get(sensorUID);
-      if (sensorData != null && sensorData.sensor != null)
+      Sensor sensor = TempMon.sensors.get(sensorUID);
+      if (sensor != null)
       {
-        header.append(sensorData.sensor.uid).append(".t;");
-        if (sensorData.sensor.isdht22())
-          header.append(sensorData.sensor.uid).append(".h;");
+        header.append(sensor.uid).append(".t;");
+        if (sensor.isdht22())
+          header.append(sensor.uid).append(".h;");
       }
+      else
+        header.append(sensorUID).append(".?;");
     }
     return header.substring(0, header.length() - 1);
   }
@@ -241,6 +263,19 @@ public class DataManager extends Thread
         if (sensorData.sensor.isdht22())
           row.append(Utils.numFormat(sensorData.h, 1)).append(';');
       }
+      else
+      {
+        Sensor sensor = TempMon.sensors.get(sensorUID);
+        if (sensor != null)
+        {
+          row.append("?;");
+          if (sensor.isdht22())
+            row.append("?;");
+        }
+        else
+          row.append(sensorUID).append("??;");
+      }
+
     }
     return row.substring(0, row.length() - 1);
   }
@@ -251,7 +286,7 @@ public class DataManager extends Thread
     {
       String fileName = lastDataRow.time.substring(0, 7) + ".csv";   // e.g. 2018-11
       if (!Files.exists(Paths.get(DATA_PATH, fileName)))
-        Files.write(Paths.get(DATA_PATH, fileName), headerToCsv(lastDataRow).getBytes());
+        Files.write(Paths.get(DATA_PATH, fileName), headerToCsv().getBytes());
 
       Files.write(Paths.get(DATA_PATH, fileName), dataRowToCsv(lastDataRow).getBytes(), StandardOpenOption.APPEND);
     }

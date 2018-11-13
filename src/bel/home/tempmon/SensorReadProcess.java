@@ -27,7 +27,10 @@ public class SensorReadProcess extends Thread
         readFromSensor(sensor);
         Utils.sleep(100);
         if (sensorsUpdated)
+        {
+          sensorsUpdated = false;
           break;
+        }
       }
       Utils.sleep(100);
     }

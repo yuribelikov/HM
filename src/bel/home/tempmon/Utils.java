@@ -59,6 +59,9 @@ public class Utils
   {
     try
     {
+      if (d.isNaN())
+        return "NaN";
+
       StringBuilder pattern = new StringBuilder("#.");
       while (precision-- > 0)
         pattern.append("#");
