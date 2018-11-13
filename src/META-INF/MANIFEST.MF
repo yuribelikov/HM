@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: bel.home.HM
-
+Main-Class: bel.home.tempmon.TempMon

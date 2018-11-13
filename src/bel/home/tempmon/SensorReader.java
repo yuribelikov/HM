@@ -52,6 +52,7 @@ public class SensorReader
       ArrayList<String> result;
       if (TempMon.emulationMode)
       {
+        Utils.sleep(Math.round(2700 * Math.random()));
         result = new ArrayList<>();
         result.add("emulation fake string..");
         if (sensor.isdht22())
