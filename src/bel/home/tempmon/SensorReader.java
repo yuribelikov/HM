@@ -11,7 +11,7 @@ public class SensorReader
 {
   private static final Logger lgr = TempMon.lgr;
 
-  private final Sensor sensor;
+  final SensorData sensorData;
   private Process p = null;
   private BufferedReader br = null;
   private boolean killed = false;
@@ -19,8 +19,7 @@ public class SensorReader
 
   SensorReader(Sensor sensor)
   {
-    this.sensor = sensor;
-    this.sensor.reset();
+    this.sensorData = new SensorData(sensor);
   }
 
   void read()
@@ -28,26 +27,24 @@ public class SensorReader
     long started = Utils.now();
     long timeout = 1000 * Utils.parse(TempMon.properties.getProperty("sensor.read.timeout"), 2);
     new Thread(this::exec).start();
-    lgr.debug(sensor.uid + ": waiting " + timeout + "ms for response..");
-    while (!sensor.hasData() && Utils.now() - started < timeout)
+    lgr.debug(sensorData.sensor.uid + ": waiting " + timeout + " ms for response..");
+    while (!sensorData.hasData() && Utils.now() - started < timeout)
       Utils.sleep(10);
 
-    if (!sensor.hasData())
+    if (!sensorData.hasData())
     {
-      lgr.debug(sensor.uid + ": no data - killing..");
+      lgr.debug(sensorData.sensor.uid + ": no data - killing..");
       kill();
     }
     else
-    {
-      lgr.debug(sensor + " - responded successfully");
-      lgr.info(sensor + " - ok");
-    }
+      lgr.debug(sensorData + " - ok");
   }
 
   private void exec()
   {
     try
     {
+      lgr.debug("exec: " + sensorData.sensor.uid + " -> " + sensorData.sensor.cmd);
       killed = false;
       ArrayList<String> result;
       if (TempMon.emulationMode)
@@ -55,18 +52,18 @@ public class SensorReader
         Utils.sleep(Math.round(2700 * Math.random()));
         result = new ArrayList<>();
         result.add("emulation fake string..");
-        if (sensor.isdht22())
+        if (sensorData.sensor.isdht22())
           result.add("Humidity = 20.30 % Temperature = 24.60 *C");
         else
         {
           result.add("78 01 4b 46 1f ff 0c 10 fa : crc=fa YES");
           result.add("8 01 4b 46 1f ff 0c 10 fa t=23500");
         }
+        lgr.debug("result: " + result);
       }
       else
       {
-        lgr.debug("exec " + sensor.uid + ": " + sensor.cmd);
-        p = Runtime.getRuntime().exec(sensor.cmd);
+        p = Runtime.getRuntime().exec(sensorData.sensor.cmd);
         result = readFromCmd();
       }
 
@@ -76,7 +73,7 @@ public class SensorReader
       if (!TempMon.emulationMode)
         p.waitFor();  // wait for process to complete
 
-      if (sensor.isdht22())
+      if (sensorData.sensor.isdht22())
         processResultLinesDHT22(result);
       else
         processResultLinesDS18B20(result);
@@ -102,7 +99,7 @@ public class SensorReader
     readLines(br, result);
     result.add("p.exitValue: " + p.exitValue());
 
-    lgr.debug(result);
+    lgr.debug("result: " + result);
     return result;
   }
 
@@ -143,7 +140,7 @@ public class SensorReader
       lgr.warn(e);
     }
 
-    lgr.warn(sensor.uid + " is killed.");
+    lgr.warn(sensorData.sensor.uid + " is killed.");
   }
 
   private void processResultLinesDHT22(ArrayList<String> result)
@@ -152,8 +149,8 @@ public class SensorReader
       if (line.startsWith("Humidity"))   // Humidity = 20.30 % Temperature = 24.60 *C
       {
         String[] sa = line.split("=");
-        sensor.h = Float.parseFloat(sa[1].substring(0, sa[1].indexOf("%")));   // humidity
-        sensor.t = Float.parseFloat(sa[2].substring(0, sa[2].indexOf("*")));     // temperature
+        sensorData.h = Float.parseFloat(sa[1].substring(0, sa[1].indexOf("%")));   // humidity
+        sensorData.t = Float.parseFloat(sa[2].substring(0, sa[2].indexOf("*")));     // temperature
         break;
       }
   }
@@ -166,7 +163,7 @@ public class SensorReader
       else if (line.contains("t="))          // 8 01 4b 46 1f ff 0c 10 fa t=23500
       {
         String[] sa = line.split("=");
-        sensor.t = Float.parseFloat(sa[1]) / 1000;
+        sensorData.t = Float.parseFloat(sa[1]) / 1000;
         break;
       }
   }

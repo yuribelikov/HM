@@ -41,8 +41,8 @@ public class SensorReadProcess extends Thread
     {
       SensorReader sensorReader = new SensorReader(sensor);
       sensorReader.read();
-      if (sensor.hasData())
-        TempMon.addSensorData(sensor);
+      if (sensorReader.sensorData.hasData())
+        TempMon.addSensorData(sensorReader.sensorData);
     }
     catch (Exception e)
     {

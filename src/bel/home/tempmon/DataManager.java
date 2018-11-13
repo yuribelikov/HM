@@ -23,7 +23,7 @@ public class DataManager extends Thread
   private class DataRow
   {
     final String time;
-    final HashMap<String, Sensor> sensors = new HashMap<>();
+    final HashMap<String, SensorData> sensorsData = new HashMap<>();
 
     DataRow(String time)
     {
@@ -33,11 +33,11 @@ public class DataManager extends Thread
 
   DataManager()
   {
-    loadData();
+    loadRecent();
     start();
   }
 
-  private void loadData()
+  private void loadRecent()
   {
     try
     {
@@ -52,17 +52,24 @@ public class DataManager extends Thread
         {
           String[] values = line.split(";");
           DataRow dataRow = new DataRow(values[0]);
-          Sensor sensor = null;
+          SensorData sensorData = null;
           for (int i = 1; i < sensors.length; i++)
           {
             if (sensors[i].endsWith(".t"))
             {
-              sensor = new Sensor(sensors[i].substring(sensors[i].indexOf('.')), null);
-              sensor.t = Utils.parseFloat(values[i]);
-              dataRow.sensors.put(sensor.uid, sensor);
+              String sensorUID = sensors[i].substring(0, sensors[i].indexOf('.'));
+              Sensor sensor = TempMon.sensors.get(sensorUID);
+              if (sensor == null)
+              {
+                sensor = new Sensor(sensorUID, null);
+                TempMon.sensors.put(sensor.uid, sensor);
+              }
+              sensorData = new SensorData(sensor);
+              sensorData.t = Utils.parseFloat(values[i]);
+              dataRow.sensorsData.put(sensor.uid, sensorData);
             }
-            else if (sensor != null)
-              sensor.h = Utils.parseFloat(values[i]);
+            else if (sensorData != null)
+              sensorData.h = Utils.parseFloat(values[i]);
           }
 
           data.add(dataRow);
@@ -88,7 +95,7 @@ public class DataManager extends Thread
       if (Utils.now() > lastSaved + dataSavePeriod && sensorsOrder != null && lastDataRow != null)
       {
         writing = true;
-        saveStatus(lastDataRow);
+        saveStatus();
         saveRecent(lastDataRow);
         writing = false;
         lastSaved = Utils.now();
@@ -111,10 +118,11 @@ public class DataManager extends Thread
     sensorsOrder = us;
   }
 
-  void addSensorData(Sensor sensor)
+  void addSensorData(SensorData sensorData)
   {
     synchronized (data)
     {
+      lgr.info("addSensorData: " + sensorData);
       String time = Utils.timeFormat(Utils.now(), Utils.DF_KEY);
       DataRow lastDataRow = lastDataRow();
       if (lastDataRow == null || !lastDataRow.time.equals(time))
@@ -126,7 +134,7 @@ public class DataManager extends Thread
         data.add(lastDataRow);
       }
 
-      lastDataRow.sensors.put(sensor.uid, sensor);
+      lastDataRow.sensorsData.put(sensorData.sensor.uid, sensorData);
     }
   }
 
@@ -135,13 +143,28 @@ public class DataManager extends Thread
     return data.size() > 0 ? data.get(data.size() - 1) : null;
   }
 
-  private void saveStatus(DataRow lastDataRow)
+  private void saveStatus()
   {
     try
     {
       List<String> statusLines = new ArrayList<>();
-      statusLines.add(Utils.timeFormat(Utils.now(), Utils.DF_PRESIZE));
-      lastValuesToStatus(lastDataRow, statusLines);
+      statusLines.add("Save time: " + Utils.timeFormat(Utils.now(), Utils.DF_PRESIZE));
+      DataRow dataRow = lastDataRow();
+      if (dataRow != null)
+      {
+        statusLines.add("");
+        statusLines.add("Current data row:");
+        rowValuesToStatus(dataRow, statusLines);
+        if (data.size() > 1)
+        {
+          statusLines.add("");
+          statusLines.add("Last completed data row:");
+          rowValuesToStatus(data.get(data.size() - 2), statusLines);
+        }
+      }
+      statusLines.add("");
+      statusLines.add("");
+      statusLines.add("hm.properties:");
       for (Map.Entry entry : TempMon.properties.entrySet())
         statusLines.add(entry.getKey() + " = " + entry.getValue());
 
@@ -155,17 +178,17 @@ public class DataManager extends Thread
     }
   }
 
-  private void lastValuesToStatus(DataRow lastDataRow, List<String> statusLines)
+  private void rowValuesToStatus(DataRow dataRow, List<String> statusLines)
   {
-    statusLines.add(lastDataRow.time);
+    statusLines.add("Row data time: " + dataRow.time);
     for (String sensorUID : sensorsOrder)
     {
-      Sensor sensor = lastDataRow.sensors.get(sensorUID);
-      if (sensor != null)
+      SensorData sensorData = dataRow.sensorsData.get(sensorUID);
+      if (sensorData != null && sensorData.sensor != null)
       {
-        statusLines.add(sensor.uid + " = " + Utils.numFormat(sensor.t, 3));
-        if (sensor.isdht22())
-          statusLines.add(sensor.uid + " = " + Utils.numFormat(sensor.h, 2));
+        statusLines.add(sensorData.sensor.uid + ".t = " + Utils.numFormat(sensorData.t, 3));
+        if (sensorData.sensor.isdht22())
+          statusLines.add(sensorData.sensor.uid + ".h = " + Utils.numFormat(sensorData.h, 2));
       }
     }
   }
@@ -194,12 +217,12 @@ public class DataManager extends Thread
     header.append("time;");
     for (String sensorUID : sensorsOrder)
     {
-      Sensor sensor = lastDataRow.sensors.get(sensorUID);
-      if (sensor != null)
+      SensorData sensorData = lastDataRow.sensorsData.get(sensorUID);
+      if (sensorData != null && sensorData.sensor != null)
       {
-        header.append(sensor.uid).append(".t;");
-        if (sensor.isdht22())
-          header.append(sensor.uid).append(".h;");
+        header.append(sensorData.sensor.uid).append(".t;");
+        if (sensorData.sensor.isdht22())
+          header.append(sensorData.sensor.uid).append(".h;");
       }
     }
     return header.substring(0, header.length() - 1);
@@ -211,12 +234,12 @@ public class DataManager extends Thread
     row.append(dataRow.time).append(';');
     for (String sensorUID : sensorsOrder)
     {
-      Sensor sensor = dataRow.sensors.get(sensorUID);
-      if (sensor != null)
+      SensorData sensorData = dataRow.sensorsData.get(sensorUID);
+      if (sensorData != null && sensorData.sensor != null)
       {
-        row.append(Utils.numFormat(sensor.t, 1)).append(';');
-        if (sensor.isdht22())
-          row.append(Utils.numFormat(sensor.h, 1)).append(';');
+        row.append(Utils.numFormat(sensorData.t, 1)).append(';');
+        if (sensorData.sensor.isdht22())
+          row.append(Utils.numFormat(sensorData.h, 1)).append(';');
       }
     }
     return row.substring(0, row.length() - 1);
@@ -226,7 +249,7 @@ public class DataManager extends Thread
   {
     try
     {
-      String fileName = lastDataRow.time.substring(0, 7);   // e.g. 2018-11
+      String fileName = lastDataRow.time.substring(0, 7) + ".csv";   // e.g. 2018-11
       if (!Files.exists(Paths.get(DATA_PATH, fileName)))
         Files.write(Paths.get(DATA_PATH, fileName), headerToCsv(lastDataRow).getBytes());
 

@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class TempMon
@@ -17,9 +18,10 @@ public class TempMon
   private static boolean isAlive = true;
   static Properties properties = null;
   private static long propertiesUpdated = 0;
-  private static SensorReadProcess sensorReadProcessT;
-  private static SensorReadProcess sensorReadProcessTH;
-  private static DataManager dataManager;
+  static final HashMap<String, Sensor> sensors = new HashMap<>();
+  private static SensorReadProcess sensorReadProcessT = null;
+  private static SensorReadProcess sensorReadProcessTH = null;
+  private static DataManager dataManager = null;
   static boolean emulationMode = false;
 
 
@@ -37,13 +39,13 @@ public class TempMon
       lgr.info("emulationMode: " + emulationMode);
 
       checkAndReloadProperties();
+      updateSensorReaders();
       waitingForStopCommand();
 
 //      tempMonProcess = new TempMonProcess();    // todo
 //      statusSaveProcess = new StatusSaveProcess();
 //      ydProcess = new YDProcess();
 
-      dataManager = new DataManager();
       while (isAlive)
       {
         if (checkAndReloadProperties())
@@ -99,6 +101,7 @@ public class TempMon
       if (sensorCMD != null)
       {
         Sensor sensor = new Sensor(sensorUID, sensorCMD);
+        sensors.put(sensor.uid, sensor);
         if (sensor.isdht22())
           thSensors.add(sensor);
         else
@@ -117,12 +120,16 @@ public class TempMon
       sensorReadProcessTH.updateSensors(thSensors);
     }
 
+    if (dataManager == null)
+      dataManager = new DataManager();
+
     dataManager.updateSensors(sa);
   }
 
-  static void addSensorData(Sensor sensor)
+  static void addSensorData(SensorData sensorData)
   {
-    dataManager.addSensorData(sensor);
+    if (dataManager != null)
+      dataManager.addSensorData(sensorData);
   }
 
   private static void checkAndReboot()
