@@ -3,18 +3,18 @@ package bel.home.tempmon;
 public class Sensor
 {
   final String uid;
-  final String cmd;
+  final String id;
 
 
-  Sensor(String uid, String cmd)
+  Sensor(String uid, String id)
   {
     this.uid = uid;
-    this.cmd = cmd;
+    this.id = id;
   }
 
   boolean isdht22()    // DHT22 (with Humidity) or DS18B20
   {
-    return cmd.contains("dht22");
+    return !id.startsWith("28-");
   }
 
   @Override

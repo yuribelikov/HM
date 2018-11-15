@@ -44,7 +44,9 @@ public class SensorReader
   {
     try
     {
-      lgr.debug("exec: " + sensorData.sensor.uid + " -> " + sensorData.sensor.cmd);
+      String cmd = sensorData.sensor.isdht22() ? (TempMon.properties.getProperty("dht22.path") + " " + sensorData.sensor.id) :
+        ("cat " + TempMon.properties.getProperty("ds18b20.path") + sensorData.sensor.id + "/w1_slave");
+      lgr.debug("exec: " + sensorData.sensor.uid + " -> " + cmd);
       killed = false;
       ArrayList<String> result;
       if (TempMon.emulationMode)
@@ -63,7 +65,7 @@ public class SensorReader
       }
       else
       {
-        p = Runtime.getRuntime().exec(sensorData.sensor.cmd);
+        p = Runtime.getRuntime().exec(cmd);
         result = readFromCmd();
       }
 
@@ -80,7 +82,7 @@ public class SensorReader
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
@@ -128,7 +130,7 @@ public class SensorReader
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
     try
     {
@@ -137,7 +139,7 @@ public class SensorReader
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
 
     lgr.warn(sensorData.sensor.uid + " is killed.");

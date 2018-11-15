@@ -17,6 +17,7 @@ public class DataManager extends Thread
 
   private boolean writing = false;
   private String[] sensorsOrder = null;
+  private DataRow currentRow = new DataRow(Utils.timeFormat(Utils.now(), Utils.DF_KEY));
   private final ArrayList<DataRow> data = new ArrayList<>();
 
 
@@ -28,6 +29,12 @@ public class DataManager extends Thread
     DataRow(String time)
     {
       this.time = time;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "time=" + time + ", sensorsData=" + sensorsData + System.lineSeparator();
     }
   }
 
@@ -55,6 +62,9 @@ public class DataManager extends Thread
           SensorData sensorData = null;
           for (int i = 1; i < sensors.length; i++)
           {
+            if (i >= values.length)
+              break;
+
             if (sensors[i].endsWith(".t"))
             {
               String sensorUID = sensors[i].substring(0, sensors[i].indexOf('.'));
@@ -77,10 +87,11 @@ public class DataManager extends Thread
       }
 
       lgr.info("data loaded from " + RECENT_FN + ", data size: " + data.size());
+      lgr.debug(data);
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
@@ -101,24 +112,20 @@ public class DataManager extends Thread
       {
         writing = true;
         saveStatus();
+        saveCurrent();
         writing = false;
         statusLastSaved = Utils.now();
       }
 
       String time = Utils.timeFormat(Utils.now(), Utils.DF_KEY);
-      DataRow lastDataRow = lastDataRow();
-      if (lastDataRow == null || !lastDataRow.time.equals(time))
+      if (!currentRow.time.equals(time))          // switch row once a minute
       {
-        if (lastDataRow != null)      // switch row once a minute
-        {
-          writing = true;
-          saveRecent();
-          appendToMonthly(lastDataRow);
-          writing = false;
-        }
-
-        lastDataRow = new DataRow(time);
-        data.add(lastDataRow);
+        writing = true;
+        data.add(currentRow);
+        saveRecent();
+        appendToMonthly(currentRow);
+        currentRow = new DataRow(time);
+        writing = false;
       }
 
       Utils.sleep(100);
@@ -141,9 +148,7 @@ public class DataManager extends Thread
   void addSensorData(SensorData sensorData)
   {
     lgr.info("addSensorData: " + sensorData);
-    DataRow lastDataRow = lastDataRow();
-    if (lastDataRow != null)
-      lastDataRow.sensorsData.put(sensorData.sensor.uid, sensorData);
+    currentRow.sensorsData.put(sensorData.sensor.uid, sensorData);
   }
 
   private DataRow lastDataRow()
@@ -157,18 +162,15 @@ public class DataManager extends Thread
     {
       List<String> statusLines = new ArrayList<>();
       statusLines.add("Save time: " + Utils.timeFormat(Utils.now(), Utils.DF_PRESIZE));
-      DataRow dataRow = lastDataRow();
-      if (dataRow != null)
+      statusLines.add("");
+      statusLines.add("Current data row:");
+      rowValuesToCurrent(currentRow, statusLines);
+      DataRow lastDataRow = lastDataRow();
+      if (lastDataRow != null)
       {
         statusLines.add("");
-        statusLines.add("Current data row:");
-        rowValuesToStatus(dataRow, statusLines);
-        if (data.size() > 1)
-        {
-          statusLines.add("");
-          statusLines.add("Last completed data row:");
-          rowValuesToStatus(data.get(data.size() - 2), statusLines);
-        }
+        statusLines.add("Last completed data row:");
+        rowValuesToCurrent(lastDataRow, statusLines);
       }
       statusLines.add("");
       statusLines.add("");
@@ -177,18 +179,18 @@ public class DataManager extends Thread
         statusLines.add(entry.getKey() + " = " + entry.getValue());
 
       Files.write(Paths.get(DATA_PATH, "status.txt"), statusLines, StandardCharsets.UTF_8);
-      lgr.debug("status is saved");
+      lgr.info("status is saved");
 
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
-  private void rowValuesToStatus(DataRow dataRow, List<String> statusLines)
+  private void rowValuesToCurrent(DataRow dataRow, List<String> statusLines)
   {
-    statusLines.add("Row data time: " + dataRow.time);
+    statusLines.add("data.time = " + dataRow.time);
     for (String sensorUID : sensorsOrder)
     {
       SensorData sensorData = dataRow.sensorsData.get(sensorUID);
@@ -213,6 +215,23 @@ public class DataManager extends Thread
     }
   }
 
+  private void saveCurrent()
+  {
+    try
+    {
+      List<String> statusLines = new ArrayList<>();
+      statusLines.add("save.time = " + Utils.timeFormat(Utils.now(), Utils.DF_PRESIZE));
+      rowValuesToCurrent(currentRow, statusLines);
+      Files.write(Paths.get(DATA_PATH, "current.txt"), statusLines, StandardCharsets.UTF_8);
+      lgr.info("current is saved");
+
+    }
+    catch (Exception e)
+    {
+      lgr.warn(e.getMessage(), e);
+    }
+  }
+
   private void saveRecent()
   {
     try
@@ -223,11 +242,11 @@ public class DataManager extends Thread
         recentLines.add(dataRowToCsv(dataRow));
 
       Files.write(Paths.get(DATA_PATH, RECENT_FN), recentLines, StandardCharsets.UTF_8);
-      lgr.debug("recent data is saved");
+      lgr.info("recent data is saved");
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
@@ -280,15 +299,17 @@ public class DataManager extends Thread
     return row.substring(0, row.length() - 1);
   }
 
-  private void appendToMonthly(DataRow lastDataRow)
+  private void appendToMonthly(DataRow dataRow)
   {
     try
     {
-      String fileName = lastDataRow.time.substring(0, 7) + ".csv";   // e.g. 2018-11
+      String fileName = dataRow.time.substring(0, 7) + ".csv";   // e.g. 2018-11
       if (!Files.exists(Paths.get(DATA_PATH, fileName)))
-        Files.write(Paths.get(DATA_PATH, fileName), headerToCsv().getBytes());
+        Files.write(Paths.get(DATA_PATH, fileName), (headerToCsv() + System.lineSeparator()).getBytes());
 
-      Files.write(Paths.get(DATA_PATH, fileName), dataRowToCsv(lastDataRow).getBytes(), StandardOpenOption.APPEND);
+      Files.write(Paths.get(DATA_PATH, fileName), (dataRowToCsv(dataRow) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+
+      lgr.info("appended to monthly");
     }
     catch (Exception e)
     {

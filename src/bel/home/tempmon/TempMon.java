@@ -3,13 +3,12 @@ package bel.home.tempmon;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 public class TempMon
 {
@@ -41,10 +40,10 @@ public class TempMon
       checkAndReloadProperties();
       updateSensorReaders();
       waitingForStopCommand();
+      if (!emulationMode)
+        scanForNewSensors();
 
-//      tempMonProcess = new TempMonProcess();    // todo
-//      statusSaveProcess = new StatusSaveProcess();
-//      ydProcess = new YDProcess();
+//      ydProcess = new YDProcess();    // todo
 
       while (isAlive)
       {
@@ -59,7 +58,7 @@ public class TempMon
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
@@ -85,7 +84,7 @@ public class TempMon
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
       return false;
     }
   }
@@ -124,6 +123,36 @@ public class TempMon
       dataManager = new DataManager();
 
     dataManager.updateSensors(sa);
+  }
+
+  private static void scanForNewSensors()
+  {
+    try
+    {
+      lgr.info("scanning for new DS18B20 sensors");
+      Process p = Runtime.getRuntime().exec("ls " + properties.getProperty("ds18b20.path"));     // ls /sys/bus/w1/devices
+      BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      String line;
+      StringBuilder output = new StringBuilder();
+      while ((line = br.readLine()) != null)
+        output.append(line).append(' ');
+      br.close();
+
+      String[] sa = output.toString().split(" ");
+      HashSet<Object> allSensorsIds = new HashSet<>();
+      for (String s : sa)
+        if (s.startsWith("28-"))
+          allSensorsIds.add(s.trim());
+
+      allSensorsIds.removeAll(properties.values());
+      if (allSensorsIds.size() > 0)
+        lgr.warn("Unregistered sensors: " + allSensorsIds);
+
+    }
+    catch (Exception e)
+    {
+      lgr.warn(e.getMessage(), e);
+    }
   }
 
   static void addSensorData(SensorData sensorData)
@@ -167,7 +196,7 @@ public class TempMon
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 
@@ -183,7 +212,7 @@ public class TempMon
       }
       catch (Exception e)
       {
-        lgr.warn(e);
+        lgr.warn(e.getMessage(), e);
       }
 
     }).start();
@@ -213,7 +242,7 @@ public class TempMon
     }
     catch (Exception e)
     {
-      lgr.warn(e);
+      lgr.warn(e.getMessage(), e);
     }
   }
 

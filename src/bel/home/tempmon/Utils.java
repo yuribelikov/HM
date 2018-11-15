@@ -60,14 +60,14 @@ public class Utils
     try
     {
       if (d.isNaN())
-        return "NaN";
+        return "?";
 
       StringBuilder pattern = new StringBuilder("#.");
       while (precision-- > 0)
         pattern.append("#");
 
       DecimalFormat df = new DecimalFormat(pattern.toString());
-      return df.format(d);
+      return df.format(d).replace(',', '.');
     }
     catch (Exception e)
     {
