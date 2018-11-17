@@ -51,8 +51,7 @@ public class TempMon
           updateSensorReaders();
 
         checkAndReboot();
-        while (isAlive)
-          Utils.sleep(10);
+        Utils.sleep(1000);
       }
 
       lgr.info("main() finished.");
@@ -68,7 +67,7 @@ public class TempMon
     try
     {
       File file = new File("hm.properties");
-//      lgr.debug("check properties file modified: " + Utils.timeFormat(file.lastModified(), Utils.DF_PRESIZE));
+      lgr.debug("check properties file modified: " + Utils.timeFormat(file.lastModified(), Utils.DF_PRESIZE));
       if (file.lastModified() <= propertiesUpdated)
         return false;
 
@@ -79,7 +78,7 @@ public class TempMon
       fis.close();
       properties = p;
       propertiesUpdated = Utils.now();
-      lgr.info("properties reloaded");
+      lgr.info("properties reloaded: " + properties);
       return true;
 
     }

@@ -14,7 +14,9 @@ public class Utils
   {
     try
     {
-        Thread.sleep(ms);
+      long till = now() + ms;
+      while (TempMon.isAlive && now() < till)
+        Thread.sleep(1);
     }
     catch (InterruptedException ignored)
     {

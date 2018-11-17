@@ -107,7 +107,7 @@ public class DataManager extends Thread
         continue;
       }
 
-      int dataSavePeriod = 1000 * Utils.parse(TempMon.properties.getProperty("status.save.period"), 10);
+      int dataSavePeriod = 1000 * Utils.parse(TempMon.properties.getProperty("current.save.period"), 10);
       if (Utils.now() > statusLastSaved + dataSavePeriod)
       {
         writing = true;

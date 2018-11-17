@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "1.12";
+  this.version = "1.2";
 
   /** @type {HTMLCanvasElement} */
   this.canvas = null;
@@ -13,6 +13,8 @@ function Dashboard()
   this.updated = 0;
   /** @type {number} */
   this.dataUpdated = 0;
+
+  this.currentData = {};    // value = map[key]
 
   /** @type {Array<number>} */
   this.dataTimes = null;
@@ -49,11 +51,10 @@ function Dashboard()
 }
 
 Dashboard.HEADER_H = 50;
-Dashboard.HEADER_CURR_TIME_W = 156;
 Dashboard.GRAPH_W = 300;
 Dashboard.GRAPH_T_H = 60;
 Dashboard.GRAPH_H_H = 100;
-Dashboard.REFRESH_PERIOD = 10;
+Dashboard.REFRESH_PERIOD = 1;
 Dashboard.DATA_UPDATE_TIMEOUT = 80;
 
 /**
@@ -68,11 +69,11 @@ Dashboard.prototype.start = function ()
   this.canvas = document.createElement("canvas");
   document.body.appendChild(this.canvas);
 
-  this.canvas.addEventListener("pointerdown", this.onPointer.bind(this));
-  this.canvas.addEventListener("pointermove", this.onPointer.bind(this));
-  this.canvas.addEventListener("pointerup", this.onPointer.bind(this));
-  this.canvas.addEventListener("pointercancel", this.onPointer.bind(this));
-  this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
+  // this.canvas.addEventListener("pointerdown", this.onPointer.bind(this));
+  // this.canvas.addEventListener("pointermove", this.onPointer.bind(this));
+  // this.canvas.addEventListener("pointerup", this.onPointer.bind(this));
+  // this.canvas.addEventListener("pointercancel", this.onPointer.bind(this));
+  // this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
 
   this.onResize();
   window.requestAnimationFrame(this.run.bind(this));
@@ -104,7 +105,7 @@ Dashboard.prototype.run = function ()
   if (now - this.updated >= Dashboard.REFRESH_PERIOD * 1000)
   {
     // $.get("data/recent.csv", this.dataReceived.bind(this));
-    $.get("data/recent.csv", {"_": $.now()}, this.dataReceived.bind(this));
+    $.get("data/current.txt", {"_": $.now()}, this.dataReceived.bind(this));
     this.updated = now;
   }
   else
@@ -113,11 +114,34 @@ Dashboard.prototype.run = function ()
   window.requestAnimationFrame(this.run.bind(this));
 };
 
+
+/**
+ * @this {Dashboard}
+ * @param {string} map
+ */
+Dashboard.prototype.dataReceived = function (map)
+{
+  // log("dataReceived: " + map.length);
+  var rows = map.split("\n");
+  for (var i = 0; i < rows.length; i++)
+  {
+    var sa = rows[i].split("=");
+    if (sa[0] && sa[1])
+    {
+      var value = sa[1].trim();
+      this.currentData[sa[0].trim()] = (value.indexOf("-") === -1 ? this.parseNumber(value) : this.parseDateTime(value));
+    }
+  }
+
+  this.dataUpdated = new Date().getTime();
+  this.redraw(true);
+};
+
 /**
  * @this {Dashboard}
  * @param {string} csv
  */
-Dashboard.prototype.dataReceived = function (csv)
+Dashboard.prototype.dataReceived0 = function (csv)
 {
   log("dataReceived: " + csv.length);
   var rows = csv.split("\n");
@@ -156,7 +180,7 @@ Dashboard.prototype.redraw = function (redrawData)
   if (redrawData)
   {
     if (!this.chartMode)
-      this.currentValuesPanel.draw(this.canvas, this.currentDataRow);
+      this.currentValuesPanel.draw(this.canvas, this.currentData);
     else
       this.chartPanel.draw(this.canvas, this.data);
   }
@@ -177,24 +201,26 @@ Dashboard.prototype.drawHeader = function (canvas)
   ctx.rect(20, 1, this.canvas.width - 20, Dashboard.HEADER_H - 2);
   ctx.stroke();
 
-  ctx.font = "30pt Calibri";
+  ctx.font = "25pt Calibri";
   var dy = Dashboard.HEADER_H - 10;
-  var now = new Date().getTime();
-  var updatedAgo = Math.floor((now - this.dataUpdated) / 1000);
-  ctx.fillStyle = "pink";
-  ctx.fillText(this.formatTime(this.dataUpdated), this.canvas.width - 390, dy);
   ctx.fillStyle = "white";
-  ctx.fillText(this.formatTime(now), this.canvas.width - Dashboard.HEADER_CURR_TIME_W, dy);
-  ctx.fillStyle = this.colorFromValue((updatedAgo - Dashboard.REFRESH_PERIOD * 0.7) / Dashboard.REFRESH_PERIOD);
-  ctx.fillText(this.formatNumber(updatedAgo), this.canvas.width - 220, dy);
+  ctx.fillText(this.formatTime(this.dataUpdated), this.canvas.width - 130, dy);
 
-  if (this.dataTimes)
+  var now = new Date().getTime();
+  if (this.currentData)
   {
-    updatedAgo = Math.floor((now - this.currentDataTime) / 1000);
-    ctx.fillStyle = "yellow";
-    ctx.fillText(this.formatTime(this.currentDataTime, true), 20, dy);
-    ctx.fillStyle = this.colorFromValue((updatedAgo - Dashboard.DATA_UPDATE_TIMEOUT * 0.7) / Dashboard.DATA_UPDATE_TIMEOUT);
-    ctx.fillText(this.formatNumber(Math.floor((now - this.currentDataTime) / 1000)), 440, dy);
+    // var currentDataSaved = this.currentData["save.time"];
+    // var currentDataCollected = this.currentData["data.time"];
+    var times = [this.currentData["save.time"], this.currentData["data.time"]];
+    for (var i = 0; i < times.length; i++)
+    {
+      var ago = Math.floor((now - times[i]) / 1000);
+      var ox = 410;
+      ctx.fillStyle = (i === 0 ? "white" : "gray");
+      ctx.fillText(this.formatTime(times[i], true), i * ox + 20, dy);
+      // ctx.fillStyle = this.colorFromValue((ago - Dashboard.DATA_UPDATE_TIMEOUT * 0.7) / Dashboard.DATA_UPDATE_TIMEOUT);
+      ctx.fillText("(" + this.formatNumber(ago) + ")", i * ox + 350, dy);
+    }
   }
 
   ctx.clearRect(0, this.canvas.height - 20, this.canvas.width, 20);
@@ -231,7 +257,7 @@ Dashboard.prototype.colorFromValue = function (value)       // <0 is white, 0-1 
  */
 Dashboard.prototype.parseDateTime = function (dateTime)
 {
-  var d = new Date(dateTime.replace("_", " "));
+  var d = new Date(dateTime.indexOf("_") !== -1 ? dateTime.replace("_", " ") : dateTime.substring(0, dateTime.indexOf(",")));
   //log(d);
   return d.getTime();
 };
