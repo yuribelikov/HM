@@ -122,6 +122,7 @@ public class DataManager extends Thread
       {
         writing = true;
         data.add(currentRow);
+        checkRecentSize();
         saveRecent();
         appendToMonthly(currentRow);
         currentRow = new DataRow(time);
@@ -132,6 +133,13 @@ public class DataManager extends Thread
     }
 
     lgr.info("DataManager is stopped");
+  }
+
+  private void checkRecentSize()
+  {
+    int limit = Utils.parse(TempMon.properties.getProperty("recent.size"), 100);
+    while (data.size() > limit)
+      data.remove(0);
   }
 
   void updateSensors(String[] sensors)
