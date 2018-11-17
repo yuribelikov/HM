@@ -15,6 +15,7 @@ public class DataManager extends Thread
   private static final String DATA_PATH = "data/";
   private static final String RECENT_FN = "recent.csv";
 
+  boolean isAlive = true;
   private boolean writing = false;
   private String[] sensorsOrder = null;
   private DataRow currentRow = new DataRow(Utils.timeFormat(Utils.now(), Utils.DF_KEY));
@@ -87,7 +88,6 @@ public class DataManager extends Thread
       }
 
       lgr.info("data loaded from " + RECENT_FN + ", data size: " + data.size());
-      lgr.debug(data);
     }
     catch (Exception e)
     {
@@ -99,7 +99,7 @@ public class DataManager extends Thread
   {
     lgr.info("DataManager is started");
     long statusLastSaved = 0;
-    while (!Thread.currentThread().isInterrupted())
+    while (isAlive)
     {
       if (sensorsOrder == null)
       {

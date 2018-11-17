@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class SensorReadProcess extends Thread
 {
   private static final Logger lgr = TempMon.lgr;
+  boolean isAlive = true;
   private ArrayList<Sensor> sensors;
   private boolean sensorsUpdated = false;
 
@@ -20,19 +21,19 @@ public class SensorReadProcess extends Thread
   public void run()
   {
     lgr.info("SensorReadProcess is started for: " + sensors);
-    while (!Thread.currentThread().isInterrupted())
+    while (isAlive)
     {
       for (Sensor sensor : sensors)
       {
         readFromSensor(sensor);
-        Utils.sleep(100);
+        Utils.sleep(10);
         if (sensorsUpdated)
         {
           sensorsUpdated = false;
           break;
         }
       }
-      Utils.sleep(100);
+      Utils.sleep(10);
     }
 
     lgr.info("SensorReadProcess is stopped for: " + sensors);

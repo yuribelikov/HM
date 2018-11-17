@@ -28,7 +28,7 @@ public class SensorReader
     long timeout = 1000 * Utils.parse(TempMon.properties.getProperty("sensor.read.timeout"), 2);
     new Thread(this::exec).start();
     lgr.debug(sensorData.sensor.uid + ": waiting " + timeout + " ms for response..");
-    while (!sensorData.hasData() && Utils.now() - started < timeout)
+    while (!sensorData.hasData() && Utils.now() - started < timeout && TempMon.isAlive)
       Utils.sleep(10);
 
     if (!sensorData.hasData())

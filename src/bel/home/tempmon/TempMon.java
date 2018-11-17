@@ -14,7 +14,7 @@ public class TempMon
 {
   static final Logger lgr = Logger.getLogger("tempmon");
 
-  private static boolean isAlive = true;
+  static boolean isAlive = true;
   static Properties properties = null;
   private static long propertiesUpdated = 0;
   static final HashMap<String, Sensor> sensors = new HashMap<>();
@@ -51,7 +51,8 @@ public class TempMon
           updateSensorReaders();
 
         checkAndReboot();
-        Utils.sleep(1000);
+        while (isAlive)
+          Utils.sleep(10);
       }
 
       lgr.info("main() finished.");
@@ -67,7 +68,7 @@ public class TempMon
     try
     {
       File file = new File("hm.properties");
-      lgr.debug("check properties file modified: " + Utils.timeFormat(file.lastModified(), Utils.DF_PRESIZE));
+//      lgr.debug("check properties file modified: " + Utils.timeFormat(file.lastModified(), Utils.DF_PRESIZE));
       if (file.lastModified() <= propertiesUpdated)
         return false;
 
@@ -165,7 +166,7 @@ public class TempMon
   {
     try
     {
-      lgr.debug("checkAndReboot..");
+//      lgr.debug("checkAndReboot..");
       String rebootOn = properties.getProperty("reboot.on");    // 57 (minutes of every hour) OR 01:57
       if (rebootOn != null)
       {
@@ -183,7 +184,7 @@ public class TempMon
         Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
-        lgr.debug("hour: " + hour + ", minute: " + minute + ", rebootOn: " + rebootOn);
+//        lgr.debug("hour: " + hour + ", minute: " + minute + ", rebootOn: " + rebootOn);
         if ((rebootHour == hour || rebootHour == -1) && minute == rebootMinute)
         {
           lgr.info("time to reboot..");
@@ -192,7 +193,7 @@ public class TempMon
         }
       }
 
-      lgr.debug("checkAndReboot - ok");
+//      lgr.debug("checkAndReboot - ok");
     }
     catch (Exception e)
     {
@@ -222,12 +223,14 @@ public class TempMon
   {
     lgr.info("stop command received, stopping threads..");
     if (sensorReadProcessT != null)
-      sensorReadProcessT.interrupt();
+      sensorReadProcessT.isAlive = false;
     if (sensorReadProcessTH != null)
-      sensorReadProcessTH.interrupt();
+      sensorReadProcessTH.isAlive = false;
+    if (dataManager != null)
+      dataManager.isAlive = false;
 
     isAlive = false;
-    Utils.sleep(1000);
+    Utils.sleep(500);
     lgr.info("stopped.");
     lgr.info("=========================================");
   }

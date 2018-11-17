@@ -1,12 +1,12 @@
 <project name="Home Monitor">
 
-    <target name="copy to YD">
+    <target name="copy to YD (C:)">
         <antcall target="zCopyToYD">
             <param name="yd.hm" value="C:/YandexDisk/hm"/>
         </antcall>
     </target>
 
-    <target name="copy to YD home">
+    <target name="copy to YD (D:)">
         <antcall target="zCopyToYD">
             <param name="yd.hm" value="D:/YandexDisk/hm"/>
         </antcall>
@@ -16,9 +16,11 @@
         <copy todir="${yd.hm}">
             <fileset dir="." includes="hm.jar"/>
             <fileset dir="." includes="build.xml"/>
+            <fileset dir="." includes="lib/*"/>
             <fileset dir="." includes="src/**/*"/>
             <fileset dir="." includes="js/**/*"/>
             <fileset dir="." includes="*.html"/>
+            <fileset dir="." includes="hm_log4j.properties"/>
         </copy>
     </target>
 
