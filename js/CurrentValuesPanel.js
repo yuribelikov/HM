@@ -1,4 +1,4 @@
-/*global log*/
+/*global log tempColorFromValue*/
 
 /**
  * @constructor
@@ -108,33 +108,8 @@ CurrentValuesPanel.prototype.printTemp = function (ctx, key, x, y, lastValues)
 {
   var t = lastValues[key];
   if (t)
-    ctx.fillStyle = this.tempColorFromValue(t);
+    ctx.fillStyle = tempColorFromValue(t);
 
   ctx.fillText(t ? t.toFixed() : "?", x, y);
 };
 
-/**
- * @this {CurrentValuesPanel}
- * @param {number} t
- * @return {string}
- */
-CurrentValuesPanel.prototype.tempColorFromValue = function (t)
-{
-  var c = "CCCCCC";
-  if (t >= 80)
-    c = "FF0000";
-  else if (t >= 60)
-    c = "FF6600";
-  else if (t >= 40)
-    c = "FFBB00";
-  else if (t >= 30)
-    c = "FFFF00";
-  else if (t <= 0)
-    c = "6666FF";
-  else if (t <= 5)
-    c = "9999FF";
-  else if (t <= 10)
-    c = "CCCCFF";
-
-  return "#" + c;
-};

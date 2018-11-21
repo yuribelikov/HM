@@ -49,3 +49,66 @@ function parseNumber(value)
     return Number.NaN;
   }
 }
+
+/**
+ * @param {number} value
+ * @return {string}
+ */
+function colorFromValue(value)       // <0 is white, 0-1 is yellow to red, >1 - red
+{
+  if (value > 1)
+    value = 1;
+
+  var r = 255;
+  var g = (value < 0 ? 255 : 255 - 255 * value);
+  var b = (value < 0 ? 255 : 0);
+
+  return "rgb(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + ")";    // "rgb(155, 102, 102)"
+}
+
+/**
+ * @param {number} time
+ * @param {boolean=} withDate
+ * @return {string}
+ */
+function formatTime(time, withDate)
+{
+  var date = new Date();
+  date.setTime(time);
+  var d = (withDate ? date.getFullYear() + "-" + this.formatNumber(1 + date.getMonth()) + "-" + this.formatNumber(date.getDate()) + "  " : "");
+  return d + this.formatNumber(date.getHours()) + ":" + this.formatNumber(date.getMinutes()) + ":" + this.formatNumber(date.getSeconds());
+}
+
+/**
+ * @param {number} num
+ * @return {string}
+ */
+function formatNumber(num)
+{
+  return num < 10 ? "0" + num : "" + num;
+}
+
+/**
+ * @param {number} t
+ * @return {string}
+ */
+function tempColorFromValue(t)
+{
+  var c = "CCCCCC";
+  if (t >= 80)
+    c = "FF0000";
+  else if (t >= 60)
+    c = "FF6600";
+  else if (t >= 40)
+    c = "FFBB00";
+  else if (t >= 30)
+    c = "FFFF00";
+  else if (t <= 0)
+    c = "6666FF";
+  else if (t <= 5)
+    c = "9999FF";
+  else if (t <= 10)
+    c = "CCCCFF";
+
+  return "#" + c;
+}

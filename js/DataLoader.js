@@ -37,6 +37,7 @@ function DataRow(timeKey)
 }
 
 DataLoader.REFRESH_PERIOD = 1;
+DataLoader.DATA_SIZE = 1000;
 
 
 /**
@@ -69,8 +70,9 @@ DataLoader.prototype.recentDataReceived = function (csv)
       for (var j = 1; j < cells.length; j++)
         dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
 
-      data.push(dataRow);
+      this.data.push(dataRow);
     }
+
     log("recentDataReceived, data.size: " + this.data.length);
   }
   catch (e)
@@ -104,27 +106,36 @@ DataLoader.prototype.run = function ()
 DataLoader.prototype.currentDataReceived = function (map)
 {
   // log("dataReceived: " + map.length);
-  var currentData = {};
+  var saveTime;
+  var dataTime;
+  var sensorsData = {};
   var rows = map.split("\n");
   for (var i = 0; i < rows.length; i++)
   {
     var sa = rows[i].split("=");
     if (sa[0] && sa[1])
     {
+      var key = sa[0].trim();
       var value = sa[1].trim();
-      currentData[sa[0].trim()] = (value.indexOf("-") === -1 ? parseNumber(value) : parseDateTime(value));
+      if (key === "save.time")
+        saveTime = value;
+      else if (key === "data.time")
+        dataTime = value;
+      else
+        sensorsData[key] = parseNumber(value);
     }
   }
 
-  if (currentData["save.time"])
-    this.currentSaved = parseDateTime(value);
+  this.currentSaved = parseDateTime(saveTime);
 
-  var currentDataTime = currentData["data.time"];
-  if (currentDataTime && (!this.currentRow || this.currentRow.time !== currentDataTime))
+  if (dataTime && (!this.currentRow || this.currentRow.timeKey !== dataTime))
   {
     if (this.currentRow)
       this.data.push(this.currentRow);
-    this.currentRow = new DataRow(currentDataTime);
+    this.currentRow = new DataRow(dataTime);
+    this.currentRow.sensorsData = sensorsData;
+    if (this.data.length > DataLoader.DATA_SIZE)
+      this.data.shift();
   }
 
   this.dataUpdated = new Date().getTime();
