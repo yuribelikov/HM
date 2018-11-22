@@ -24,4 +24,9 @@
         </copy>
     </target>
 
+    <target name="sync data from YD to HM dev">
+        <copy todir="D:/HM/data/">
+            <fileset dir="D:/YandexDisk/hm/data" includes="*"/>
+        </copy>
+    </target>
 </project>

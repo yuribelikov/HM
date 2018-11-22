@@ -49,11 +49,11 @@ Dashboard.prototype.start = function ()
   this.canvas = document.createElement("canvas");
   document.body.appendChild(this.canvas);
 
-  // this.canvas.addEventListener("pointerdown", this.onPointer.bind(this));
-  // this.canvas.addEventListener("pointermove", this.onPointer.bind(this));
-  // this.canvas.addEventListener("pointerup", this.onPointer.bind(this));
-  // this.canvas.addEventListener("pointercancel", this.onPointer.bind(this));
-  // this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointerdown", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointermove", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointerup", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointercancel", this.onPointer.bind(this));
+  this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
 
   this.onResize();
   window.requestAnimationFrame(this.run.bind(this));
