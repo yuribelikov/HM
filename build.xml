@@ -2,7 +2,7 @@
 
     <target name="copy to YD (C:)">
         <antcall target="zCopyToYD">
-            <param name="yd.hm" value="C:/YandexDisk/hm"/>
+            <param name="yd.hm" value="C:/Users/Bel/YandexDisk/hm"/>
         </antcall>
     </target>
 
@@ -29,4 +29,11 @@
             <fileset dir="D:/YandexDisk/hm/data" includes="*"/>
         </copy>
     </target>
+
+    <target name="sync(2) data from YD to HM dev">
+        <copy todir="C:/IdeaProjects/HM/data/">
+            <fileset dir="C:/Users/Bel/YandexDisk/hm/data" includes="*"/>
+        </copy>
+    </target>
+
 </project>
