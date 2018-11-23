@@ -59,7 +59,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
   {
     log("recentDataReceived, file size: " + csv.length);
     var rows = csv.split("\n");
-    var dataHeaders = rows[0].split(";").slice(1);
+    var dataHeaders = rows[0].split(";");
     for (var i = 1; i < rows.length; i++)
     {
       if (rows[i].length === 0)
@@ -133,11 +133,21 @@ DataLoader.prototype.currentDataReceived = function (map)
     if (this.currentRow)
       this.data.push(this.currentRow);
     this.currentRow = new DataRow(dataTime);
-    this.currentRow.sensorsData = sensorsData;
+
+    if (this.data.length > 0)
+    {
+      var lastRow = this.data[this.data.length - 1];
+      if (Object.assign)
+        this.currentRow.sensorsData = Object.assign({}, lastRow.sensorsData);
+    }
     if (this.data.length > DataLoader.DATA_SIZE)
       this.data.shift();
   }
 
+  if (Object.assign)
+    this.currentRow.sensorsData = Object.assign(this.currentRow.sensorsData, sensorsData);
+  else
+    this.currentRow.sensorsData = sensorsData;
   this.dataUpdated = new Date().getTime();
   this.dataRequested = false;
 };
