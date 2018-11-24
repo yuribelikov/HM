@@ -139,17 +139,25 @@ DataLoader.prototype.currentDataReceived = function (map)
     if (this.data.length > 0)
     {
       var lastRow = this.data[this.data.length - 1];
-      if (Object.assign)
-        this.currentRow.sensorsData = Object.assign({}, lastRow.sensorsData);
+      this.copySensorsData(lastRow.sensorsData, this.currentRow.sensorsData);
     }
     if (this.data.length > DataLoader.DATA_SIZE)
       this.data.shift();
   }
 
-  if (Object.assign)
-    this.currentRow.sensorsData = Object.assign(this.currentRow.sensorsData, sensorsData);
-  else
-    this.currentRow.sensorsData = sensorsData;
+  this.copySensorsData(sensorsData, this.currentRow.sensorsData);
   this.dataUpdated = new Date().getTime();
   this.dataRequested = false;
+};
+
+/**
+ * @this {DataLoader}
+ * @param {Object} from
+ * @param {Object} to
+ */
+DataLoader.prototype.copySensorsData = function (from, to)
+{
+  for (var property in from)
+    if (from.hasOwnProperty(property) && from[property])
+      to[property] = from[property];
 };

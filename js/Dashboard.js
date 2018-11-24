@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "2.01";
+  this.version = "2.04";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -114,7 +114,7 @@ Dashboard.prototype.drawHeader = function ()
   ctx.clearRect(0, 0, this.canvas.width, Dashboard.HEADER_H);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  ctx.rect(20, 1, this.canvas.width - 20, Dashboard.HEADER_H - 2);
+  ctx.rect(1, 1, this.canvas.width - 2, Dashboard.HEADER_H - 2);
   ctx.stroke();
 
   ctx.font = "25pt Calibri";
