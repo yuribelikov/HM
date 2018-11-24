@@ -146,8 +146,8 @@ DataLoader.prototype.currentDataReceived = function (map)
   }
 
   this.copySensorsData(sensorsData, this.currentRow.sensorsData);
-  var outside = this.currentRow.sensorsData["outside.t"];
-  var inside = this.currentRow.sensorsData["inside.t"];
+  var outside = sensorsData["outside.t"];
+  var inside = sensorsData["inside.t"];
   if (outside && inside && outside < inside)
     this.currentRow.sensorsData["outside.t"] = outside - (inside - outside) / 10;
 
