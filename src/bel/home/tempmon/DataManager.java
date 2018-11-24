@@ -121,8 +121,10 @@ public class DataManager extends Thread
       if (!currentRow.time.equals(time))          // switch row once a minute
       {
         writing = true;
+        lgr.info("adding row: " + currentRow);
         data.add(currentRow);
         checkRecentSize();
+        lgr.info("data.size: " + data.size());
         saveRecent();
         appendToMonthly(currentRow);
         currentRow = new DataRow(time);
