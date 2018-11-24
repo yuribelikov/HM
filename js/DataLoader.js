@@ -146,6 +146,11 @@ DataLoader.prototype.currentDataReceived = function (map)
   }
 
   this.copySensorsData(sensorsData, this.currentRow.sensorsData);
+  var outside = this.currentRow.sensorsData["outside.t"];
+  var inside = this.currentRow.sensorsData["inside.t"];
+  if (outside && inside && outside < inside)
+    this.currentRow.sensorsData["outside.t"] = outside - (inside - outside) / 10;
+
   this.dataUpdated = new Date().getTime();
   this.dataRequested = false;
 };
