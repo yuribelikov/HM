@@ -17,7 +17,7 @@ CurrentValuesPanel.prototype.draw = function (canvas, currentData)
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
 
-  ctx.fillStyle = "#000020";
+  ctx.fillStyle = "#000025";
   ctx.fillRect(0, Dashboard.HEADER_H, canvas.width, canvas.height - 150);
   var x2 = canvas.width / 2;
   var dy = Dashboard.HEADER_H + 420;
