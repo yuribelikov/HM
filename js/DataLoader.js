@@ -37,7 +37,7 @@ function DataRow(timeKey)
 }
 
 DataLoader.REFRESH_PERIOD = 1;
-DataLoader.DATA_SIZE = 1000;
+DataLoader.DATA_SIZE = 10;
 
 
 /**
@@ -91,6 +91,9 @@ DataLoader.prototype.recentDataReceived = function (csv)
 DataLoader.prototype.run = function ()
 {
   var now = new Date().getTime();
+  if (now - this.dataUpdated >= 30000)    // this.dataRequested stays true if there was an error on loading current.txt
+    this.dataRequested = false;
+
   if (!this.dataRequested && now - this.dataUpdated >= DataLoader.REFRESH_PERIOD * 1000)
   {
     $.get("data/current.txt", {"_": $.now()}, this.currentDataReceived.bind(this));
@@ -141,8 +144,11 @@ DataLoader.prototype.currentDataReceived = function (map)
       var lastRow = this.data[this.data.length - 1];
       this.copySensorsData(lastRow.sensorsData, this.currentRow.sensorsData);
     }
+
     if (this.data.length > DataLoader.DATA_SIZE)
       this.data.shift();
+
+    log("current row rotated, data.size: " + this.data.length);
   }
 
   this.copySensorsData(sensorsData, this.currentRow.sensorsData);
