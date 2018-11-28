@@ -1,4 +1,4 @@
-/*global log logObj formatNumber*/
+/*global log logObj DataRow formatNumber*/
 
 /**
  * @constructor
@@ -6,6 +6,9 @@
 function ChartPanel()
 {
 }
+
+ChartPanel.MIN_T = -30;
+ChartPanel.MAX_T = 110;
 
 /**
  * @this {ChartPanel}
@@ -82,13 +85,11 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
   ctx.font = "12pt Calibri";
   ctx.fillStyle = "white";
   ctx.setLineDash([1, 8]);
-  var minT = -30;
-  var maxT = 110;
-  var step = cr.h / (maxT - minT);
-  for (var t = minT; t <= maxT; t += 10)
+  var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
+  for (var t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
     ctx.beginPath();
-    var y = cr.ey - (t - minT) * step;
+    var y = cr.ey - (t - ChartPanel.MIN_T) * step;
     ctx.fillText("" + t, cr.x - 30, y + 4);
     if (t === 0 || t === 100)
       ctx.setLineDash([1, 2]);
@@ -110,15 +111,55 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
  */
 ChartPanel.prototype.drawCurves = function (canvas, cr, data)
 {
+  var dataByTime = {};
+  for (var i = 0; i < data.length; i++)
+    dataByTime[data[i].timeKey] = data[i];
+
   var ctx = canvas.getContext("2d");
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "yellow";
   ctx.font = "12pt Calibri";
   ctx.fillStyle = "white";
-  ctx.setLineDash([1, 8]);
-  var minT = -30;
-  var maxT = 110;
-  var step = cr.h / (maxT - minT);
+  ctx.setLineDash([]);
+  var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
+  var dy = cr.ey + ChartPanel.MIN_T * step;
+  var prevSensorsData = null;
+  for (i = 0; i < cr.w; i++)
+  {
+    var time = new Date();
+    time.setMinutes(time.getMinutes() - i);
+    var timeKey = this.makeTimeKey(time);
+    var row = dataByTime[timeKey];
+    if (!row || !row.sensorsData)
+      continue;
 
+    if (prevSensorsData)
+      for (var sensor in row.sensorsData)
+        if (row.sensorsData.hasOwnProperty(sensor) && row.sensorsData[sensor])
+        {
+          var prevT = prevSensorsData[sensor];
+          var t = row.sensorsData[sensor];
+          if (prevT && t)
+          {
+            ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
+            ctx.lineTo(cr.ex - i, dy - t * step);
+          }
+        }
 
+    prevSensorsData = row.sensorsData;
+  }
+
+  ctx.stroke();
+  ctx.closePath();
+};
+
+/**
+ * @this {ChartPanel}
+ * @param {Date} time
+ * @return {string}
+ */
+ChartPanel.prototype.makeTimeKey = function (time)
+{
+  return time.getFullYear() + "-" + formatNumber(1 + time.getMonth()) + "-" + formatNumber(time.getDate()) + "_" +
+    formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
 };

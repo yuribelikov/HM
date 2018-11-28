@@ -1,4 +1,4 @@
-/*global log parseDateTime parseNumber*/
+/*global DataRow log parseDateTime parseNumber*/
 
 /**
  * @constructor
@@ -20,20 +20,6 @@ function DataLoader()
 
 
   this.loadRecent();
-}
-
-/**
- * @constructor
- */
-function DataRow(timeKey)
-{
-  /** @type {String} */
-  this.timeKey = timeKey;
-  /** @type {Number} */
-  this.time = parseDateTime(timeKey);
-
-  /** @type {Object} */
-  this.sensorsData = {};      // map<sensorID, value}
 }
 
 DataLoader.REFRESH_PERIOD = 1;
