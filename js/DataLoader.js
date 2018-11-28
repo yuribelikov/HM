@@ -37,7 +37,7 @@ function DataRow(timeKey)
 }
 
 DataLoader.REFRESH_PERIOD = 1;
-DataLoader.DATA_SIZE = 10;
+DataLoader.DATA_SIZE = 1000;
 
 
 /**

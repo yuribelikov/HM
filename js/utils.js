@@ -16,6 +16,19 @@ function log(text)
 }
 
 /**
+ * @param {Object} obj
+ */
+function logObj(obj)
+{
+  var text = "{";
+  for (var property in obj)
+    if (obj.hasOwnProperty(property))
+      text += (property + "=" + obj[property] + ", ");
+
+  log(text.slice(0, -2) + "}");
+}
+
+/**
  * @param {string} dateTime in format "2016-04-04_06:23" OR "2018-11-17 22:02:36,225"
  * @return {number}
  */
@@ -75,8 +88,8 @@ function formatTime(time, withDate)
 {
   var date = new Date();
   date.setTime(time);
-  var d = (withDate ? date.getFullYear() + "-" + this.formatNumber(1 + date.getMonth()) + "-" + this.formatNumber(date.getDate()) + "  " : "");
-  return d + this.formatNumber(date.getHours()) + ":" + this.formatNumber(date.getMinutes()) + ":" + this.formatNumber(date.getSeconds());
+  var d = (withDate ? date.getFullYear() + "-" + formatNumber(1 + date.getMonth()) + "-" + formatNumber(date.getDate()) + "  " : "");
+  return d + formatNumber(date.getHours()) + ":" + formatNumber(date.getMinutes()) + ":" + formatNumber(date.getSeconds());
 }
 
 /**

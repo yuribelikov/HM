@@ -13,14 +13,14 @@ function Dashboard()
   /** @type {HTMLCanvasElement} */
   this.canvas = null;
   /** @type {number} */
-  this.updated = 0;
+  this.redrawn = 0;
 
   /** @type CurrentValuesPanel */
   this.currentValuesPanel = new CurrentValuesPanel();
   /** @type ChartPanel */
   this.chartPanel = new ChartPanel();
   /** @type {Boolean} */
-  this.chartMode = false;
+  this.chartMode = true;
 
   /** @type {Object} */
   this.downEvent = null;
@@ -32,9 +32,6 @@ function Dashboard()
 }
 
 Dashboard.HEADER_H = 50;
-Dashboard.GRAPH_W = 300;
-Dashboard.GRAPH_T_H = 60;
-Dashboard.GRAPH_H_H = 100;
 Dashboard.REFRESH_PERIOD = 200;
 
 /**
@@ -81,7 +78,8 @@ Dashboard.prototype.run = function ()
 {
   var now = new Date().getTime();
   //log("run, now: " + now + ", this.updated: " + this.updated + ", diff: " + (now - this.updated));
-  if (now - this.updated >= Dashboard.REFRESH_PERIOD)
+  // if (now - this.updated >= Dashboard.REFRESH_PERIOD)
+  if (this.redrawn < this.dataLoader.dataUpdated || now - this.redrawn > Dashboard.REFRESH_PERIOD)
     this.redraw();
 
   window.requestAnimationFrame(this.run.bind(this));
@@ -92,6 +90,14 @@ Dashboard.prototype.run = function ()
  */
 Dashboard.prototype.redraw = function ()
 {
+  if (!this.canvas)
+    return;
+
+  var ctx = this.canvas.getContext("2d");
+  ctx.beginPath();
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  ctx.closePath();
+
   this.drawHeader();
 
   if (!this.chartMode)
@@ -101,6 +107,8 @@ Dashboard.prototype.redraw = function ()
   }
   else
     this.chartPanel.draw(this.canvas, this.dataLoader.data);
+
+  this.redrawn = new Date().getTime();
 };
 
 /**
@@ -111,7 +119,6 @@ Dashboard.prototype.drawHeader = function ()
   var ctx = this.canvas.getContext("2d");
   ctx.setLineDash([]);
   ctx.beginPath();
-  ctx.clearRect(0, 0, this.canvas.width, Dashboard.HEADER_H);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
   ctx.rect(1, 1, this.canvas.width - 2, Dashboard.HEADER_H - 2);
@@ -136,12 +143,14 @@ Dashboard.prototype.drawHeader = function ()
     }
   }
 
-  ctx.clearRect(0, this.canvas.height - 20, this.canvas.width, 20);
-  ctx.fillStyle = "white";
-  ctx.fillText(this.version, 20, this.canvas.height - 40);
-  //noinspection JSUnresolvedVariable
-  var text = this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
-  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 40);
+  if (!this.chartMode)
+  {
+    ctx.fillStyle = "white";
+    ctx.fillText(this.version, 20, this.canvas.height - 40);
+    //noinspection JSUnresolvedVariable
+    var text = this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
+    ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 40);
+  }
   ctx.closePath();
 };
 
