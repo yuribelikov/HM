@@ -7,11 +7,10 @@ function ChartPanel()
 {
 }
 
-
 /**
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
- * @param {Array<Array<number>>} data
+ * @param {DataRow[]} data
  */
 ChartPanel.prototype.draw = function (canvas, data)
 {
@@ -34,7 +33,7 @@ ChartPanel.prototype.draw = function (canvas, data)
 
   this.drawAxisX(canvas, cr);
   this.drawAxisY(canvas, cr);
-
+  this.drawCurves(canvas, cr, data);
 
 };
 
@@ -103,3 +102,23 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
 
 };
 
+/**
+ * @this {ChartPanel}
+ * @param {HTMLCanvasElement} canvas
+ * @param {Object} cr
+ * @param {DataRow[]} data
+ */
+ChartPanel.prototype.drawCurves = function (canvas, cr, data)
+{
+  var ctx = canvas.getContext("2d");
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "white";
+  ctx.font = "12pt Calibri";
+  ctx.fillStyle = "white";
+  ctx.setLineDash([1, 8]);
+  var minT = -30;
+  var maxT = 110;
+  var step = cr.h / (maxT - minT);
+
+
+};
