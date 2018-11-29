@@ -170,12 +170,15 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
       if (!row || !row.sensorsData)
         continue;
 
-      if (prevSensorsData && prevSensorsData[sensor] && row.sensorsData[sensor])
+      if (prevSensorsData)
       {
         var prevT = prevSensorsData[sensor];
         var t = row.sensorsData[sensor];
-        ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
-        ctx.lineTo(cr.ex - i, dy - t * step);
+        if (prevT && prevT > - 50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 20)
+        {
+          ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
+          ctx.lineTo(cr.ex - i, dy - t * step);
+        }
       }
       prevSensorsData = row.sensorsData;
     }
