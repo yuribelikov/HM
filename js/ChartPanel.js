@@ -15,9 +15,10 @@ ChartPanel.MAX_T = 110;
 /**
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
+ * @param {String[]} dataHeaders
  * @param {DataRow[]} data
  */
-ChartPanel.prototype.draw = function (canvas, data)
+ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
 {
   var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
   ar.w = ar.ex - ar.x;
@@ -43,7 +44,7 @@ ChartPanel.prototype.draw = function (canvas, data)
   this.drawAxisX(canvas, cr);
   this.drawAxisY(canvas, cr);
 
-  this.drawCurves(canvas, cr, data);
+  this.drawCurves(canvas, cr, dataHeaders, data);
 
 };
 
@@ -131,60 +132,57 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
+ * @param {String[]} dataHeaders
  * @param {DataRow[]} data
  */
-ChartPanel.prototype.drawCurves = function (canvas, cr, data)
+ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
 {
   var dataByTime = {};
   for (var i = 0; i < data.length; i++)
     dataByTime[data[i].timeKey] = data[i];
 
-  var t0 = new Date().getTime();
   var ctx = canvas.getContext("2d");
-  ctx.beginPath();
   ctx.setLineDash([]);
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   var dy = cr.ey + ChartPanel.MIN_T * step;
-  var prevSensorsData = null;
-  for (i = 0; i < cr.w; i++)
+  for (var h = 0; h < dataHeaders.length; h++)
   {
-    var time = new Date();
-    time.setMinutes(time.getMinutes() - i);
-    var timeKey = this.makeTimeKey(time);
-    var row = dataByTime[timeKey];
-    if (!row || !row.sensorsData)
-      continue;
+    var sensor = dataHeaders[h];
+    ctx.beginPath();
+    var style = this.sensors.styles[sensor];
+    if (style)
+    {
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.width;
+    }
+    else    // default style
+    {
+      ctx.strokeStyle = "yellow";
+      ctx.lineWidth = 1;
+    }
+    var prevSensorsData = null;
+    for (i = 0; i < cr.w; i++)
+    {
+      var time = new Date();
+      time.setMinutes(time.getMinutes() - i);
+      var timeKey = this.makeTimeKey(time);
+      var row = dataByTime[timeKey];
+      if (!row || !row.sensorsData)
+        continue;
 
-    if (prevSensorsData)
-      for (var sensor in row.sensorsData)
-        if (row.sensorsData.hasOwnProperty(sensor) && row.sensorsData[sensor])
-        {
-          var prevT = prevSensorsData[sensor];
-          var t = row.sensorsData[sensor];
-          if (prevT && t)
-          {
-            var style = this.sensors.styles[sensor];
-            if (style)
-            {
-              ctx.strokeStyle = style.color;
-              ctx.lineWidth = style.width;
-            }
-            else    // default style
-            {
-              ctx.strokeStyle = "yellow";
-              ctx.lineWidth = 1;
-            }
-            ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
-            ctx.lineTo(cr.ex - i, dy - t * step);
-          }
-        }
+      if (prevSensorsData && prevSensorsData[sensor] && row.sensorsData[sensor])
+      {
+        var prevT = prevSensorsData[sensor];
+        var t = row.sensorsData[sensor];
+        ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
+        ctx.lineTo(cr.ex - i, dy - t * step);
+      }
+      prevSensorsData = row.sensorsData;
+    }
 
-    prevSensorsData = row.sensorsData;
+    ctx.stroke();
+    ctx.closePath();
   }
-
-  ctx.stroke();
-  ctx.closePath();
-  log("draw took: " + (new Date().getTime() - t0));
 };
 
 /**

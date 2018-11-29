@@ -10,6 +10,8 @@ function DataLoader()
   /** @type {Number} */
   this.dataUpdated = 0;
 
+  /** @type {String[]} */
+  this.dataHeaders = null;
   /** @type {DataRow[]} */
   this.data = [];
 
@@ -45,7 +47,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
   {
     log("recentDataReceived, file size: " + csv.length);
     var rows = csv.split("\n");
-    var dataHeaders = rows[0].split(";");
+    this.dataHeaders = rows[0].split(";");
     for (var i = 1; i < rows.length; i++)
     {
       if (rows[i].length === 0)
@@ -54,10 +56,10 @@ DataLoader.prototype.recentDataReceived = function (csv)
       var cells = rows[i].split(";");
       var dataRow = new DataRow(cells[0].trim());
       for (var j = 1; j < cells.length; j++)
-        dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
+        dataRow.sensorsData[this.dataHeaders[j]] = parseNumber(cells[j]);
 
       this.data.push(dataRow);
-      if (this.data.length > DataLoader.DATA_SIZE)
+      if (this.data.length >= DataLoader.DATA_SIZE)
         this.data.shift();
     }
 
