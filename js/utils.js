@@ -107,21 +107,29 @@ function formatNumber(num)
  */
 function tempColorFromValue(t)
 {
-  var c = "CCCCCC";
-  if (t >= 80)
+  var c;
+  if (t > 100)
+    c = "CC0000";
+  else if (t > 90)
     c = "FF0000";
-  else if (t >= 60)
-    c = "FF6600";
-  else if (t >= 40)
+  else if (t > 80)
+    c = "FF6060";
+  else if (t > 60)
+    c = "FF8800";
+  else if (t > 40)
     c = "FFBB00";
-  else if (t >= 30)
+  else if (t > 20)
     c = "FFFF00";
-  else if (t <= 0)
+  else if (t > 0)
+    c = "FFFFFF";
+  else if (t > -10)
+    c = "8888FF";
+  else if (t > -20)
     c = "6666FF";
-  else if (t <= 5)
-    c = "9999FF";
-  else if (t <= 10)
-    c = "CCCCFF";
+  else if (t > -20)
+    c = "4444FF";
+  else
+    c = "2222FF";
 
   return "#" + c;
 }

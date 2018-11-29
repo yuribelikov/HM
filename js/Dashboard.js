@@ -32,7 +32,7 @@ function Dashboard()
 }
 
 Dashboard.HEADER_H = 50;
-Dashboard.REFRESH_PERIOD = 200;
+Dashboard.REFRESH_PERIOD = 800;
 
 /**
  * @this {Dashboard}

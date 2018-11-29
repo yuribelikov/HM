@@ -57,8 +57,8 @@ DataLoader.prototype.recentDataReceived = function (csv)
         dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
 
       this.data.push(dataRow);
-      if (this.data.length >= DataLoader.DATA_SIZE)
-        break;
+      if (this.data.length > DataLoader.DATA_SIZE)
+        this.data.shift();
     }
 
     log("recentDataReceived, data.size: " + this.data.length);
