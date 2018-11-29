@@ -11,6 +11,10 @@ function ChartPanel()
 
 ChartPanel.MIN_T = -30;
 ChartPanel.MAX_T = 110;
+ChartPanel.SENSOR_STATE_DISABLED = 1;
+ChartPanel.SENSOR_STATE_ENABLED = 2;
+ChartPanel.SENSOR_STATE_SELECTED = 3;
+
 
 /**
  * @this {ChartPanel}
@@ -43,8 +47,8 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
   ctx.fillStyle = "white";
   this.drawAxisX(canvas, cr);
   this.drawAxisY(canvas, cr);
-
   this.drawCurves(canvas, cr, dataHeaders, data);
+  this.drawSensors(canvas, cr, dataHeaders, data);
 
 };
 
@@ -197,4 +201,48 @@ ChartPanel.prototype.makeTimeKey = function (time)
 {
   return time.getFullYear() + "-" + formatNumber(1 + time.getMonth()) + "-" + formatNumber(time.getDate()) + "_" +
     formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
+};
+
+/**
+ * @this {ChartPanel}
+ * @param {HTMLCanvasElement} canvas
+ * @param {Object} cr
+ * @param {String[]} dataHeaders
+ * @param {DataRow[]} data
+ */
+ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
+{
+  var ctx = canvas.getContext("2d");
+  ctx.beginPath();
+  ctx.font = "12pt Arial";
+  var row = data[data.length - 1];
+  var sh = cr.h / dataHeaders.length;
+  for (var h = 0; h < dataHeaders.length; h++)
+  {
+    var sensor = dataHeaders[h];
+    this.drawSensor(ctx, cr.ex + 50, cr.y + h * sh, sh - 8, this.sensors.styles[sensor], row.sensorsData[sensor], ChartPanel.SENSOR_STATE_ENABLED);
+  }
+  ctx.stroke();
+  ctx.closePath();
+};
+
+/**
+ * @this {ChartPanel}
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} h
+ * @param {Object} style
+ * @param {Number} value
+ * @param {Number} state
+ */
+ChartPanel.prototype.drawSensor = function (ctx, x, y, h, style, value, state)
+{
+  ctx.setLineDash([]);
+  ctx.fillStyle = style ? style.color : "yellow";
+  ctx.fillRect(x, y, 120, h);
+  ctx.stroke();
+  ctx.fillStyle = "black";
+  ctx.fillText(style ? style.label : "???", x + 10, y + h - 10);
+
 };
