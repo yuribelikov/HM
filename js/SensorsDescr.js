@@ -11,9 +11,9 @@ function SensorsDescr()
   this.styles["outside.t"] = {label: "Улица", color: "#80FF80", width: 3};
   this.styles["outside.h"] = {label: "Улица влаж.", color: "#80FF80", width: 1};
   this.styles["test.t"] = {label: "Тест", color: "gray", width: 1};
-  this.styles["warmOut.t"] = {label: "Выход из печи", color: "red", width: 2};
-  this.styles["warm.floor.t"] = {label: "Пол в ванной", color: "#FF8800", width: 1};
-  this.styles["warmIn.t"] = {label: "Вход в печь", color: "#FFCC00", width: 1};
+  this.styles["warmOut.t"] = {label: "Печь - выход", color: "red", width: 2};
+  this.styles["warm.floor.t"] = {label: "Пол в душе", color: "#FF8800", width: 1};
+  this.styles["warmIn.t"] = {label: "Печь - вход", color: "#FFCC00", width: 1};
   this.styles["bedroom.t"] = {label: "Спальня", color: "#AAAA00", width: 3};
   this.styles["room.t"] = {label: "Кабинет", color: "#888800", width: 2};
   this.styles["second.floor.t"] = {label: "2-й этаж", color: "#CCCC00", width: 2};

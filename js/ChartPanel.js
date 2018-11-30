@@ -214,13 +214,12 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
 {
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
-  ctx.font = "12pt Arial";
   var row = data[data.length - 1];
   var sh = cr.h / dataHeaders.length;
   for (var h = 0; h < dataHeaders.length; h++)
   {
     var sensor = dataHeaders[h];
-    this.drawSensor(ctx, cr.ex + 50, cr.y + h * sh, sh - 8, this.sensors.styles[sensor], row.sensorsData[sensor], ChartPanel.SENSOR_STATE_ENABLED);
+    this.drawSensor(ctx, cr.ex + 50, cr.y + h * sh, sh - 20, this.sensors.styles[sensor], row.sensorsData[sensor], ChartPanel.SENSOR_STATE_ENABLED);
   }
   ctx.stroke();
   ctx.closePath();
@@ -243,6 +242,9 @@ ChartPanel.prototype.drawSensor = function (ctx, x, y, h, style, value, state)
   ctx.fillRect(x, y, 120, h);
   ctx.stroke();
   ctx.fillStyle = "black";
-  ctx.fillText(style ? style.label : "???", x + 10, y + h - 10);
+  ctx.font = "14pt Arial";
+  ctx.fillText(style ? style.label : "???", x + 5, y + 20);
+  ctx.font = "bold 24pt Arial";
+  ctx.fillText(value ? value.toFixed(1) : "?", x + 10, y + h - 8);
 
 };
