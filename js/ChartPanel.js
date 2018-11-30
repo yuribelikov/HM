@@ -5,8 +5,21 @@
  */
 function ChartPanel()
 {
+  /** @type {Object} */
+  this.dataByTime = {};
+
   /** @type {SensorsDescr} */
   this.sensors = new SensorsDescr();
+
+  /** @type {Object} */
+  this.areaRect = null;
+  /** @type {Object} */
+  this.curvesRect = null;
+
+  /** @type {Number} */
+  this.dataOffset = 0;
+
+
 }
 
 ChartPanel.MIN_T = -30;
@@ -27,10 +40,17 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
   var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
   ar.w = ar.ex - ar.x;
   ar.h = ar.ey - ar.y;
+  this.areaRect = ar;
+
   var cr = {x: 40, y: ar.y + 20, ex: ar.ex - 180, ey: ar.ey - 30, w: 0, h: 0};    // curves rect
   cr.w = cr.ex - cr.x;
   cr.h = cr.ey - cr.y;
-  // logObj(cr);
+  this.curvesRect = cr;
+
+  this.dataByTime = {};
+  for (var i = 0; i < data.length; i++)
+    this.dataByTime[data[i].timeKey] = data[i];
+
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
   ctx.lineWidth = 2;
@@ -49,6 +69,7 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
   this.drawAxisY(canvas, cr);
   this.drawCurves(canvas, cr, dataHeaders, data);
   this.drawSensors(canvas, cr, dataHeaders, data);
+  this.drawDataOffset(ctx, cr);
 
 };
 
@@ -69,10 +90,10 @@ ChartPanel.prototype.drawAxisX = function (canvas, cr)
     time.setMinutes(time.getMinutes() - i);
     if (time.getMinutes() === 0)
     {
-      var strDate = formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
+      var strTime = formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
       var x = cr.ex - i - 20;
-      ctx.fillText(strDate, x, cr.y - 4);
-      ctx.fillText(strDate, x, cr.ey + 24);
+      ctx.fillText(strTime, x, cr.y - 4);
+      ctx.fillText(strTime, x, cr.ey + 24);
       ctx.moveTo(cr.ex - i, cr.y);
       ctx.lineTo(cr.ex - i, cr.ey);
     }
@@ -141,10 +162,6 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
  */
 ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
 {
-  var dataByTime = {};
-  for (var i = 0; i < data.length; i++)
-    dataByTime[data[i].timeKey] = data[i];
-
   var ctx = canvas.getContext("2d");
   ctx.setLineDash([]);
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
@@ -165,12 +182,12 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
       ctx.lineWidth = 1;
     }
     var prevSensorsData = null;
-    for (i = 0; i < cr.w; i++)
+    for (var i = 0; i < cr.w; i++)
     {
       var time = new Date();
       time.setMinutes(time.getMinutes() - i);
       var timeKey = this.makeTimeKey(time);
-      var row = dataByTime[timeKey];
+      var row = this.dataByTime[timeKey];
       if (!row || !row.sensorsData)
         continue;
 
@@ -178,7 +195,7 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
       {
         var prevT = prevSensorsData[sensor];
         var t = row.sensorsData[sensor];
-        if (prevT && prevT > - 50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 20)
+        if (prevT && prevT > -50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 10)
         {
           ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
           ctx.lineTo(cr.ex - i, dy - t * step);
@@ -212,9 +229,16 @@ ChartPanel.prototype.makeTimeKey = function (time)
  */
 ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
 {
+  var time = new Date();
+  time.setMinutes(time.getMinutes() - this.dataOffset);
+  var timeKey = this.makeTimeKey(time);
+  var row = this.dataByTime[timeKey];
+  if (!row)
+    return;
+
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
-  var row = data[data.length - 1];
+  ctx.setLineDash([]);
   var sh = cr.h / dataHeaders.length;
   for (var h = 0; h < dataHeaders.length; h++)
   {
@@ -237,7 +261,6 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
  */
 ChartPanel.prototype.drawSensor = function (ctx, x, y, h, style, value, state)
 {
-  ctx.setLineDash([]);
   ctx.fillStyle = style ? style.color : "yellow";
   ctx.fillRect(x, y, 120, h);
   ctx.stroke();
@@ -247,4 +270,66 @@ ChartPanel.prototype.drawSensor = function (ctx, x, y, h, style, value, state)
   ctx.font = "bold 24pt Arial";
   ctx.fillText(value ? value.toFixed(1) : "?", x + 10, y + h - 8);
 
+};
+
+/**
+ * @this {ChartPanel}
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Object} cr
+ */
+ChartPanel.prototype.drawDataOffset = function (ctx, cr)
+{
+  if (this.dataOffset === 0)
+    return;
+
+  ctx.beginPath();
+  ctx.strokeStyle = "yellow";
+  ctx.lineWidth = 1;
+  var x = cr.ex - this.dataOffset;
+  ctx.moveTo(x, cr.y);
+  ctx.lineTo(x, cr.ey);
+  ctx.stroke();
+  ctx.closePath();
+
+  for (var i = 0; i <=1; i++)
+  {
+    var oy = 6 + cr.y + i * cr.h;
+    ctx.beginPath();
+    ctx.fillStyle = "black";
+    ctx.fillRect(x - 44, oy - 20, 88, 34);
+    ctx.lineWidth = 2;
+    ctx.rect(x - 40, oy - 18, 80, 30);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.fillStyle = "yellow";
+    ctx.font = "bold 18pt Arial";
+    var time = new Date();
+    time.setMinutes(time.getMinutes() - this.dataOffset);
+    var strTime = formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
+    ctx.fillText(strTime, x - 33, oy + 5);
+    ctx.stroke();
+    ctx.closePath();
+  }
+};
+
+/**
+ * @this {ChartPanel}
+ * @param {Number} x
+ * @param {Number} y
+ */
+ChartPanel.prototype.click = function (x, y)
+{
+  var ar = this.areaRect;
+  var cr = this.curvesRect;
+
+  if (x >= cr.x && x < cr.ex && y >= cr.y && y < cr.ey)   // click on curves area
+  {
+    var offset = cr.ex - x;
+    if (offset > 0 && offset < cr.w)
+      this.dataOffset = offset;
+  }
+  else
+    this.dataOffset = 0;
 };

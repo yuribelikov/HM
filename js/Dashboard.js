@@ -186,7 +186,7 @@ Dashboard.prototype.onPointer = function (evt)
   else if (evt.type === "pointerup")
   {
     if (dx < 3 && dy < 3)
-      this.click(evt.clientX, evt.clientY);
+      this.click(Math.round(evt.clientX), Math.round(evt.clientY));
 
     this.downEvent = null;
   }
@@ -226,6 +226,10 @@ Dashboard.prototype.onPointer = function (evt)
  */
 Dashboard.prototype.click = function (x, y)
 {
-  // if (y < Dashboard.HEADER_H && x > this.canvas.width - Dashboard.HEADER_CURR_TIME_W)
-  //   this.updateDataIndex(0);
+  if (this.chartMode)
+  {
+    this.chartPanel.click(x, y);
+    this.redraw();
+  }
+
 };
