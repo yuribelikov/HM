@@ -124,8 +124,21 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([2, 10]);
+  ctx.setLineDash([1, 15]);
+  ctx.lineWidth = 1;
   ctx.strokeStyle = "white";
+  for (t = ChartPanel.MIN_T + 5; t <= ChartPanel.MAX_T; t += 10)
+  {
+    y = cr.ey - (t - ChartPanel.MIN_T) * step;
+    ctx.moveTo(cr.x, y);
+    ctx.lineTo(cr.ex, y);
+  }
+  ctx.stroke();
+  ctx.closePath();
+
+  ctx.beginPath();
+  ctx.setLineDash([2, 10]);
+  ctx.lineWidth = 2;
   for (t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
     y = cr.ey - (t - ChartPanel.MIN_T) * step;
