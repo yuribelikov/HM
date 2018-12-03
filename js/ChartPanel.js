@@ -1,4 +1,4 @@
-/*global log logObj DataRow formatNumber tempColorFromValue*/
+/*global log logObj DataRow formatNumber tempColorFromValue LocalStorage*/
 
 /**
  * @constructor
@@ -12,8 +12,6 @@ function ChartPanel()
   this.sensors = new SensorsDescr();
 
   /** @type {Object} */
-  this.areaRect = null;
-  /** @type {Object} */
   this.curvesRect = null;
 
   /** @type {Number} */
@@ -25,6 +23,7 @@ function ChartPanel()
   /** @type {Number[]} */
   this.sensorsStates = [];
 
+  this.init();
 }
 
 ChartPanel.MIN_T = -30;
@@ -36,6 +35,26 @@ ChartPanel.SENSOR_STATE_SELECTED = 3;
 
 /**
  * @this {ChartPanel}
+ */
+ChartPanel.prototype.init = function ()
+{
+  for (var key in window.localStorage)
+    if (key.indexOf("state.") ===0 && window.localStorage.hasOwnProperty(key))
+    {
+      try
+      {
+        var value = JSON.parse(window.localStorage[key]);
+        var sensor = key.substring(6);
+        this.sensorsStates[sensor] = value;
+      }
+      catch (e)
+      {
+      }
+    }
+};
+
+/**
+ * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {String[]} dataHeaders
  * @param {DataRow[]} data
@@ -44,10 +63,6 @@ ChartPanel.SENSOR_STATE_SELECTED = 3;
 ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
 {
   var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
-  ar.w = ar.ex - ar.x;
-  ar.h = ar.ey - ar.y;
-  this.areaRect = ar;
-
   var cr = {x: 40, y: ar.y + 20, ex: ar.ex - 180, ey: ar.ey - 30, w: 0, h: 0};    // curves rect
   cr.w = cr.ex - cr.x;
   cr.h = cr.ey - cr.y;
@@ -204,7 +219,7 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
     }
 
     if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_SELECTED)
-      ctx.lineWidth = (ctx.lineWidth  === 1 ? 4 : ctx.lineWidth * 2);
+      ctx.lineWidth = (ctx.lineWidth === 1 ? 4 : ctx.lineWidth * 2);
 
     var prevSensorsData = null;
     for (var i = 0; i < cr.w; i++)
@@ -369,7 +384,6 @@ ChartPanel.prototype.drawDataOffset = function (ctx, cr)
  */
 ChartPanel.prototype.click = function (x, y)
 {
-  var ar = this.areaRect;
   var cr = this.curvesRect;
 
   if (x >= cr.x && x < cr.ex && y >= cr.y && y < cr.ey)   // click on curves area
@@ -394,9 +408,9 @@ ChartPanel.prototype.click = function (x, y)
         else
           sensorState = ChartPanel.SENSOR_STATE_SELECTED;
 
+        log("state: " + sensorState);
         this.sensorsStates[this.sensorsRects[i].id] = sensorState;
-        log("state: " + this.sensorsStates[this.sensorsRects[i].id]);
-
+        window.localStorage.setItem("state." + this.sensorsRects[i].id, JSON.stringify(sensorState));
         break;
       }
   }
