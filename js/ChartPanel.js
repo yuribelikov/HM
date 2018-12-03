@@ -219,7 +219,7 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
     }
 
     if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_SELECTED)
-      ctx.lineWidth = (ctx.lineWidth === 1 ? 4 : ctx.lineWidth * 2);
+      ctx.lineWidth *= 2;
 
     var prevSensorsData = null;
     for (var i = 0; i < cr.w; i++)

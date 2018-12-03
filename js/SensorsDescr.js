@@ -6,15 +6,15 @@ function SensorsDescr()
   /** @type {Object} */
   this.styles = {};
 
-  this.styles["inside.t"] = {label: "Гостинная", color: "white", width: 3};
+  this.styles["inside.t"] = {label: "Гостинная", color: "white", width: 2};
   this.styles["inside.h"] = {label: "Гост. влаж.", color: "#BBBBBB", width: 1};
-  this.styles["outside.t"] = {label: "Улица", color: "#60FF60", width: 3};
+  this.styles["outside.t"] = {label: "Улица", color: "#60FF60", width: 2};
   this.styles["outside.h"] = {label: "Улица влаж.", color: "#00AA00", width: 1};
   this.styles["test.t"] = {label: "Тест", color: "gray", width: 1};
   this.styles["warmOut.t"] = {label: "Печь - выход", color: "red", width: 2};
   this.styles["warmFloor.t"] = {label: "Пол в душе", color: "#FF8800", width: 1};
   this.styles["warmIn.t"] = {label: "Печь - вход", color: "#FFCC00", width: 1};
-  this.styles["bedroom.t"] = {label: "Спальня", color: "#FF00FF", width: 3};
+  this.styles["bedroom.t"] = {label: "Спальня", color: "#FF00FF", width: 2};
   this.styles["room.t"] = {label: "Кабинет", color: "#AA00AA", width: 2};
   this.styles["secondFloor.t"] = {label: "2-й этаж", color: "#CCCC00", width: 2};
   this.styles["winterGarden.t"] = {label: "Зимний сад", color: "#88FF88", width: 2};
