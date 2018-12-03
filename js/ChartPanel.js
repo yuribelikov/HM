@@ -16,6 +16,8 @@ function ChartPanel()
 
   /** @type {Number} */
   this.dataOffset = 0;
+  /** @type {Object[]} */
+  this.dataOffsetPoints = [];
 
   /** @type {Object[]} */
   this.sensorsRects = [];
@@ -39,7 +41,7 @@ ChartPanel.SENSOR_STATE_SELECTED = 3;
 ChartPanel.prototype.init = function ()
 {
   for (var key in window.localStorage)
-    if (key.indexOf("state.") ===0 && window.localStorage.hasOwnProperty(key))
+    if (key.indexOf("state.") === 0 && window.localStorage.hasOwnProperty(key))
     {
       try
       {
@@ -235,7 +237,7 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
       {
         var prevT = prevSensorsData[sensor];
         var t = row.sensorsData[sensor];
-        if (prevT && prevT > -50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 10)
+        if (prevT && prevT > -50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 10 && prevT / t < 2 && t / prevT < 2)
         {
           ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
           ctx.lineTo(cr.ex - i, dy - t * step);
@@ -316,6 +318,8 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
     ctx.fillStyle = "white";
     var border = 4;
     ctx.fillRect(sr.x - border, sr.y - border, sr.w + 2 * border, sr.h + 2 * border);
+    ctx.fillStyle = "black";
+    ctx.fillRect(sr.x, sr.y, sr.w, sr.h);
   }
 
   ctx.fillStyle = style ? style.color : "yellow";
@@ -325,13 +329,15 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
   if (state === ChartPanel.SENSOR_STATE_DISABLED)
     ctx.fillStyle = "#333333";
 
-  ctx.fillRect(sr.x, sr.y, sr.w, sr.h);
-  ctx.stroke();
+  ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
-  ctx.font = "14pt Arial";
-  ctx.fillText(style ? style.label : "???", sr.x + 5, sr.y + 20);
   ctx.font = "bold 24pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 10, sr.y + sr.h - 8);
+  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 30);
+  ctx.font = "14pt Arial";
+  ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 8);
+  ctx.font = "bold 14pt Arial";
+  if (state !== ChartPanel.SENSOR_STATE_DISABLED)
+    ctx.fillText("x", sr.x + sr.w - 13, sr.y + 15);
 
 };
 
@@ -359,11 +365,19 @@ ChartPanel.prototype.drawDataOffset = function (ctx, cr)
     var oy = 6 + cr.y + i * cr.h;
     ctx.beginPath();
     ctx.fillStyle = "black";
-    ctx.fillRect(x - 44, oy - 20, 88, 34);
+    ctx.fillRect(x - 48, oy - 22, 96, 38);
     ctx.lineWidth = 2;
     ctx.rect(x - 40, oy - 18, 80, 30);
+    ctx.moveTo(x - 40, oy - 18);
+    ctx.lineTo(x - 55, oy - 3);
+    ctx.lineTo(x - 40, oy + 12);
+    ctx.moveTo(x + 40, oy - 18);
+    ctx.lineTo(x + 55, oy - 3);
+    ctx.lineTo(x + 40, oy + 12);
     ctx.stroke();
     ctx.closePath();
+    this.dataOffsetPoints[2 * i] = {x: x - 47, y: oy - 3, dir: 1};
+    this.dataOffsetPoints[2 * i + 1] = {x: x + 47, y: oy - 3, dir: -1};
 
     ctx.beginPath();
     ctx.fillStyle = "yellow";
@@ -385,6 +399,21 @@ ChartPanel.prototype.drawDataOffset = function (ctx, cr)
 ChartPanel.prototype.click = function (x, y)
 {
   var cr = this.curvesRect;
+  if (this.dataOffset > 0)    // precise moving
+    for (var i = 0; i <= 3; i++)
+    {
+      var point = this.dataOffsetPoints[i];
+      var a = x - point.x;
+      var b = y - point.y;
+      var dist = Math.sqrt(a * a + b * b);
+      if (dist < 10)
+      {
+        this.dataOffset += point.dir;
+        if (this.dataOffset < 0 || this.dataOffset >= cr.w)
+          this.dataOffset = 0;
+        return;
+      }
+    }
 
   if (x >= cr.x && x < cr.ex && y >= cr.y && y < cr.ey)   // click on curves area
   {
@@ -394,25 +423,24 @@ ChartPanel.prototype.click = function (x, y)
   }
   else if (this.sensorsRects.length > 0 && x >= this.sensorsRects[0].x && x < (this.sensorsRects[0].x + this.sensorsRects[0].w))
   {
-    for (var i = 0; i < this.sensorsRects.length; i++)
-      if (y >= this.sensorsRects[i].y && y < (this.sensorsRects[i].y + this.sensorsRects[i].h))
+    for (i = 0; i < this.sensorsRects.length; i++)
+    {
+      var sr = this.sensorsRects[i];
+      if (y >= sr.y && y < (sr.y + sr.h))
       {
-        log("click on: " + this.sensorsRects[i].id);
-        var sensorState = this.sensorsStates[this.sensorsRects[i].id];
-        if (sensorState)
-        {
-          sensorState++;
-          if (sensorState > ChartPanel.SENSOR_STATE_SELECTED)
-            sensorState = ChartPanel.SENSOR_STATE_DISABLED;
-        }
-        else
-          sensorState = ChartPanel.SENSOR_STATE_SELECTED;
+        log("click on: " + sr.id);
+        var sensorState = this.sensorsStates[sr.id] ? this.sensorsStates[sr.id] : ChartPanel.SENSOR_STATE_ENABLED;
+        if (x > sr.x + sr.w - 16 && y < sr.y + 16)    // enable/disable
+          sensorState = (sensorState === ChartPanel.SENSOR_STATE_DISABLED ? ChartPanel.SENSOR_STATE_ENABLED : ChartPanel.SENSOR_STATE_DISABLED);
+        else    // select/deselect
+          sensorState = (sensorState === ChartPanel.SENSOR_STATE_ENABLED ? ChartPanel.SENSOR_STATE_SELECTED : ChartPanel.SENSOR_STATE_ENABLED);
 
         log("state: " + sensorState);
-        this.sensorsStates[this.sensorsRects[i].id] = sensorState;
-        window.localStorage.setItem("state." + this.sensorsRects[i].id, JSON.stringify(sensorState));
+        this.sensorsStates[sr.id] = sensorState;
+        window.localStorage.setItem("state." + sr.id, JSON.stringify(sensorState));
         break;
       }
+    }
   }
   else
     this.dataOffset = 0;
