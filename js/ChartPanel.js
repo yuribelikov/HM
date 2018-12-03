@@ -155,8 +155,8 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([6, 2]);
-  ctx.strokeStyle = "#8080FF";
+  ctx.setLineDash([6, 6]);
+  ctx.strokeStyle = "#4040FF";
   y = cr.ey - (0 - ChartPanel.MIN_T) * step;
   ctx.moveTo(cr.x, y);
   ctx.lineTo(cr.ex, y);
@@ -187,6 +187,9 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
   for (var h = 0; h < dataHeaders.length; h++)
   {
     var sensor = dataHeaders[h];
+    if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_DISABLED)
+      continue;
+
     ctx.beginPath();
     var style = this.sensors.styles[sensor];
     if (style)
@@ -199,6 +202,10 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
       ctx.strokeStyle = "yellow";
       ctx.lineWidth = 1;
     }
+
+    if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_SELECTED)
+      ctx.lineWidth = (ctx.lineWidth  === 1 ? 4 : ctx.lineWidth * 2);
+
     var prevSensorsData = null;
     for (var i = 0; i < cr.w; i++)
     {
@@ -264,6 +271,7 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
   ctx.setLineDash([]);
+  ctx.lineWidth = 6;
   var sh = cr.h / dataHeaders.length;
   var sensorsRects = [];
   for (var h = 0; h < dataHeaders.length; h++)
@@ -288,12 +296,20 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow
  */
 ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
 {
+  if (state === ChartPanel.SENSOR_STATE_SELECTED)
+  {
+    ctx.fillStyle = "white";
+    var border = 4;
+    ctx.fillRect(sr.x - border, sr.y - border, sr.w + 2 * border, sr.h + 2 * border);
+  }
+
   ctx.fillStyle = style ? style.color : "yellow";
   if (!state)
     state = ChartPanel.SENSOR_STATE_ENABLED;
 
   if (state === ChartPanel.SENSOR_STATE_DISABLED)
-    ctx.fillStyle = "#444444";
+    ctx.fillStyle = "#333333";
+
   ctx.fillRect(sr.x, sr.y, sr.w, sr.h);
   ctx.stroke();
   ctx.fillStyle = "black";
