@@ -127,7 +127,7 @@ DataLoader.prototype.currentDataReceived = function (map)
 
   if (dataTime && (!this.currentRow || this.currentRow.timeKey !== dataTime))
   {
-    if (this.currentRow && parseDateTime(dataTime) - this.currentRow.time > 120)    // data wasn't updated by some reason for some time..
+    if (this.currentRow && parseDateTime(dataTime) - this.currentRow.time > 120000)    // data wasn't updated by some reason for some time..
       location.reload();
 
     if (this.currentRow)
