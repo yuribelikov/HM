@@ -1,4 +1,4 @@
-/*global log parseDateTime*/
+/*global log objToString parseDateTime*/
 
 /**
  * @constructor
@@ -13,3 +13,12 @@ function DataRow(timeKey)
   /** @type {Object} */
   this.sensorsData = {};      // map<String sensorID, Number value>
 }
+
+/**
+ * @this {DataRow}
+ * @return {String}
+ */
+DataRow.prototype.toString = function ()
+{
+  return this.timeKey + "  => " + objToString(this.sensorsData);
+};

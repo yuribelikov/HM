@@ -106,7 +106,7 @@ Dashboard.prototype.redraw = function ()
       this.currentValuesPanel.draw(this.canvas, this.dataLoader.currentRow.sensorsData);
   }
   else
-    this.chartPanel.draw(this.canvas, this.dataLoader.dataHeaders, this.dataLoader.data);
+    this.chartPanel.draw(this.canvas, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);
 
   this.redrawn = new Date().getTime();
 };

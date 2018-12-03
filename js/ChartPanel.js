@@ -19,6 +19,11 @@ function ChartPanel()
   /** @type {Number} */
   this.dataOffset = 0;
 
+  /** @type {Object[]} */
+  this.sensorsRects = [];
+
+  /** @type {Number[]} */
+  this.sensorsStates = [];
 
 }
 
@@ -34,8 +39,9 @@ ChartPanel.SENSOR_STATE_SELECTED = 3;
  * @param {HTMLCanvasElement} canvas
  * @param {String[]} dataHeaders
  * @param {DataRow[]} data
+ * @param {DataRow} currentRow
  */
-ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
+ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
 {
   var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
   ar.w = ar.ex - ar.x;
@@ -67,8 +73,8 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data)
   ctx.fillStyle = "white";
   this.drawAxisX(canvas, cr);
   this.drawAxisY(canvas, cr);
-  this.drawCurves(canvas, cr, dataHeaders, data);
-  this.drawSensors(canvas, cr, dataHeaders, data);
+  this.drawCurves(canvas, cr, dataHeaders);
+  this.drawSensors(canvas, cr, dataHeaders, currentRow);
   this.drawDataOffset(ctx, cr);
 
 };
@@ -171,9 +177,8 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
  * @param {String[]} dataHeaders
- * @param {DataRow[]} data
  */
-ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders, data)
+ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
 {
   var ctx = canvas.getContext("2d");
   ctx.setLineDash([]);
@@ -238,14 +243,21 @@ ChartPanel.prototype.makeTimeKey = function (time)
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
  * @param {String[]} dataHeaders
- * @param {DataRow[]} data
+ * @param {DataRow} currentRow
  */
-ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
+ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow)
 {
-  var time = new Date();
-  time.setMinutes(time.getMinutes() - this.dataOffset);
-  var timeKey = this.makeTimeKey(time);
-  var row = this.dataByTime[timeKey];
+  var row = null;
+  if (this.dataOffset === 0)
+    row = currentRow;
+  else
+  {
+    var time = new Date();
+    time.setMinutes(time.getMinutes() - this.dataOffset);
+    var timeKey = this.makeTimeKey(time);
+    row = this.dataByTime[timeKey];
+  }
+
   if (!row)
     return;
 
@@ -253,35 +265,42 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, data)
   ctx.beginPath();
   ctx.setLineDash([]);
   var sh = cr.h / dataHeaders.length;
+  var sensorsRects = [];
   for (var h = 0; h < dataHeaders.length; h++)
   {
     var sensor = dataHeaders[h];
-    this.drawSensor(ctx, cr.ex + 50, cr.y + h * sh, sh - 20, this.sensors.styles[sensor], row.sensorsData[sensor], ChartPanel.SENSOR_STATE_ENABLED);
+    var sensorRect = {id: sensor, x: cr.ex + 50, y: cr.y + h * sh, w: 120, h: sh - 20};
+    this.drawSensor(ctx, sensorRect, this.sensors.styles[sensor], row.sensorsData[sensor], this.sensorsStates[sensor]);
+    sensorsRects.push(sensorRect);
   }
   ctx.stroke();
   ctx.closePath();
+  this.sensorsRects = sensorsRects;
 };
 
 /**
  * @this {ChartPanel}
  * @param {CanvasRenderingContext2D} ctx
- * @param {Number} x
- * @param {Number} y
- * @param {Number} h
+ * @param {Object} sr
  * @param {Object} style
  * @param {Number} value
  * @param {Number} state
  */
-ChartPanel.prototype.drawSensor = function (ctx, x, y, h, style, value, state)
+ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
 {
   ctx.fillStyle = style ? style.color : "yellow";
-  ctx.fillRect(x, y, 120, h);
+  if (!state)
+    state = ChartPanel.SENSOR_STATE_ENABLED;
+
+  if (state === ChartPanel.SENSOR_STATE_DISABLED)
+    ctx.fillStyle = "#444444";
+  ctx.fillRect(sr.x, sr.y, sr.w, sr.h);
   ctx.stroke();
   ctx.fillStyle = "black";
   ctx.font = "14pt Arial";
-  ctx.fillText(style ? style.label : "???", x + 5, y + 20);
+  ctx.fillText(style ? style.label : "???", sr.x + 5, sr.y + 20);
   ctx.font = "bold 24pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", x + 10, y + h - 8);
+  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 10, sr.y + sr.h - 8);
 
 };
 
@@ -304,7 +323,7 @@ ChartPanel.prototype.drawDataOffset = function (ctx, cr)
   ctx.stroke();
   ctx.closePath();
 
-  for (var i = 0; i <=1; i++)
+  for (var i = 0; i <= 1; i++)
   {
     var oy = 6 + cr.y + i * cr.h;
     ctx.beginPath();
@@ -342,6 +361,28 @@ ChartPanel.prototype.click = function (x, y)
     var offset = cr.ex - x;
     if (offset > 0 && offset < cr.w)
       this.dataOffset = offset;
+  }
+  else if (this.sensorsRects.length > 0 && x >= this.sensorsRects[0].x && x < (this.sensorsRects[0].x + this.sensorsRects[0].w))
+  {
+    for (var i = 0; i < this.sensorsRects.length; i++)
+      if (y >= this.sensorsRects[i].y && y < (this.sensorsRects[i].y + this.sensorsRects[i].h))
+      {
+        log("click on: " + this.sensorsRects[i].id);
+        var sensorState = this.sensorsStates[this.sensorsRects[i].id];
+        if (sensorState)
+        {
+          sensorState++;
+          if (sensorState > ChartPanel.SENSOR_STATE_SELECTED)
+            sensorState = ChartPanel.SENSOR_STATE_DISABLED;
+        }
+        else
+          sensorState = ChartPanel.SENSOR_STATE_SELECTED;
+
+        this.sensorsStates[this.sensorsRects[i].id] = sensorState;
+        log("state: " + this.sensorsStates[this.sensorsRects[i].id]);
+
+        break;
+      }
   }
   else
     this.dataOffset = 0;

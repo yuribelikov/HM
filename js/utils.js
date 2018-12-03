@@ -20,12 +20,21 @@ function log(text)
  */
 function logObj(obj)
 {
+  log(objToString(obj));
+}
+
+/**
+ * @param {Object} obj
+ * @return {String}
+ */
+function objToString(obj)
+{
   var text = "{";
   for (var property in obj)
     if (obj.hasOwnProperty(property))
       text += (property + "=" + obj[property] + ", ");
 
-  log(text.slice(0, -2) + "}");
+  return text.slice(0, -2) + "}";
 }
 
 /**

@@ -66,6 +66,8 @@ DataLoader.prototype.recentDataReceived = function (csv)
     dataHeaders.shift();
     this.dataHeaders = dataHeaders;
     log("recentDataReceived, data.size: " + this.data.length);
+    if (this.data.length > 0)
+      log("last row: " + this.data[this.data.length - 1].toString());
   }
   catch (e)
   {
@@ -125,6 +127,9 @@ DataLoader.prototype.currentDataReceived = function (map)
 
   if (dataTime && (!this.currentRow || this.currentRow.timeKey !== dataTime))
   {
+    if (this.currentRow && parseDateTime(dataTime) - this.currentRow.time > 120)    // data wasn't updated by some reason for some time..
+      location.reload();
+
     if (this.currentRow)
       this.data.push(this.currentRow);
     this.currentRow = new DataRow(dataTime);
