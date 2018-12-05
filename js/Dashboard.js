@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "3.01";
+  this.version = "3.01h";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -20,13 +20,12 @@ function Dashboard()
   /** @type ChartPanel */
   this.chartPanel = new ChartPanel();
   /** @type {Boolean} */
-  this.chartMode = true;
+  this.chartMode = false;
 
   /** @type {Object} */
   this.downEvent = null;
   /** @type {Object} */
-  this.moveEvent = null;
-
+  // this.moveEvent = null;
 
   this.start();
 }
@@ -172,50 +171,50 @@ Dashboard.prototype.drawHeader = function ()
 Dashboard.prototype.onPointer = function (evt)
 {
   // log(evt.type, evt.clientX, evt.clientY);
-  var minMove = 20;
-  var slideDist = 70;
+  // var minMove = 20;
+  // var slideDist = 70;
   var dx = this.downEvent !== null ? evt.clientX - this.downEvent.clientX : 0;
   var dy = this.downEvent !== null ? evt.clientY - this.downEvent.clientY : 0;
-  var mx = this.moveEvent !== null ? evt.clientX - this.moveEvent.clientX : 0;
-  var my = this.moveEvent !== null ? evt.clientY - this.moveEvent.clientY : 0;
+  // var mx = this.moveEvent !== null ? evt.clientX - this.moveEvent.clientX : 0;
+  // var my = this.moveEvent !== null ? evt.clientY - this.moveEvent.clientY : 0;
   if (evt.type === "pointerdown")
   {
     this.downEvent = evt;
-    this.moveEvent = evt;
+    // this.moveEvent = evt;
   }
   else if (evt.type === "pointerup")
   {
-    if (dx < 3 && dy < 3)
+    if (dx < 3 && dy < 3)  // noinspection JSSuspiciousNameCombination
       this.click(Math.round(evt.clientX), Math.round(evt.clientY));
 
     this.downEvent = null;
   }
-  else if (evt.type === "pointermove" && this.downEvent != null)
-  {
-    // log(evt.type, evt.clientX, evt.clientY);
-    if (dy > minMove && Math.abs(dx) < minMove)   // down
-    {
-      if (dy > slideDist && !this.chartMode)
-      {
-        this.chartMode = true;
-        this.redraw();
-      }
-    }
-    else if (-dy > minMove && Math.abs(dx) < minMove)   // up
-    {
-      if (-dy > slideDist && this.chartMode)
-      {
-        this.chartMode = false;
-        this.redraw();
-      }
-    }
-    else if (evt.clientY > Dashboard.HEADER_H && Math.abs(my) < 10 && (mx > 2 || mx < -2))   // right / left
-    {
-      // this.updateDataIndex(this.currentDataIndex + Math.round(mx / 10));
-    }
-
-    this.moveEvent = evt;
-  }
+  // else if (evt.type === "pointermove" && this.downEvent != null)
+  // {
+  //   // log(evt.type, evt.clientX, evt.clientY);
+  //   if (dy > minMove && Math.abs(dx) < minMove)   // down
+  //   {
+  //     if (dy > slideDist && !this.chartMode)
+  //     {
+  //       this.chartMode = true;
+  //       this.redraw();
+  //     }
+  //   }
+  //   else if (-dy > minMove && Math.abs(dx) < minMove)   // up
+  //   {
+  //     if (-dy > slideDist && this.chartMode)
+  //     {
+  //       this.chartMode = false;
+  //       this.redraw();
+  //     }
+  //   }
+  //   else if (evt.clientY > Dashboard.HEADER_H && Math.abs(my) < 10 && (mx > 2 || mx < -2))   // right / left
+  //   {
+  //     // this.updateDataIndex(this.currentDataIndex + Math.round(mx / 10));
+  //   }
+  //
+  //   this.moveEvent = evt;
+  // }
 
 };
 
@@ -226,10 +225,11 @@ Dashboard.prototype.onPointer = function (evt)
  */
 Dashboard.prototype.click = function (x, y)
 {
-  if (this.chartMode)
-  {
+  log("click on: " + x + ", " + y);
+  if (y < Dashboard.HEADER_H)
+    this.chartMode = !this.chartMode;
+  else if (this.chartMode)
     this.chartPanel.click(x, y);
-    this.redraw();
-  }
 
+  this.redraw();
 };
