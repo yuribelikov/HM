@@ -20,7 +20,7 @@ function Dashboard()
   /** @type ChartPanel */
   this.chartPanel = new ChartPanel();
   /** @type {Boolean} */
-  this.chartMode = false;
+  this.chartMode = true;
 
   /** @type {Object} */
   this.downEvent = null;

@@ -237,7 +237,7 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
       {
         var prevT = prevSensorsData[sensor];
         var t = row.sensorsData[sensor];
-        if (prevT && prevT > -50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 10 && prevT / t < 2 && t / prevT < 2)
+        if (prevT && prevT > -50 && prevT < 999 && t && t > -50 && t < 999 && Math.abs(t - prevT) < 10)
         {
           ctx.moveTo(cr.ex - i + 1, dy - prevT * step);
           ctx.lineTo(cr.ex - i, dy - t * step);
