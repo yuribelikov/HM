@@ -64,35 +64,35 @@ ChartPanel.prototype.init = function ()
  */
 ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
 {
-  var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
-  var cr = {x: 40, y: ar.y + 20, ex: ar.ex - 180, ey: ar.ey - 30, w: 0, h: 0};    // curves rect
-  cr.w = cr.ex - cr.x;
-  cr.h = cr.ey - cr.y;
-  this.curvesRect = cr;
-
   this.dataByTime = {};
   for (var i = 0; i < data.length; i++)
     this.dataByTime[data[i].timeKey] = data[i];
 
+  var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
+  ar.w = ar.ex - ar.x;
+  ar.h = ar.ey - ar.y;
+  var s = window.devicePixelRatio === 1 ? 1 : window.devicePixelRatio / 1.5;
+  var cr = {x: 27 * s, y: ar.y + 20 * s, ex: ar.ex - 140 - s * 30, ey: ar.ey - 25 * s, w: 0, h: 0};    // curves rect
+  cr.w = cr.ex - cr.x;
+  cr.h = cr.ey - cr.y;
+  this.curvesRect = cr;
+
   var ctx = canvas.getContext("2d");
+  var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   ctx.beginPath();
-  ctx.lineWidth = 2;
-  // ctx.strokeStyle = "cyan";
-  // ctx.rect(ar.x + 1, ar.y, ar.w - 1, ar.h);
-  // ctx.strokeStyle = "green";
-  // ctx.rect(cr.x, cr.y, cr.w, cr.h);
+  ctx.fillStyle = "#250000";
+  ctx.fillRect(cr.x, cr.y, cr.w, (ChartPanel.MAX_T - 100) * step);
+  ctx.fillStyle = "#000025";
+  var h = 0 - ChartPanel.MIN_T * step;
+  ctx.fillRect(cr.x, cr.ey - h, cr.w, h);
   ctx.stroke();
   ctx.closePath();
 
-  ctx.lineWidth = 2;
-  ctx.setLineDash([]);
-  ctx.font = "14pt Arial";
-  ctx.fillStyle = "white";
-  this.drawAxisX(canvas, cr);
-  this.drawAxisY(canvas, cr);
+  this.drawAxisX(canvas, cr, s);
+  this.drawAxisY(canvas, cr, s);
   this.drawCurves(canvas, cr, dataHeaders);
-  this.drawSensors(canvas, cr, dataHeaders, currentRow);
-  this.drawDataOffset(ctx, cr);
+  this.drawSensors(canvas, ar, cr, s, dataHeaders, currentRow);
+  this.drawDataOffset(canvas, cr, s);
 
 };
 
@@ -100,12 +100,16 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
+ * @param {Number} s
  */
-ChartPanel.prototype.drawAxisX = function (canvas, cr)
+ChartPanel.prototype.drawAxisX = function (canvas, cr, s)
 {
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
-  ctx.setLineDash([2, 10]);
+  ctx.lineWidth = s;
+  ctx.setLineDash([2, 7 * s]);
+  ctx.font = 10 * s + "pt Arial";
+  ctx.fillStyle = "white";
   ctx.strokeStyle = "white";
   for (var i = 0; i < cr.w; i++)
   {
@@ -113,10 +117,10 @@ ChartPanel.prototype.drawAxisX = function (canvas, cr)
     time.setMinutes(time.getMinutes() - i);
     if (time.getMinutes() === 0)
     {
-      var strTime = formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
-      var x = cr.ex - i - 20;
-      ctx.fillText(strTime, x, cr.y - 4);
-      ctx.fillText(strTime, x, cr.ey + 24);
+      var strTime = formatNumber(time.getHours());
+      var x = cr.ex - i - 8 * s;
+      ctx.fillText(strTime, x, cr.y - 6 * s);
+      ctx.fillText(strTime, x, cr.ey + 18 * s);
       ctx.moveTo(cr.ex - i, cr.y);
       ctx.lineTo(cr.ex - i, cr.ey);
     }
@@ -130,24 +134,27 @@ ChartPanel.prototype.drawAxisX = function (canvas, cr)
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
+ * @param {Number} s
  */
-ChartPanel.prototype.drawAxisY = function (canvas, cr)
+ChartPanel.prototype.drawAxisY = function (canvas, cr, s)
 {
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
+  ctx.lineWidth = s;
+  ctx.font = 10 * s + "pt Arial";
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   for (var t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
-    var y = cr.ey - (t - ChartPanel.MIN_T) * step + 5;
+    var y = cr.ey - (t - ChartPanel.MIN_T) * step + 4 * s;
     ctx.fillStyle = tempColorFromValue(t);
-    ctx.fillText(t, cr.x - 34, y);
-    ctx.fillText(t, cr.ex + 8, y);
+    ctx.fillText(t, cr.x - ctx.measureText(t).width - 4 * s, y);
+    ctx.fillText(t, cr.ex + 2 * s, y);
   }
   ctx.stroke();
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([1, 15]);
+  ctx.setLineDash([2, 10 * s]);
   ctx.lineWidth = 1;
   ctx.strokeStyle = "white";
   for (t = ChartPanel.MIN_T + 5; t <= ChartPanel.MAX_T; t += 10)
@@ -160,31 +167,14 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr)
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([2, 10]);
-  ctx.lineWidth = 2;
+  ctx.setLineDash([2, 7 * s]);
+  ctx.lineWidth = s;
   for (t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
     y = cr.ey - (t - ChartPanel.MIN_T) * step;
     ctx.moveTo(cr.x, y);
     ctx.lineTo(cr.ex, y);
   }
-  ctx.stroke();
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.setLineDash([6, 6]);
-  ctx.strokeStyle = "#4040FF";
-  y = cr.ey - (0 - ChartPanel.MIN_T) * step;
-  ctx.moveTo(cr.x, y);
-  ctx.lineTo(cr.ex, y);
-  ctx.stroke();
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.strokeStyle = "red";
-  y = cr.ey - (100 - ChartPanel.MIN_T) * step;
-  ctx.moveTo(cr.x, y);
-  ctx.lineTo(cr.ex, y);
   ctx.stroke();
   ctx.closePath();
 };
@@ -265,11 +255,13 @@ ChartPanel.prototype.makeTimeKey = function (time)
 /**
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
+ * @param {Object} ar
  * @param {Object} cr
+ * @param {Number} s
  * @param {String[]} dataHeaders
  * @param {DataRow} currentRow
  */
-ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow)
+ChartPanel.prototype.drawSensors = function (canvas, ar, cr, s, dataHeaders, currentRow)
 {
   var row = null;
   if (this.dataOffset === 0)
@@ -288,14 +280,13 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
   ctx.setLineDash([]);
-  ctx.lineWidth = 6;
-  var sh = cr.h / dataHeaders.length;
+  var sh = (ar.h - 4 * s) / dataHeaders.length;
   var sensorsRects = [];
   for (var h = 0; h < dataHeaders.length; h++)
   {
     var sensor = dataHeaders[h];
-    var sensorRect = {id: sensor, x: cr.ex + 50, y: cr.y + h * sh, w: 120, h: sh - 20};
-    this.drawSensor(ctx, sensorRect, this.sensors.styles[sensor], row.sensorsData[sensor], this.sensorsStates[sensor]);
+    var sensorRect = {id: sensor, x: cr.ex + 32 * s, y: ar.y + 6 * s + h * sh, w: 130, h: sh - 8 * s};
+    this.drawSensor(ctx, sensorRect, s, this.sensors.styles[sensor], row.sensorsData[sensor], this.sensorsStates[sensor]);
     sensorsRects.push(sensorRect);
   }
   ctx.stroke();
@@ -307,16 +298,17 @@ ChartPanel.prototype.drawSensors = function (canvas, cr, dataHeaders, currentRow
  * @this {ChartPanel}
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} sr
+ * @param {Number} s
  * @param {Object} style
  * @param {Number} value
  * @param {Number} state
  */
-ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
+ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
 {
   if (state === ChartPanel.SENSOR_STATE_SELECTED)
   {
     ctx.fillStyle = "white";
-    var border = 4;
+    var border = 3 * s;
     ctx.fillRect(sr.x - border, sr.y - border, sr.w + 2 * border, sr.h + 2 * border);
     ctx.fillStyle = "black";
     ctx.fillRect(sr.x, sr.y, sr.w, sr.h);
@@ -331,11 +323,10 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
 
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
-  ctx.font = "bold 24pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 30);
-  ctx.font = "14pt Arial";
-  ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 8);
-  ctx.font = "bold 14pt Arial";
+  ctx.font = "bold " + 14 * s + "pt Arial";
+  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 20 * s);
+  ctx.font = "bold " + 14 + "pt Arial";
+  ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
     ctx.fillText("x", sr.x + sr.w - 13, sr.y + 15);
 
@@ -343,14 +334,16 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, style, value, state)
 
 /**
  * @this {ChartPanel}
- * @param {CanvasRenderingContext2D} ctx
+ * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
+ * @param {Number} s
  */
-ChartPanel.prototype.drawDataOffset = function (ctx, cr)
+ChartPanel.prototype.drawDataOffset = function (canvas, cr, s)
 {
   if (this.dataOffset === 0)
     return;
 
+  var ctx = canvas.getContext("2d");
   ctx.beginPath();
   ctx.strokeStyle = "yellow";
   ctx.lineWidth = 1;
@@ -360,32 +353,33 @@ ChartPanel.prototype.drawDataOffset = function (ctx, cr)
   ctx.stroke();
   ctx.closePath();
 
+  var h = 24 * s;
   for (var i = 0; i <= 1; i++)
   {
-    var oy = 6 + cr.y + i * cr.h;
+    var y = cr.y - 10 * s + i * cr.h;
     ctx.beginPath();
     ctx.fillStyle = "black";
-    ctx.fillRect(x - 48, oy - 22, 96, 38);
-    ctx.lineWidth = 2;
-    ctx.rect(x - 40, oy - 18, 80, 30);
-    ctx.moveTo(x - 40, oy - 18);
-    ctx.lineTo(x - 55, oy - 3);
-    ctx.lineTo(x - 40, oy + 12);
-    ctx.moveTo(x + 40, oy - 18);
-    ctx.lineTo(x + 55, oy - 3);
-    ctx.lineTo(x + 40, oy + 12);
+    ctx.fillRect(x - 3 * h / 2, y, 3 * h, h);
+    ctx.lineWidth = 2 * s;
+    ctx.rect(x - h, y, 2 * h, h);
+    ctx.moveTo(x - h, y);
+    ctx.lineTo(x - 3 * h / 2, y + h / 2);
+    ctx.lineTo(x - h, y + h);
+    ctx.moveTo(x + h, y);
+    ctx.lineTo(x + 3 * h / 2, y + h / 2);
+    ctx.lineTo(x + h, y + h);
     ctx.stroke();
     ctx.closePath();
-    this.dataOffsetPoints[2 * i] = {x: x - 47, y: oy - 3, dir: 1};
-    this.dataOffsetPoints[2 * i + 1] = {x: x + 47, y: oy - 3, dir: -1};
+    this.dataOffsetPoints[2 * i] = {x: x - 3 * h / 2, y: y + h / 2, dir: 1};
+    this.dataOffsetPoints[2 * i + 1] = {x: x + 3 * h / 2, y: y + h / 2, dir: -1};
 
     ctx.beginPath();
     ctx.fillStyle = "yellow";
-    ctx.font = "bold 18pt Arial";
+    ctx.font = "bold " + 13 * s + "pt Arial";
     var time = new Date();
     time.setMinutes(time.getMinutes() - this.dataOffset);
     var strTime = formatNumber(time.getHours()) + ":" + formatNumber(time.getMinutes());
-    ctx.fillText(strTime, x - 33, oy + 5);
+    ctx.fillText(strTime, x - 22 * s, y + h - 6 * s);
     ctx.stroke();
     ctx.closePath();
   }
@@ -406,7 +400,7 @@ ChartPanel.prototype.click = function (x, y)
       var a = x - point.x;
       var b = y - point.y;
       var dist = Math.sqrt(a * a + b * b);
-      if (dist < 10)
+      if (dist < 20)
       {
         this.dataOffset += point.dir;
         if (this.dataOffset < 0 || this.dataOffset >= cr.w)
