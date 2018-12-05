@@ -30,7 +30,7 @@ function Dashboard()
   this.start();
 }
 
-Dashboard.HEADER_H = 50;
+Dashboard.HEADER_H = 17 * window.devicePixelRatio;
 Dashboard.REFRESH_PERIOD = 800;
 
 /**
@@ -115,18 +115,19 @@ Dashboard.prototype.redraw = function ()
  */
 Dashboard.prototype.drawHeader = function ()
 {
+  var s = window.devicePixelRatio;
   var ctx = this.canvas.getContext("2d");
   ctx.setLineDash([]);
   ctx.beginPath();
-  ctx.lineWidth = 2;
+  ctx.lineWidth = s;
   ctx.strokeStyle = "red";
   ctx.rect(1, 1, this.canvas.width - 2, Dashboard.HEADER_H - 2);
   ctx.stroke();
 
-  ctx.font = "25pt Calibri";
-  var dy = Dashboard.HEADER_H - 10;
+  ctx.font = 8 * s + "pt Arial";
+  var dy = Dashboard.HEADER_H - 2 - 3 * s;
   ctx.fillStyle = "white";
-  ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 130, dy);
+  ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 45 * s, dy);
 
   var now = new Date().getTime();
   if (this.dataLoader.currentRow)
@@ -135,10 +136,10 @@ Dashboard.prototype.drawHeader = function ()
     for (var i = 0; i < times.length; i++)
     {
       var ago = Math.floor((now - times[i]) / 1000);
-      var ox = 410;
+      var ox = 157 * s;
       ctx.fillStyle = (i === 0 ? "white" : "gray");
-      ctx.fillText(formatTime(times[i], true), i * ox + 20, dy);
-      ctx.fillText("(" + formatNumber(ago) + ")", i * ox + 350, dy);
+      ctx.fillText(formatTime(times[i], true), i * ox + 4 * s, dy);
+      ctx.fillText("(" + formatNumber(ago) + ")", i * ox + 112 * s, dy);
     }
   }
 
