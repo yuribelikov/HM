@@ -25,7 +25,7 @@ function DataLoader()
 }
 
 DataLoader.REFRESH_PERIOD = 1;
-DataLoader.DATA_SIZE = 10000;
+DataLoader.DATA_SIZE = 1500;
 
 
 /**
