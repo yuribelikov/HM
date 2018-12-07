@@ -90,7 +90,7 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
 
   this.drawAxisX(canvas, cr, s);
   this.drawAxisY(canvas, cr, s);
-  this.drawCurves(canvas, cr, dataHeaders);
+  this.drawCurves(canvas, cr, s, dataHeaders);
   this.drawSensors(canvas, ar, cr, s, dataHeaders, currentRow);
   this.drawDataOffset(canvas, cr, s);
 
@@ -183,9 +183,10 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr, s)
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
+ * @param {Number} cr
  * @param {String[]} dataHeaders
  */
-ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
+ChartPanel.prototype.drawCurves = function (canvas, cr, s, dataHeaders)
 {
   var ctx = canvas.getContext("2d");
   ctx.setLineDash([]);
@@ -200,18 +201,14 @@ ChartPanel.prototype.drawCurves = function (canvas, cr, dataHeaders)
     ctx.beginPath();
     var style = this.sensors.styles[sensor];
     if (style)
-    {
       ctx.strokeStyle = style.color;
-      ctx.lineWidth = style.width;
-    }
     else    // default style
-    {
       ctx.strokeStyle = "yellow";
-      ctx.lineWidth = 1;
-    }
 
     if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_SELECTED)
-      ctx.lineWidth *= 2;
+      ctx.lineWidth = 3 * s;
+    else
+      ctx.lineWidth = s;
 
     var prevSensorsData = null;
     for (var i = 0; i < cr.w; i++)
@@ -324,11 +321,11 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
   ctx.font = "bold " + 14 * s + "pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 20 * s);
-  ctx.font = "bold " + 14 + "pt Arial";
+  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 5 + 15 * s);
+  ctx.font = "bold " + 11 * s + "pt Arial";
   ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
-    ctx.fillText("x", sr.x + sr.w - 13, sr.y + 15);
+    ctx.fillText("x", sr.x + sr.w - 7 - 6 * s, sr.y + 7 + 8 * s);
 
 };
 
