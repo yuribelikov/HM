@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "3.02";
+  this.version = "3.1";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -20,7 +20,7 @@ function Dashboard()
   /** @type ChartPanel */
   this.chartPanel = new ChartPanel();
   /** @type {Boolean} */
-  this.chartMode = true;
+  this.chartMode = false;
 
   /** @type {Object} */
   this.downEvent = null;

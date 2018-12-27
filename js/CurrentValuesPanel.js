@@ -5,7 +5,28 @@
  */
 function CurrentValuesPanel()
 {
+  /** @type {Object[]} */
+  this.sensors = [];
+
+  this.init();
 }
+
+/**
+ * @this {CurrentValuesPanel}
+ */
+CurrentValuesPanel.prototype.init = function ()
+{
+  this.sensors.push({x: 0, y: 0, w: 0.5, h: 0.3, name: "warmOut.t", label: "Из печи"});
+  this.sensors.push({x: 0.5, y: 0, w: 0.5, h: 0.15, name: "warmFloor.t", label: "Пол в ванной"});
+  this.sensors.push({x: 0.5, y: 0.15, w: 0.5, h: 0.15, name: "warmIn.t", label: "В печь"});
+  this.sensors.push({x: 0, y: 0.3, w: 0.5, h: 0.2, name: "inside.t", label: "Гостиная"});
+  this.sensors.push({x: 0.5, y: 0.3, w: 0.5, h: 0.2, name: "outside.t", label: "Улица"});
+  this.sensors.push({x: 0, y: 0.5, w: 0.5, h: 0.2, name: "room.t", label: "Кабинет"});
+  this.sensors.push({x: 0.5, y: 0.5, w: 0.5, h: 0.2, name: "bedroom.t", label: "Спальня"});
+  this.sensors.push({x: 0, y: 0.7, w: 0.5, h: 0.2, name: "winterGarden.t", label: "Зим. сад"});
+  this.sensors.push({x: 0.5, y: 0.7, w: 0.5, h: 0.2, name: "secondFloor.t", label: "2й этаж"});
+
+};
 
 /**
  * @this {CurrentValuesPanel}
@@ -18,87 +39,38 @@ CurrentValuesPanel.prototype.draw = function (canvas, currentData)
   ctx.beginPath();
 
   ctx.fillStyle = "#000025";
-  ctx.fillRect(0, Dashboard.HEADER_H, canvas.width, canvas.height - 150);
-  var x2 = canvas.width / 2;
-  var dy = Dashboard.HEADER_H + 420;
-
-  ctx.font = "70pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Из печи", 30, dy - 340);
-  ctx.font = "330pt Calibri";
-  this.printTemp(ctx, 30, dy + 20, currentData["warmOut.t"]);
-
-  ctx.font = "46pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Пол в", x2 + 90, dy - 350);
-  ctx.fillText("ванной", x2 + 90, dy - 280);
-  ctx.font = "120pt Calibri";
-  this.printTemp(ctx, x2 + 300, dy - 220, currentData["warmFloor.t"]);
-
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("В", x2 + 90, dy - 100);
-  ctx.fillText("печь", x2 + 90, dy - 30);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, x2 + 250, dy + 20, currentData["warmIn.t"]);
-
-  dy += 420;
-  ctx.font = "75pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Гостиная", 30, dy - 270);
-  ctx.font = "240pt Calibri";
-  this.printTemp(ctx, 40, dy, currentData["inside.t"]);
-
-  var outside = currentData["outside.t"];
-  var inside = currentData["inside.t"];
-  if (outside && inside && outside < inside)
-    outside -= (inside - outside) / 10;
-
-  ctx.font = "75pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Улица", x2 + 50, dy - 270);
-  ctx.font = "210pt Calibri";
-  this.printTemp(ctx, x2 + 40, dy, outside);
-
-  dy += 320;
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Кабинет", 30, dy - 200);
-  ctx.font = "180pt Calibri";
-  this.printTemp(ctx, 40, dy, currentData["room.t"]);
-
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Спальня", x2 + 50, dy - 200);
-  ctx.font = "180pt Calibri";
-  this.printTemp(ctx, x2 + 100, dy, currentData["bedroom.t"]);
-
-  dy += 300;
-  ctx.font = "50pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Зим. сад", 30, dy - 190);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, 40, dy, currentData["winterGarden.t"]);
-
-  ctx.font = "50pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("2й этаж", x2 + 50, dy - 190);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, x2 + 100, dy, currentData["secondFloor.t"]);
-
-
+  ctx.fillRect(0, Dashboard.HEADER_H, canvas.width, 0.9 * canvas.height);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  ctx.rect(1, Dashboard.HEADER_H - 2, canvas.width - 2, 480);
-  ctx.rect(550, Dashboard.HEADER_H - 2, canvas.width - 551, 240);
-  ctx.rect(550, Dashboard.HEADER_H - 2, canvas.width - 551, 480);
+  var s = window.devicePixelRatio;
+  for (var i = 0; i < this.sensors.length; i++)
+  {
+    var sensor = this.sensors[i];
+    var w = sensor.w * canvas.width;
+    var h = sensor.h * canvas.height;
+    var x = sensor.x * canvas.width;
+    var y = Dashboard.HEADER_H + sensor.y * canvas.height;
+    var offset = 7 * s;
+    var fontSize = h / 6;
+    ctx.font = fontSize + "pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText(sensor.label, x + offset, y + fontSize + offset / 2);
+    fontSize = h / 1.6;
+    ctx.font = fontSize + "pt Calibri";
+    var value = currentData[sensor.name];
+    var text = value ? value.toFixed() : "?";
+    if (sensor.name === "outside.t")
+    {
+      var outside = value;
+      var inside = currentData["inside.t"];
+      if (outside && inside && outside < inside)
+        outside -= (inside - outside) / 10;
+    }
+    this.printTemp(ctx, x + w / 2 - ctx.measureText(text).width / 2, y + h - offset, value);
+    ctx.rect(x, y, w, h);
+  }
 
-  ctx.rect(1, Dashboard.HEADER_H - 2 + 480, canvas.width - 2, 401);
-  ctx.rect(1, Dashboard.HEADER_H - 2 + 881, canvas.width - 2, 321);
-  ctx.rect(1, Dashboard.HEADER_H - 2 + 1202, canvas.width -2, 281);
-  ctx.rect(1, Dashboard.HEADER_H - 2 + 480, 500, 1003);
   ctx.stroke();
-
   ctx.closePath();
 };
 
