@@ -14,6 +14,9 @@ function ChartPanel()
   /** @type {Object} */
   this.curvesRect = null;
 
+  /** @type {Boolean} */
+  this.vertical = false;
+
   /** @type {Number} */
   this.dataOffset = 0;
   /** @type {Object[]} */
@@ -71,6 +74,7 @@ ChartPanel.prototype.draw = function (canvas, dataHeaders, data, currentRow)
   var ar = {x: 0, y: Dashboard.HEADER_H, ex: canvas.width, ey: canvas.height, w: 0, h: 0};    // area rect
   ar.w = ar.ex - ar.x;
   ar.h = ar.ey - ar.y;
+  this.vertical = ar.h > ar.w;
   var s = window.devicePixelRatio === 1 ? 1 : window.devicePixelRatio / 1.5;
   var cr = {x: 27 * s, y: ar.y + 20 * s, ex: ar.ex - 140 - s * 30, ey: ar.ey - 25 * s, w: 0, h: 0};    // curves rect
   cr.w = cr.ex - cr.x;
@@ -321,7 +325,8 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
   ctx.font = "bold " + 14 * s + "pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + sr.w - 56, sr.y + 5 + 15 * s);
+  var x = this.vertical ? sr.x + 15 : sr.x + sr.w - 56;
+  ctx.fillText(value ? value.toFixed(1) : "?", x, sr.y + 5 + 15 * s);
   ctx.font = "bold " + 11 * s + "pt Arial";
   ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
