@@ -321,7 +321,7 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
   ctx.font = "bold " + 14 * s + "pt Arial";
-  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + 15, sr.y + 5 + 15 * s);
+  ctx.fillText(value ? value.toFixed(1) : "?", sr.x + sr.w - 56, sr.y + 5 + 15 * s);
   ctx.font = "bold " + 11 * s + "pt Arial";
   ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
