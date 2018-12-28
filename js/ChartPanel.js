@@ -187,7 +187,7 @@ ChartPanel.prototype.drawAxisY = function (canvas, cr, s)
  * @this {ChartPanel}
  * @param {HTMLCanvasElement} canvas
  * @param {Object} cr
- * @param {Number} cr
+ * @param {Number} s
  * @param {String[]} dataHeaders
  */
 ChartPanel.prototype.drawCurves = function (canvas, cr, s, dataHeaders)
