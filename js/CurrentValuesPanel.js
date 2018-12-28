@@ -37,9 +37,6 @@ CurrentValuesPanel.prototype.draw = function (canvas, currentData)
 {
   var ctx = canvas.getContext("2d");
   ctx.beginPath();
-
-  ctx.fillStyle = "#000025";
-  ctx.fillRect(0, Dashboard.HEADER_H, canvas.width, 0.9 * canvas.height);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
   var s = window.devicePixelRatio;
@@ -50,6 +47,8 @@ CurrentValuesPanel.prototype.draw = function (canvas, currentData)
     var h = sensor.h * canvas.height;
     var x = sensor.x * canvas.width;
     var y = Dashboard.HEADER_H + sensor.y * canvas.height;
+    ctx.fillStyle = "#000025";
+    ctx.fillRect(x, y, w, h);
     var offset = 7 * s;
     var fontSize = h / 6;
     ctx.font = fontSize + "pt Calibri";
