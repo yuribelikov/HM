@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "3.1";
+  this.version = "3.22";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -19,8 +19,10 @@ function Dashboard()
   this.currentValuesPanel = new CurrentValuesPanel();
   /** @type ChartPanel */
   this.chartPanel = new ChartPanel();
+  /** @type {Number} */
+  this.mode = Dashboard.MODE_CURR_VALUES;
   /** @type {Boolean} */
-  this.chartMode = true;
+  this.portrait = false;
 
   /** @type {Object} */
   this.downEvent = null;
@@ -31,7 +33,9 @@ function Dashboard()
 }
 
 Dashboard.HEADER_H = 17 * window.devicePixelRatio;
-Dashboard.REFRESH_PERIOD = 800;
+Dashboard.MODE_CURR_VALUES = 0;
+Dashboard.MODE_CHART = 1;
+Dashboard.MODE_BOTH = 2;
 
 /**
  * @this {Dashboard}
@@ -52,6 +56,9 @@ Dashboard.prototype.start = function ()
   this.canvas.addEventListener("pointerleave", this.onPointer.bind(this));
 
   this.onResize();
+  if (!this.portrait)
+    this.mode = Dashboard.MODE_BOTH;
+
   window.requestAnimationFrame(this.run.bind(this));
 };
 
@@ -66,6 +73,10 @@ Dashboard.prototype.onResize = function ()
   {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+    this.portrait = (this.canvas.height > this.canvas.width);
+    if ((this.portrait && this.mode === Dashboard.MODE_BOTH) || (!this.portrait && this.mode === Dashboard.MODE_CURR_VALUES))
+      this.mode = Dashboard.MODE_CHART;
+    log("portrait: " + this.portrait + ", mode: " + this.mode);
     this.redraw();
   }
 };
@@ -77,8 +88,7 @@ Dashboard.prototype.run = function ()
 {
   var now = new Date().getTime();
   //log("run, now: " + now + ", this.updated: " + this.updated + ", diff: " + (now - this.updated));
-  // if (now - this.updated >= Dashboard.REFRESH_PERIOD)
-  if (this.redrawn < this.dataLoader.dataUpdated || now - this.redrawn > Dashboard.REFRESH_PERIOD)
+  if (this.redrawn < this.dataLoader.dataUpdated || now - this.redrawn > 800)
     this.redraw();
 
   window.requestAnimationFrame(this.run.bind(this));
@@ -99,13 +109,27 @@ Dashboard.prototype.redraw = function ()
 
   this.drawHeader();
 
-  if (!this.chartMode)
-  {
-    if (this.dataLoader.currentRow)
-      this.currentValuesPanel.draw(this.canvas, this.dataLoader.currentRow.sensorsData);
-  }
-  else
-    this.chartPanel.draw(this.canvas, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);
+  var minCurrPW = this.canvas.width / 4;
+  var currValPanelRect =
+    {
+      x: this.mode === Dashboard.MODE_BOTH ? this.canvas.width - minCurrPW : 0,
+      y: Dashboard.HEADER_H,
+      w: this.mode === Dashboard.MODE_BOTH ? minCurrPW : this.canvas.width,
+      h: this.canvas.height - Dashboard.HEADER_H
+    };
+  var chartPanelRect =
+    {
+      x: 0,
+      y: currValPanelRect.y,
+      w: this.mode === Dashboard.MODE_BOTH ? currValPanelRect.x : this.canvas.width,
+      h: currValPanelRect.h
+    };
+
+  if (this.dataLoader.currentRow && this.mode !== Dashboard.MODE_CHART)
+    this.currentValuesPanel.draw(ctx, currValPanelRect, this.dataLoader.currentRow.sensorsData);
+
+  if (this.mode !== Dashboard.MODE_CURR_VALUES)
+    this.chartPanel.draw(ctx, chartPanelRect, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);
 
   this.redrawn = new Date().getTime();
 };
@@ -143,14 +167,9 @@ Dashboard.prototype.drawHeader = function ()
     }
   }
 
-  if (!this.chartMode)
-  {
-    ctx.fillStyle = "white";
-    ctx.fillText(this.version, 20, this.canvas.height - 40);
-    //noinspection JSUnresolvedVariable
-    var text = this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
-    ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 40);
-  }
+  ctx.fillStyle = "white";
+  var text = "ver: " + this.version + "   scr: " + this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
+  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 3 * window.devicePixelRatio);
   ctx.closePath();
 };
 
@@ -228,8 +247,14 @@ Dashboard.prototype.click = function (x, y)
 {
   log("click on: " + x + ", " + y);
   if (y < Dashboard.HEADER_H)
-    this.chartMode = !this.chartMode;
-  else if (this.chartMode)
+  {
+    if (this.portrait)
+      this.mode = 1 - this.mode;    // switch between 0 and 1
+    else
+      this.mode = 3 - this.mode;    // switch between 1 and 2
+    log("this.mode: " + this.mode);
+  }
+  else if (this.mode)
     this.chartPanel.click(x, y);
 
   this.redraw();
