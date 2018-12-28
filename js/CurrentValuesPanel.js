@@ -58,34 +58,19 @@ CurrentValuesPanel.prototype.draw = function (canvas, currentData)
     fontSize = h / 1.6;
     ctx.font = fontSize + "pt Calibri";
     var value = currentData[sensor.name];
-    var text = value ? value.toFixed() : "?";
     if (sensor.name === "outside.t")
     {
-      var outside = value;
       var inside = currentData["inside.t"];
-      if (outside && inside && outside < inside)
-        outside -= (inside - outside) / 10;
+      if (value && inside && value < inside)
+        value -= (inside - value) / 10;
     }
-    this.printTemp(ctx, x + w / 2 - ctx.measureText(text).width / 2, y + h - offset, value);
+    if (value)
+      ctx.fillStyle = tempColorFromValue(value);
+    var text = value ? value.toFixed() : "?";
+    ctx.fillText(text, x + w / 2 - ctx.measureText(text).width / 2, y + h - offset);
     ctx.rect(x, y, w, h);
   }
 
   ctx.stroke();
   ctx.closePath();
 };
-
-/**
- * @this {CurrentValuesPanel}
- * @param {CanvasRenderingContext2D} ctx
- * @param {Number} x
- * @param {Number} y
- * @param {Number} t
- */
-CurrentValuesPanel.prototype.printTemp = function (ctx, x, y, t)
-{
-  if (t)
-    ctx.fillStyle = tempColorFromValue(t);
-
-  ctx.fillText(t ? t.toFixed() : "?", x, y);
-};
-
