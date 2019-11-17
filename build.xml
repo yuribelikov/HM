@@ -1,12 +1,12 @@
 <project name="Home Monitor">
 
-    <target name="copy to YD">
+    <target name="copy to YD (C:)">
         <antcall target="zCopyToYD">
-            <param name="yd.hm" value="C:/YandexDisk/hm"/>
+            <param name="yd.hm" value="C:/Users/Bel/YandexDisk/hm"/>
         </antcall>
     </target>
 
-    <target name="copy to YD home">
+    <target name="copy to YD (D:)">
         <antcall target="zCopyToYD">
             <param name="yd.hm" value="D:/YandexDisk/hm"/>
         </antcall>
@@ -16,9 +16,29 @@
         <copy todir="${yd.hm}">
             <fileset dir="." includes="hm.jar"/>
             <fileset dir="." includes="build.xml"/>
+            <fileset dir="." includes="lib/*"/>
             <fileset dir="." includes="src/**/*"/>
             <fileset dir="." includes="js/**/*"/>
             <fileset dir="." includes="*.html"/>
+            <fileset dir="." includes="hm_log4j.properties"/>
+        </copy>
+    </target>
+
+    <target name="sync data from YD to HM dev">
+        <copy todir="D:/HM/data/">
+            <fileset dir="D:/YandexDisk/hm/data" includes="*"/>
+        </copy>
+    </target>
+
+    <target name="sync(2) data from YD to HM dev">
+        <copy todir="C:/IdeaProjects/HM/data/">
+            <fileset dir="C:/Users/Bel/YandexDisk/hm/data" includes="*"/>
+        </copy>
+    </target>
+
+    <target name="sync(3) data from YD to HM dev">
+        <copy todir="C:/IdeaProjects/HM/data/">
+            <fileset dir="D:/YandexDisk/hm/data" includes="*"/>
         </copy>
     </target>
 

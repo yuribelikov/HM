@@ -1,140 +1,76 @@
-/*global log*/
+/*global log tempColorFromValue*/
 
 /**
  * @constructor
  */
 function CurrentValuesPanel()
 {
+  /** @type {Object[]} */
+  this.sensors = [];
+
+  this.init();
 }
 
 /**
  * @this {CurrentValuesPanel}
- * @param {HTMLCanvasElement} canvas
- * @param {Array<number>} dataRow
  */
-CurrentValuesPanel.prototype.draw = function (canvas, dataRow)
+CurrentValuesPanel.prototype.init = function ()
 {
-  var ctx = canvas.getContext("2d");
-  ctx.beginPath();
+  this.sensors.push({x: 0, y: 0, w: 0.6, h: 0.36, name: "warmOut.t", label: "Из печи"});
+  this.sensors.push({x: 0.6, y: 0, w: 0.4, h: 0.18, name: "warmFloor.t", label: "Пол в ванной"});
+  this.sensors.push({x: 0.6, y: 0.18, w: 0.4, h: 0.18, name: "warmIn.t", label: "В печь"});
+  this.sensors.push({x: 0, y: 0.36, w: 0.5, h: 0.24, name: "inside.t", label: "Гостиная"});
+  this.sensors.push({x: 0.5, y: 0.36, w: 0.5, h: 0.24, name: "outside.t", label: "Улица"});
+  this.sensors.push({x: 0, y: 0.6, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет"});
+  this.sensors.push({x: 0.5, y: 0.6, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня"});
+  this.sensors.push({x: 0, y: 0.78, w: 0.5, h: 0.2, name: "winterGarden.t", label: "Зим. сад"});
+  this.sensors.push({x: 0.5, y: 0.78, w: 0.5, h: 0.2, name: "secondFloor.t", label: "2й этаж"});
 
-  ctx.clearRect(0, Dashboard.HEADER_H, canvas.width, canvas.height - Dashboard.HEADER_H);
-  var x2 = canvas.width / 2;
-  var dy = Dashboard.HEADER_H + 420;
-
-  ctx.font = "70pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Из печи", 30, dy - 340);
-  ctx.font = "330pt Calibri";
-  this.printTemp(ctx, "warmOut.t", 30, dy + 20, dataRow);
-
-  ctx.font = "46pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Пол в", x2 + 90, dy - 350);
-  ctx.fillText("ванной", x2 + 90, dy - 280);
-  ctx.font = "120pt Calibri";
-  this.printTemp(ctx, "warm.floor.t", x2 + 300, dy - 220, dataRow);
-
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("В", x2 + 90, dy - 100);
-  ctx.fillText("печь", x2 + 90, dy - 30);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, "warmIn.t", x2 + 250, dy + 20, dataRow);
-
-  dy += 420;
-  ctx.font = "75pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Гостиная", 30, dy - 270);
-  ctx.font = "240pt Calibri";
-  this.printTemp(ctx, "inside.t", 40, dy, dataRow);
-
-  ctx.font = "75pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Улица", x2 + 50, dy - 270);
-  ctx.font = "210pt Calibri";
-  this.printTemp(ctx, "outside.t", x2 + 40, dy, dataRow);
-
-  dy += 320;
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Кабинет", 30, dy - 200);
-  ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "room.t", 40, dy, dataRow);
-
-  ctx.font = "60pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Спальня", x2 + 50, dy - 200);
-  ctx.font = "180pt Calibri";
-  this.printTemp(ctx, "bedroom.t", x2 + 100, dy, dataRow);
-
-  dy += 300;
-  ctx.font = "50pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("Зим. сад", 30, dy - 190);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, "winter.garden.t", 40, dy, dataRow);
-
-  ctx.font = "50pt Calibri";
-  ctx.fillStyle = "#00FF00";
-  ctx.fillText("2й этаж", x2 + 50, dy - 190);
-  ctx.font = "160pt Calibri";
-  this.printTemp(ctx, "second.floor.t", x2 + 100, dy, dataRow);
-
-
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "red";
-  ctx.rect(20, Dashboard.HEADER_H - 2, canvas.width, 480);
-  ctx.rect(560, Dashboard.HEADER_H - 2, canvas.width - 561, 240);
-  ctx.rect(560, Dashboard.HEADER_H - 2, canvas.width - 561, 480);
-
-  ctx.rect(20, Dashboard.HEADER_H - 2 + 480, canvas.width - 20, 401);
-  ctx.rect(20, Dashboard.HEADER_H - 2 + 881, canvas.width - 20, 321);
-  ctx.rect(20, Dashboard.HEADER_H - 2 + 1202, canvas.width - 20, 281);
-  ctx.rect(20, Dashboard.HEADER_H - 2 + 480, 500, 1003);
-  ctx.stroke();
-
-  ctx.closePath();
 };
 
 /**
  * @this {CurrentValuesPanel}
  * @param {CanvasRenderingContext2D} ctx
- * @param {string} key
- * @param {number} x
- * @param {number} y
- * @param {Object} lastValues
+ * @param {Object} rect
+ * @param {Object} currentData
  */
-CurrentValuesPanel.prototype.printTemp = function (ctx, key, x, y, lastValues)
+CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
 {
-  var t = lastValues[key];
-  if (t)
-    ctx.fillStyle = this.tempColorFromValue(t);
+  ctx.beginPath();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "red";
+  var s = window.devicePixelRatio;
+  for (var i = 0; i < this.sensors.length; i++)
+  {
+    var sensor = this.sensors[i];
+    var w = sensor.w * rect.w;
+    var h = sensor.h * rect.h;
+    var m = h < w ? h : w;
+    var x = rect.x + sensor.x * rect.w;
+    var y = rect.y + sensor.y * rect.h;
+    ctx.fillStyle = "#000025";
+    ctx.fillRect(x, y, w, h);
+    var offset = 7 * s;
+    var fontSize = m / 7;
+    ctx.font = fontSize + "pt Calibri";
+    ctx.fillStyle = "#00FF00";
+    ctx.fillText(sensor.label, x + offset, y + fontSize + offset / 2);
+    fontSize = m / 1.6;
+    ctx.font = fontSize + "pt Calibri";
+    var value = currentData[sensor.name];
+    if (sensor.name === "outside.t")
+    {
+      var inside = currentData["inside.t"];
+      if (value && inside && value < inside)
+        value -= (inside - value) / 10;
+    }
+    if (value)
+      ctx.fillStyle = tempColorFromValue(value);
+    var text = value ? value.toFixed() : "?";
+    ctx.fillText(text, x + w / 2 - ctx.measureText(text).width / 2, y + h - 1.5 * offset);
+    ctx.rect(x, y, w, h);
+  }
 
-  ctx.fillText(t ? t.toFixed() : "?", x, y);
-};
-
-/**
- * @this {CurrentValuesPanel}
- * @param {number} t
- * @return {string}
- */
-CurrentValuesPanel.prototype.tempColorFromValue = function (t)
-{
-  var c = "CCCCCC";
-  if (t >= 80)
-    c = "FF0000";
-  else if (t >= 60)
-    c = "FF6600";
-  else if (t >= 40)
-    c = "FFBB00";
-  else if (t >= 30)
-    c = "FFFF00";
-  else if (t <= 0)
-    c = "6666FF";
-  else if (t <= 5)
-    c = "9999FF";
-  else if (t <= 10)
-    c = "CCCCFF";
-
-  return "#" + c;
+  ctx.stroke();
+  ctx.closePath();
 };
