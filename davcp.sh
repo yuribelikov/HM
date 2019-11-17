@@ -22,6 +22,11 @@ fi
 
 davDir='/media/dav';
 davTodayDir="$davDir/$today";
+if ! [ -d $davTodayDir ]
+then
+  echo "dav today directory is not exist, creating: $davTodayDir";
+  mkdir $davTodayDir;
+fi
 echo "moving '$srcDav' to '$davTodayDir'";
 mv $srcDav $davTodayDir;
 
