@@ -236,6 +236,13 @@ Dashboard.prototype.onPointer = function (evt)
 Dashboard.prototype.click = function (x, y)
 {
   log("click on: " + x + ", " + y);
+  if (!this.soundsEnabled)
+  {
+    this.beep.play();
+    this.soundsEnabled = true;
+    return;
+  }
+
   if (y < Dashboard.HEADER_H)
   {
     if (this.portrait)
@@ -248,12 +255,6 @@ Dashboard.prototype.click = function (x, y)
     this.chartPanel.click(x, y);
 
   this.redraw();
-
-  if (!this.soundsEnabled)
-  {
-    this.beep.play();
-    this.soundsEnabled = true;
-  }
 };
 
 /**
