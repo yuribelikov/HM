@@ -12,6 +12,11 @@ public class Sensor
     this.id = id;
   }
 
+  boolean isRemote()
+  {
+    return id.equals("remote");
+  }
+
   boolean isdht22()    // DHT22 (with Humidity) or DS18B20
   {
     return !id.startsWith("28-");

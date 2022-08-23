@@ -1,11 +1,17 @@
 package bel.home.tempmon;
 
 import org.apache.log4j.Logger;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SensorReader
 {
@@ -44,6 +50,12 @@ public class SensorReader
   {
     try
     {
+      if (sensorData.sensor.isRemote())
+      {
+        requestRemote();
+        return;
+      }
+
       String cmd = sensorData.sensor.isdht22() ? (TempMon.properties.getProperty("dht22.path") + " " + sensorData.sensor.id) :
         ("cat " + TempMon.properties.getProperty("ds18b20.path") + sensorData.sensor.id + "/w1_slave");
       lgr.debug("exec: " + sensorData.sensor.uid + " -> " + cmd);
@@ -170,4 +182,34 @@ public class SensorReader
       }
   }
 
+  private void requestRemote()
+  {
+    try
+    {
+      URL url = new URL(TempMon.properties.getProperty("remote.url"));
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("POST");
+      connection.setRequestProperty("Content-Type", "application/json");
+      connection.setUseCaches(false);
+      connection.setDoOutput(true);
+      connection.setConnectTimeout(5000);
+      List<Object> params = new ArrayList<>();
+      params.add("hm");
+      params.add("dataLoad");
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.writeValue(connection.getOutputStream(), params);
+      Map map = mapper.readValue(connection.getInputStream(), Map.class);
+//      lgr.info("result: " + map);
+      List<Map> sensorsData  = (List)map.get("sensorsData");
+      for (Map data : sensorsData)
+        if (data.get("name").toString().toLowerCase().startsWith(sensorData.sensor.uid))
+          sensorData.t = ((Double)data.get("last")).floatValue();
+
+    }
+    catch (Exception e)
+    {
+      lgr.warn(e.getMessage(), e);
+    }
+
+  }
 }
