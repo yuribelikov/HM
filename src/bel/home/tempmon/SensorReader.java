@@ -187,6 +187,7 @@ public class SensorReader
     try
     {
       URL url = new URL(TempMon.properties.getProperty("remote.url"));
+      lgr.debug("get remote sensor data from: " + url);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Content-Type", "application/json");
@@ -199,7 +200,7 @@ public class SensorReader
       ObjectMapper mapper = new ObjectMapper();
       mapper.writeValue(connection.getOutputStream(), params);
       Map map = mapper.readValue(connection.getInputStream(), Map.class);
-//      lgr.info("result: " + map);
+      lgr.debug("result: " + map);
       List<Map> sensorsData  = (List)map.get("sensorsData");
       for (Map data : sensorsData)
         if (data.get("name").toString().toLowerCase().startsWith(sensorData.sensor.uid))
