@@ -9,7 +9,6 @@ function SensorsDescr()
   this.styles["inside.t"] = {label: "Гост. t", color: "white"};
   this.styles["inside.h"] = {label: "Гост. h", color: "#BBBBBB"};
   this.styles["outside.t"] = {label: "Улица t", color: "#60FF60"};
-  this.styles["outside.h"] = {label: "Улица h", color: "#00AA00"};
   this.styles["test.t"] = {label: "Тест", color: "gray"};
   this.styles["warmOut.t"] = {label: "Из печи", color: "red"};
   this.styles["warmFloor.t"] = {label: "Теп. пол", color: "#FF8800"};

@@ -19,7 +19,7 @@ public class Sensor
 
   boolean isdht22()    // DHT22 (with Humidity) or DS18B20
   {
-    return !id.startsWith("28-");
+    return !id.startsWith("28-") && !isRemote();
   }
 
   @Override

@@ -58,12 +58,6 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     fontSize = m / 1.6;
     ctx.font = fontSize + "pt Calibri";
     var value = currentData[sensor.name];
-    if (sensor.name === "outside.t")
-    {
-      var inside = currentData["inside.t"];
-      if (value && inside && value < inside)
-        value -= (inside - value) / 10;
-    }
     if (value)
       ctx.fillStyle = tempColorFromValue(value);
     var text = value ? value.toFixed() : "?";
