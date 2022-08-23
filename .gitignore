@@ -3,3 +3,4 @@ cmd.sh.done
 cmd0.sh
 data/*
 log*
+nginx-1.8.0*
