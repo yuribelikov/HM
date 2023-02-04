@@ -159,6 +159,6 @@ DataLoader.prototype.currentDataReceived = function (map)
 DataLoader.prototype.copySensorsData = function (from, to)
 {
   for (var property in from)
-    if (from.hasOwnProperty(property) && from[property])
+    if (from.hasOwnProperty(property) && !isNaN(from[property]))
       to[property] = from[property];
 };
