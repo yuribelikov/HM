@@ -58,9 +58,9 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     fontSize = m / 1.6;
     ctx.font = fontSize + "pt Calibri";
     var value = currentData[sensor.name];
-    if (value)
+    if (!isNaN(value))
       ctx.fillStyle = tempColorFromValue(value);
-    var text = value ? value.toFixed() : "?";
+    var text = isNaN(value) ? "?" : value.toFixed();
     ctx.fillText(text, x + w / 2 - ctx.measureText(text).width / 2, y + h - 1.5 * offset);
     ctx.rect(x, y, w, h);
   }
