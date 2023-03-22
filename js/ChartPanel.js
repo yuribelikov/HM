@@ -51,8 +51,7 @@ ChartPanel.prototype.init = function ()
         var value = JSON.parse(window.localStorage[key]);
         var sensor = key.substring(6);
         this.sensorsStates[sensor] = value;
-      }
-      catch (e)
+      } catch (e)
       {
       }
     }
@@ -193,14 +192,14 @@ ChartPanel.prototype.drawCurves = function (ctx, cr, s, dataHeaders)
   ctx.setLineDash([]);
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   var dy = cr.ey + ChartPanel.MIN_T * step;
-  for (var h = 0; h < dataHeaders.length; h++)
+  for (var h = 0; h < this.sensors.styles.length; h++)
   {
-    var sensor = dataHeaders[h];
-    if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_DISABLED)
+    var style = this.sensors.styles[h];
+    var sensor = style.sensor;
+    if (!dataHeaders.includes(sensor) || this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_DISABLED)
       continue;
 
     ctx.beginPath();
-    var style = this.sensors.styles[sensor];
     if (style)
       ctx.strokeStyle = style.color;
     else    // default style
