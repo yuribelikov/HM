@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "3.32";
+  this.version = "4.00";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -109,7 +109,7 @@ Dashboard.prototype.run = function ()
  */
 Dashboard.prototype.redraw = function ()
 {
-  if (!this.canvas)
+  if (!this.canvas || !this.dataLoader.dataHeaders)
     return;
 
   var ctx = this.canvas.getContext("2d");
@@ -119,38 +119,27 @@ Dashboard.prototype.redraw = function ()
 
   this.drawHeader();
 
-  if (this.soundsEnabled)
-  {
-    var minCurrPW = this.canvas.width / 4;
-    var currValPanelRect =
-      {
-        x: this.mode === Dashboard.MODE_BOTH ? this.canvas.width - minCurrPW : 0,
-        y: Dashboard.HEADER_H,
-        w: this.mode === Dashboard.MODE_BOTH ? minCurrPW : this.canvas.width,
-        h: this.canvas.height - Dashboard.HEADER_H
-      };
-    var chartPanelRect =
-      {
-        x: 0,
-        y: currValPanelRect.y,
-        w: this.mode === Dashboard.MODE_BOTH ? currValPanelRect.x : this.canvas.width,
-        h: currValPanelRect.h
-      };
+  var minCurrPW = this.canvas.width / 4;
+  var currValPanelRect =
+    {
+      x: this.mode === Dashboard.MODE_BOTH ? this.canvas.width - minCurrPW : 0,
+      y: Dashboard.HEADER_H,
+      w: this.mode === Dashboard.MODE_BOTH ? minCurrPW : this.canvas.width,
+      h: this.canvas.height - Dashboard.HEADER_H
+    };
+  var chartPanelRect =
+    {
+      x: 0,
+      y: currValPanelRect.y,
+      w: this.mode === Dashboard.MODE_BOTH ? currValPanelRect.x : this.canvas.width,
+      h: currValPanelRect.h
+    };
 
-    if (this.dataLoader.currentRow && this.mode !== Dashboard.MODE_CHART)
-      this.currentValuesPanel.draw(ctx, currValPanelRect, this.dataLoader.currentRow.sensorsData);
+  if (this.dataLoader.currentRow && this.mode !== Dashboard.MODE_CHART)
+    this.currentValuesPanel.draw(ctx, currValPanelRect, this.dataLoader.currentRow.sensorsData);
 
-    if (this.mode !== Dashboard.MODE_CURR_VALUES)
-      this.chartPanel.draw(ctx, chartPanelRect, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);
-  }
-  else
-  {
-    var fontSize = 70;
-    ctx.font = fontSize + "pt Calibri";
-    ctx.fillStyle = "#FF0000";
-    ctx.fillText("Нажмите на экран,", this.canvas.width / 2 - 7 * fontSize, this.canvas.height / 2 - fontSize * 0.8);
-    ctx.fillText("чтобы включить звук", this.canvas.width / 2 - 7 * fontSize, this.canvas.height / 2 + fontSize * 0.8);
-  }
+  if (this.mode !== Dashboard.MODE_CURR_VALUES)
+    this.chartPanel.draw(ctx, chartPanelRect, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);
 
   this.redrawn = new Date().getTime();
 };
@@ -189,8 +178,11 @@ Dashboard.prototype.drawHeader = function ()
   }
 
   ctx.fillStyle = "white";
+  dy = this.canvas.height - 5;
+  ctx.fillText(this.soundsEnabled ? "o((" : "X", 3, dy);
+
   var text = "ver: " + this.version + "   scr: " + this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
-  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, this.canvas.height - 3 * window.devicePixelRatio);
+  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, dy);
   ctx.closePath();
 };
 
@@ -238,9 +230,8 @@ Dashboard.prototype.click = function (x, y)
   log("click on: " + x + ", " + y);
   if (!this.soundsEnabled)
   {
-    this.beep.play();
+    // this.beep.play();
     this.soundsEnabled = true;
-    return;
   }
 
   if (y < Dashboard.HEADER_H)

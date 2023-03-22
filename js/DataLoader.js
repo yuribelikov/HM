@@ -46,7 +46,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
   try
   {
     log("recentDataReceived, file size: " + csv.length);
-    var rows = csv.split("\n");
+    var rows = csv.replace("\r", "").split("\n");
     var dataHeaders = rows[0].split(";");
     for (var i = 1; i < rows.length; i++)
     {
@@ -64,6 +64,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
     }
 
     dataHeaders.shift();
+    dataHeaders.push("warmDiff.t");
     this.dataHeaders = dataHeaders;
     log("recentDataReceived, data.size: " + this.data.length);
     if (this.data.length > 0)
@@ -122,6 +123,8 @@ DataLoader.prototype.currentDataReceived = function (map)
         sensorsData[key] = parseNumber(value);
     }
   }
+
+  sensorsData["warmDiff.t"] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];
 
   this.currentSaved = parseDateTime(saveTime);
 

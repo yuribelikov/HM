@@ -261,7 +261,7 @@ ChartPanel.prototype.makeTimeKey = function (time)
  */
 ChartPanel.prototype.drawSensors = function (ctx, ar, cr, s, dataHeaders, currentRow)
 {
-  var row = null;
+  var row;
   if (this.dataOffset === 0)
     row = currentRow;
   else
@@ -279,11 +279,14 @@ ChartPanel.prototype.drawSensors = function (ctx, ar, cr, s, dataHeaders, curren
   ctx.setLineDash([]);
   var sh = (ar.h - 4 * s) / dataHeaders.length;
   var sensorsRects = [];
-  for (var h = 0; h < dataHeaders.length; h++)
+  for (var i = 0; i < this.sensors.styles.length; i++)
   {
-    var sensor = dataHeaders[h];
-    var sensorRect = {id: sensor, x: cr.ex + 32 * s, y: ar.y + 6 * s + h * sh, w: 130, h: sh - 8 * s};
-    this.drawSensor(ctx, sensorRect, s, this.sensors.styles[sensor], row.sensorsData[sensor], this.sensorsStates[sensor]);
+    var sensor = this.sensors.styles[i].sensor;
+    if (!dataHeaders.includes(sensor))
+      continue;
+
+    var sensorRect = {id: sensor, x: cr.ex + 32 * s, y: ar.y + 6 * s + i * sh, w: 130, h: sh - 8 * s};
+    this.drawSensor(ctx, sensorRect, s, this.sensors.styles[i], row.sensorsData[sensor], this.sensorsStates[sensor]);
     sensorsRects.push(sensorRect);
   }
   ctx.stroke();
