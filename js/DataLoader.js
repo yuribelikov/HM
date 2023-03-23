@@ -26,6 +26,7 @@ function DataLoader()
 
 DataLoader.REFRESH_PERIOD = 1;
 DataLoader.DATA_SIZE = 2000;
+DataLoader.WARM_DIFF_SENSOR = "warmDiff.t";
 
 
 /**
@@ -58,13 +59,14 @@ DataLoader.prototype.recentDataReceived = function (csv)
       for (var j = 1; j < cells.length; j++)
         dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
 
+      dataRow.sensorsData[DataLoader.WARM_DIFF_SENSOR] = dataRow.sensorsData["warmOut.t"] - dataRow.sensorsData["warmIn.t"];
       this.data.push(dataRow);
       if (this.data.length >= DataLoader.DATA_SIZE)
         this.data.shift();
     }
 
     dataHeaders.shift();
-    dataHeaders.push("warmDiff.t");
+    dataHeaders.push(DataLoader.WARM_DIFF_SENSOR);
     this.dataHeaders = dataHeaders;
     log("recentDataReceived, data.size: " + this.data.length);
     if (this.data.length > 0)
@@ -124,7 +126,7 @@ DataLoader.prototype.currentDataReceived = function (map)
     }
   }
 
-  sensorsData["warmDiff.t"] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];
+  sensorsData[DataLoader.WARM_DIFF_SENSOR] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];
 
   this.currentSaved = parseDateTime(saveTime);
 

@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.01";
+  this.version = "4.02";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -179,7 +179,7 @@ Dashboard.prototype.drawHeader = function ()
 
   ctx.fillStyle = "white";
   dy = this.canvas.height - 5;
-  ctx.fillText(this.soundsEnabled ? "o((" : "X", 3, dy);
+  ctx.fillText(this.soundsEnabled ? "))o" : "X", 3, dy);
 
   var text = "ver: " + this.version + "   scr: " + this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, dy);

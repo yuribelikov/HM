@@ -27,7 +27,7 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push({x: 0.5, y: 0.6, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет"});
 
   this.sensors.push({x: 0, y: 0.8, w: 0.3, h: 0.09, name: "warmIn.t", label: "Котёл: вход"});
-  this.sensors.push({x: 0.3, y: 0.84, w: 0.2, h: 0.1, name: "warmDiff.t", label: "Нагрев на"});
+  this.sensors.push({x: 0.3, y: 0.84, w: 0.2, h: 0.1, name: DataLoader.WARM_DIFF_SENSOR, label: "Нагрев на"});
   this.sensors.push({x: 0, y: 0.89, w: 0.3, h: 0.09, name: "warmOut.t", label: "Выход"});
   this.sensors.push({x: 0.5, y: 0.8, w: 0.5, h: 0.17, name: "warmFloor.t", label: "Тёплый пол"});
 };
@@ -66,10 +66,10 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     if (!isNaN(value))
     {
       if (sensor.name === "outside.t")
-        value = value.toFixed();
+        value = Math.round(value);
 
       var vf = Math.trunc(value);
-      var vd = Math.round(10 * (value - vf)).toFixed();
+      var vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
       var dx = vd > 0 ? fontSize / 5 : 0;
       ctx.fillText(vf, x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);

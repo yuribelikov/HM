@@ -64,7 +64,7 @@ function parseNumber(value)
   try
   {
     //log(Number(value));
-    return Number(value);
+    return Math.round(Number(value) * 10) / 10;
   }
   catch (ignored)
   {
