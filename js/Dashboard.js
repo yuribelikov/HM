@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.15";
+  this.version = "4.16";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -116,7 +116,7 @@ Dashboard.prototype.redraw = function ()
 
   Dashboard.SCALE = 1 / window.visualViewport.scale;
   Dashboard.AMAZON = window.visualViewport.height > 2200 ? 1.1 : 1;
-  Dashboard.HEADER_H = 17 * Dashboard.SCALE;
+  Dashboard.HEADER_H = 20 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
   ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -163,8 +163,8 @@ Dashboard.prototype.drawHeader = function ()
   ctx.rect(1, 1, this.canvas.width - 2, Dashboard.HEADER_H - 2);
   ctx.stroke();
 
-  ctx.font = 8 * s + "pt Arial";
-  var dy = Dashboard.HEADER_H - 2 - 3 * s;
+  ctx.font = 10 * s + "pt Arial";
+  var dy = Dashboard.HEADER_H - 2 - 4 * s;
   ctx.fillStyle = "white";
   ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 45 * s, dy);
 
