@@ -115,7 +115,7 @@ Dashboard.prototype.redraw = function ()
     return;
 
   Dashboard.SCALE = 1 / window.visualViewport.scale;
-  Dashboard.AMAZON = window.visualViewport.height > 2200 ? 1.5 : 1;
+  Dashboard.AMAZON = window.visualViewport.height > 2200 ? 1.2 : 1;
   Dashboard.HEADER_H = 17 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
