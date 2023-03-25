@@ -75,7 +75,7 @@ ChartPanel.prototype.draw = function (ctx, rect, dataHeaders, data, currentRow)
   ar.w = ar.ex - ar.x;
   ar.h = ar.ey - ar.y;
   this.portrait = ar.h > ar.w;
-  var s = window.visualViewport.scale === 1 ? 1.5 : (1 / window.visualViewport.scale);
+  var s = Dashboard.SCALE === 1 ? 1.5 : Dashboard.SCALE;
   var cr = {x: 27 * s, y: ar.y + 20 * s, ex: ar.ex - 140 - s * 30, ey: ar.ey - 25 * s, w: 0, h: 0};    // curves rect
   cr.w = cr.ex - cr.x;
   cr.h = cr.ey - cr.y;

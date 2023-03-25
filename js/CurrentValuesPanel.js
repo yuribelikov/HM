@@ -43,7 +43,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
   ctx.beginPath();
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  var s = 1 / window.visualViewport.scale;
+  var s = Dashboard.SCALE;
   for (var i = 0; i < this.sensors.length; i++)
   {
     var sensor = this.sensors[i];
