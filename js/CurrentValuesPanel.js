@@ -54,7 +54,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     var y = rect.y + sensor.y * rect.h;
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
-    var offset = 5 * s;
+    var offset = Dashboard.AMAZON * 5 * s;
     var fontSize = Dashboard.AMAZON * m / 8
     ctx.font = fontSize + "pt Calibri";
     ctx.fillStyle = "#00FF00";
