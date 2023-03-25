@@ -32,6 +32,7 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push({x: 0.5, y: 0.8, w: 0.5, h: 0.17, name: "warmFloor.t", label: "Тёплый пол"});
 };
 
+
 /**
  * @this {CurrentValuesPanel}
  * @param {CanvasRenderingContext2D} ctx
