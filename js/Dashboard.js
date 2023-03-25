@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.16";
+  this.version = "4.17";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -166,20 +166,14 @@ Dashboard.prototype.drawHeader = function ()
   ctx.font = 10 * s + "pt Arial";
   var dy = Dashboard.HEADER_H - 2 - 4 * s;
   ctx.fillStyle = "white";
-  ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 45 * s, dy);
+  ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 55 * s, dy);
 
   var now = new Date().getTime();
   if (this.dataLoader.currentRow)
   {
-    var times = [this.dataLoader.currentSaved, this.dataLoader.currentRow.time];
-    for (var i = 0; i < times.length; i++)
-    {
-      var ago = Math.floor((now - times[i]) / 1000);
-      var ox = 250 * s;
-      ctx.fillStyle = (i === 0 ? "white" : "gray");
-      ctx.fillText(formatTime(times[i], true), i * ox + 4 * s, dy);
-      ctx.fillText("(" + formatNumber(ago) + ")", i * ox + 150 * s, dy);
-    }
+      var ago = Math.floor((now - this.dataLoader.currentSaved) / 1000);
+      ctx.fillText(formatTime(this.dataLoader.currentSaved, true), 5, dy);
+      ctx.fillText("(" + formatNumber(ago) + ")", 5 + 150 * s, dy);
   }
 
   ctx.fillStyle = "white";
@@ -188,7 +182,7 @@ Dashboard.prototype.drawHeader = function ()
 
   var text = "ver: " + this.version + "   scr: " + window.visualViewport.width.toFixed() + "x" + window.visualViewport.height.toFixed() +
     " (" + window.visualViewport.scale.toFixed(3) + ") - " + Dashboard.SCALE.toFixed(3) + "x" + Dashboard.AMAZON;
-  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, dy);
+  ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 10, dy);
   ctx.closePath();
 };
 
