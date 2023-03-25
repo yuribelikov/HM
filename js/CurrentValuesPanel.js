@@ -56,11 +56,13 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     ctx.fillRect(x, y, w, h);
     var offset = 5 * s;
     var fontSize = (m / 8) * 3;//(Dashboard.AMAZON ? 2 : 1);
-    ctx.font = fontSize + "pt Calibri";
+    // ctx.font = fontSize + "pt Calibri";
+    ctx.font = "50pt Calibri";
     ctx.fillStyle = "#00FF00";
-    ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
+    ctx.fillText(sensor.label+"AAA", x + offset, y + fontSize + offset);
     fontSize = (m / 1.6) * 3;//(Dashboard.AMAZON ? 2 : 1);
-    ctx.font = fontSize + "pt Calibri";
+    // ctx.font = fontSize + "pt Calibri";
+    ctx.font = "100pt Calibri";
     var value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
