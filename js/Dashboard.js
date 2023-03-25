@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.14";
+  this.version = "4.15";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -40,7 +40,7 @@ function Dashboard()
 }
 
 Dashboard.SCALE = 1;
-Dashboard.AMAZON = false;
+Dashboard.AMAZON = 1;
 Dashboard.HEADER_H = 17;
 Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
@@ -115,7 +115,7 @@ Dashboard.prototype.redraw = function ()
     return;
 
   Dashboard.SCALE = 1 / window.visualViewport.scale;
-  Dashboard.AMAZON = window.visualViewport.height > 2200;
+  Dashboard.AMAZON = window.visualViewport.height > 2200 ? 1.5 : 1;
   Dashboard.HEADER_H = 17 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
@@ -187,7 +187,7 @@ Dashboard.prototype.drawHeader = function ()
   ctx.fillText(this.soundsEnabled ? "))o" : "X", 3, dy);
 
   var text = "ver: " + this.version + "   scr: " + window.visualViewport.width.toFixed() + "x" + window.visualViewport.height.toFixed() +
-    " (" + window.visualViewport.scale.toFixed(3) + ") - " + Dashboard.SCALE.toFixed(3) + "x" + (Dashboard.AMAZON ? 2 : 1);
+    " (" + window.visualViewport.scale.toFixed(3) + ") - " + Dashboard.SCALE.toFixed(3) + "x" + Dashboard.AMAZON;
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, dy);
   ctx.closePath();
 };

@@ -322,10 +322,10 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
 
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
-  ctx.font = "bold " + (11 * s * (Dashboard.AMAZON ? 2 : 1)) + "pt Arial";
+  ctx.font = "bold " + (11 * s * Dashboard.AMAZON) + "pt Arial";
   var x = this.portrait ? sr.x + 5 : sr.x + sr.w - 70;
   ctx.fillText(isNaN(value) ? "?" : value.toFixed(1), x, sr.y + 5 + 12 * s);
-  ctx.font = "bold " + (8 * s * (Dashboard.AMAZON ? 2 : 1)) + "pt Arial";
+  ctx.font = "bold " + (8 * s * Dashboard.AMAZON) + "pt Arial";
   ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
     ctx.fillText("x", sr.x + sr.w - 7 - 6 * s, sr.y + 7 + 8 * s);
