@@ -175,10 +175,10 @@ Dashboard.prototype.drawHeader = function ()
     for (var i = 0; i < times.length; i++)
     {
       var ago = Math.floor((now - times[i]) / 1000);
-      var ox = 157 * s;
+      var ox = 250 * s;
       ctx.fillStyle = (i === 0 ? "white" : "gray");
       ctx.fillText(formatTime(times[i], true), i * ox + 4 * s, dy);
-      ctx.fillText("(" + formatNumber(ago) + ")", i * ox + 112 * s, dy);
+      ctx.fillText("(" + formatNumber(ago) + ")", i * ox + 150 * s, dy);
     }
   }
 
