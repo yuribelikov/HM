@@ -108,8 +108,8 @@ ChartPanel.prototype.draw = function (ctx, rect, dataHeaders, data, currentRow)
 ChartPanel.prototype.drawAxisX = function (ctx, cr, s)
 {
   ctx.beginPath();
-  ctx.lineWidth = s;
-  ctx.setLineDash([2, 7 * s]);
+  ctx.lineWidth = s / 2;
+  ctx.setLineDash([2, 4 * s]);
   ctx.font = 8 * s + "pt Arial";
   ctx.fillStyle = "white";
   ctx.strokeStyle = "white";
@@ -141,7 +141,7 @@ ChartPanel.prototype.drawAxisX = function (ctx, cr, s)
 ChartPanel.prototype.drawAxisY = function (ctx, cr, s)
 {
   ctx.beginPath();
-  ctx.lineWidth = s;
+  ctx.lineWidth = s / 2;
   ctx.font = 8 * s + "pt Arial";
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   for (var t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
@@ -155,8 +155,8 @@ ChartPanel.prototype.drawAxisY = function (ctx, cr, s)
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([2, 10 * s]);
-  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 6 * s]);
+  ctx.lineWidth = s / 2;
   ctx.strokeStyle = "white";
   for (t = ChartPanel.MIN_T + 5; t <= ChartPanel.MAX_T; t += 10)
   {
@@ -168,7 +168,7 @@ ChartPanel.prototype.drawAxisY = function (ctx, cr, s)
   ctx.closePath();
 
   ctx.beginPath();
-  ctx.setLineDash([2, 7 * s]);
+  ctx.setLineDash([2, 4 * s]);
   ctx.lineWidth = s;
   for (t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
