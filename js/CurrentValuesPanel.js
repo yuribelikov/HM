@@ -20,16 +20,16 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push({x: 0.6, y: 0, w: 0.4, h: 0.17, name: "winterGarden.t", label: "Зим. сад"});
   this.sensors.push({x: 0.6, y: 0.17, w: 0.4, h: 0.17, name: "underFloor.t", label: "Подпол"});
 
-  this.sensors.push({x: 0, y: 0.36, w: 0.5, h: 0.22, name: "inside.t", label: "1й этаж"});
-  this.sensors.push({x: 0.5, y: 0.36, w: 0.5, h: 0.22, name: "secondFloor.t", label: "2й этаж"});
+  this.sensors.push({x: 0, y: 0.35, w: 0.5, h: 0.22, name: "inside.t", label: "1й этаж"});
+  this.sensors.push({x: 0.5, y: 0.35, w: 0.5, h: 0.22, name: "secondFloor.t", label: "2й этаж"});
 
-  this.sensors.push({x: 0, y: 0.6, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня"});
-  this.sensors.push({x: 0.5, y: 0.6, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет"});
+  this.sensors.push({x: 0, y: 0.58, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня"});
+  this.sensors.push({x: 0.5, y: 0.58, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет"});
 
-  this.sensors.push({x: 0, y: 0.8, w: 0.3, h: 0.09, name: "warmIn.t", label: "Котёл: вход"});
-  this.sensors.push({x: 0.3, y: 0.84, w: 0.2, h: 0.1, name: DataLoader.WARM_DIFF_SENSOR, label: "Нагрев на"});
-  this.sensors.push({x: 0, y: 0.89, w: 0.3, h: 0.09, name: "warmOut.t", label: "Выход"});
-  this.sensors.push({x: 0.5, y: 0.8, w: 0.5, h: 0.17, name: "warmFloor.t", label: "Тёплый пол"});
+  this.sensors.push({x: 0, y: 0.77, w: 0.3, h: 0.1, name: "warmIn.t", label: "Котёл: вход"});
+  this.sensors.push({x: 0.3, y: 0.82, w: 0.2, h: 0.1, name: DataLoader.WARM_DIFF_SENSOR, label: "Нагрев на"});
+  this.sensors.push({x: 0, y: 0.87, w: 0.3, h: 0.1, name: "warmOut.t", label: "Выход"});
+  this.sensors.push({x: 0.5, y: 0.77, w: 0.5, h: 0.2, name: "warmFloor.t", label: "Тёплый пол"});
 };
 
 /**

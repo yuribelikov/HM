@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.07";
+  this.version = "4.08";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -40,7 +40,7 @@ function Dashboard()
 }
 
 Dashboard.SCALE = 1;
-Dashboard.HEADER_H = 17 * Dashboard.SCALE;
+Dashboard.HEADER_H = 17;
 Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
 Dashboard.MODE_BOTH = 2;
@@ -114,6 +114,7 @@ Dashboard.prototype.redraw = function ()
     return;
 
   Dashboard.SCALE = (1 / window.visualViewport.scale) * (window.visualViewport.height > 2200 ? 1.5 : 1);
+  Dashboard.HEADER_H = 17 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
   ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
