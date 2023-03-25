@@ -75,7 +75,7 @@ ChartPanel.prototype.draw = function (ctx, rect, dataHeaders, data, currentRow)
   ar.w = ar.ex - ar.x;
   ar.h = ar.ey - ar.y;
   this.portrait = ar.h > ar.w;
-  var s = window.devicePixelRatio === 1 ? 1 : window.devicePixelRatio / 1.5;
+  var s = window.visualViewport.scale === 1 ? 1.5 : (1 / window.visualViewport.scale);
   var cr = {x: 27 * s, y: ar.y + 20 * s, ex: ar.ex - 140 - s * 30, ey: ar.ey - 25 * s, w: 0, h: 0};    // curves rect
   cr.w = cr.ex - cr.x;
   cr.h = cr.ey - cr.y;
@@ -110,7 +110,7 @@ ChartPanel.prototype.drawAxisX = function (ctx, cr, s)
   ctx.beginPath();
   ctx.lineWidth = s;
   ctx.setLineDash([2, 7 * s]);
-  ctx.font = 10 * s + "pt Arial";
+  ctx.font = 8 * s + "pt Arial";
   ctx.fillStyle = "white";
   ctx.strokeStyle = "white";
   for (var i = 0; i < cr.w; i++)
@@ -142,7 +142,7 @@ ChartPanel.prototype.drawAxisY = function (ctx, cr, s)
 {
   ctx.beginPath();
   ctx.lineWidth = s;
-  ctx.font = 10 * s + "pt Arial";
+  ctx.font = 8 * s + "pt Arial";
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   for (var t = ChartPanel.MIN_T; t <= ChartPanel.MAX_T; t += 10)
   {
@@ -284,7 +284,7 @@ ChartPanel.prototype.drawSensors = function (ctx, ar, cr, s, dataHeaders, curren
     if (!dataHeaders.includes(sensor))
       continue;
 
-    var sensorRect = {id: sensor, x: cr.ex + 32 * s, y: ar.y + 6 * s + i * sh, w: 130, h: sh - 8 * s};
+    var sensorRect = {id: sensor, x: cr.ex + 25 * s, y: ar.y + 6 * s + i * sh, w: 140, h: sh - 5 * s};
     this.drawSensor(ctx, sensorRect, s, this.sensors.styles[i], row.sensorsData[sensor], this.sensorsStates[sensor]);
     sensorsRects.push(sensorRect);
   }
@@ -322,10 +322,10 @@ ChartPanel.prototype.drawSensor = function (ctx, sr, s, style, value, state)
 
   ctx.fillRect(sr.x + 1, sr.y + 1, sr.w - 2, sr.h - 2);
   ctx.fillStyle = "black";
-  ctx.font = "bold " + 14 * s + "pt Arial";
-  var x = this.portrait ? sr.x + 15 : sr.x + sr.w - 56;
-  ctx.fillText(isNaN(value) ? "?" : value.toFixed(1), x, sr.y + 5 + 15 * s);
   ctx.font = "bold " + 11 * s + "pt Arial";
+  var x = this.portrait ? sr.x + 5 : sr.x + sr.w - 70;
+  ctx.fillText(isNaN(value) ? "?" : value.toFixed(1), x, sr.y + 5 + 12 * s);
+  ctx.font = "bold " + 8 * s + "pt Arial";
   ctx.fillText(style ? style.label : "???", sr.x + 4, sr.y + sr.h - 6);
   if (state !== ChartPanel.SENSOR_STATE_DISABLED)
     ctx.fillText("x", sr.x + sr.w - 7 - 6 * s, sr.y + 7 + 8 * s);

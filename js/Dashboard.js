@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.02";
+  this.version = "4.03";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -39,7 +39,7 @@ function Dashboard()
   this.start();
 }
 
-Dashboard.HEADER_H = 17 * window.devicePixelRatio;
+Dashboard.HEADER_H = 17 / window.visualViewport.scale;
 Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
 Dashboard.MODE_BOTH = 2;
@@ -149,7 +149,7 @@ Dashboard.prototype.redraw = function ()
  */
 Dashboard.prototype.drawHeader = function ()
 {
-  var s = window.devicePixelRatio;
+  var s = 1 / window.visualViewport.scale;
   var ctx = this.canvas.getContext("2d");
   ctx.setLineDash([]);
   ctx.beginPath();
@@ -181,7 +181,7 @@ Dashboard.prototype.drawHeader = function ()
   dy = this.canvas.height - 5;
   ctx.fillText(this.soundsEnabled ? "))o" : "X", 3, dy);
 
-  var text = "ver: " + this.version + "   scr: " + this.canvas.width + "x" + this.canvas.height + " (" + window.devicePixelRatio + ")";
+  var text = "ver: " + this.version + "   scr: " + this.canvas.width + "x" + this.canvas.height + " (" + window.visualViewport.scale.toFixed(3) + ")";
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 3, dy);
   ctx.closePath();
 };

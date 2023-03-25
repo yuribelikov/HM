@@ -43,7 +43,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
   ctx.beginPath();
   ctx.lineWidth = 2;
   ctx.strokeStyle = "red";
-  var s = window.devicePixelRatio;
+  var s = 1 / window.visualViewport.scale;
   for (var i = 0; i < this.sensors.length; i++)
   {
     var sensor = this.sensors[i];
@@ -59,10 +59,10 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     ctx.font = fontSize + "pt Calibri";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = m / 2.2;
+    fontSize = m / 1.6;
     ctx.font = fontSize + "pt Calibri";
     var value = currentData[sensor.name];
-    let dy = y + h - offset - fontSize / 10;
+    let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
     {
       if (sensor.name === "outside.t")
@@ -71,7 +71,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
       var vf = Math.trunc(value);
       var vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      var dx = vd > 0 ? fontSize / 5 : 0;
+      var dx = vd > 0 ? fontSize / 4 : 0;
       ctx.fillText(vf, x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
       if (vd > 0)
       {
