@@ -32,7 +32,6 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push({x: 0.5, y: 0.8, w: 0.5, h: 0.17, name: "warmFloor.t", label: "Тёплый пол"});
 };
 
-
 /**
  * @this {CurrentValuesPanel}
  * @param {CanvasRenderingContext2D} ctx
@@ -60,7 +59,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
     ctx.font = fontSize + "pt Calibri";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = m / 1.6;
+    fontSize = m / 3;
     ctx.font = fontSize + "pt Calibri";
     var value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
