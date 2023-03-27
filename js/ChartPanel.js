@@ -206,7 +206,7 @@ ChartPanel.prototype.drawCurves = function (ctx, cr, s, dataHeaders)
       ctx.strokeStyle = "yellow";
 
     if (this.sensorsStates[sensor] === ChartPanel.SENSOR_STATE_SELECTED)
-      ctx.lineWidth = 3 * s;
+      ctx.lineWidth = 2 * s;
     else
       ctx.lineWidth = s;
 

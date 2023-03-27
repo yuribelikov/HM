@@ -47,18 +47,36 @@ DataLoader.prototype.recentDataReceived = function (csv)
   try
   {
     log("recentDataReceived, file size: " + csv.length);
-    var rows = csv.replace("\r", "").split("\n");
-    var dataHeaders = rows[0].split(";");
-    for (var i = 1; i < rows.length; i++)
+    const rows = csv.replace("\r", "").split("\n");
+    const dataHeaders = rows[0].split(";");
+
+    log(window.location);
+    let tt;
+    if (window.location.host === "localhost")
+    {
+      tt = new Date();
+      tt.setTime(tt.getTime() - (rows.length - 1) * 60000);
+      log("tt: " + tt);
+    }
+
+    for (let i = 1; i < rows.length; i++)
     {
       if (rows[i].length === 0)
         continue;
 
-      var cells = rows[i].split(";");
-      var dataRow = new DataRow(cells[0].trim());
-      for (var j = 1; j < cells.length; j++)
+      const cells = rows[i].split(";");
+      if (tt)     // 2023-03-22_23:49
+      {
+        tt.setTime(tt.getTime() + 60000);
+        cells[0] = this.timeToStr(tt);
+        // log(cells[0]);
+      }
+
+      const dataRow = new DataRow(cells[0].trim());
+      for (let j = 1; j < cells.length; j++)
         dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
 
+      // log(dataRow.timeKey, dataRow.time);
       dataRow.sensorsData[DataLoader.WARM_DIFF_SENSOR] = dataRow.sensorsData["warmOut.t"] - dataRow.sensorsData["warmIn.t"];
       this.data.push(dataRow);
       if (this.data.length >= DataLoader.DATA_SIZE)
@@ -71,14 +89,18 @@ DataLoader.prototype.recentDataReceived = function (csv)
     log("recentDataReceived, data.size: " + this.data.length);
     if (this.data.length > 0)
       log("last row: " + this.data[this.data.length - 1].toString());
-  }
-  catch (e)
+  } catch (e)
   {
     log(e);
   }
 
   window.requestAnimationFrame(this.run.bind(this));
 };
+
+DataLoader.prototype.timeToStr = function (tt)
+{
+  return tt.getFullYear() + '-' + pad(tt.getMonth() + 1) + '-' + pad(tt.getDate()) + '_' + pad(tt.getHours()) + ':' + pad(tt.getMinutes());
+}
 
 /**
  * @this {DataLoader}
@@ -124,6 +146,14 @@ DataLoader.prototype.currentDataReceived = function (map)
       else
         sensorsData[key] = parseNumber(value);
     }
+  }
+
+  if (window.location.host === "localhost")
+  {
+    const now = new Date();
+    dataTime = this.timeToStr(now);
+    saveTime = dataTime;
+    log("dataTime: " + dataTime);
   }
 
   sensorsData[DataLoader.WARM_DIFF_SENSOR] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];

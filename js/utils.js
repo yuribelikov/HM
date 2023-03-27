@@ -1,6 +1,6 @@
 /*exported log parseDateTime parseNumber*/
 
-function pad(num, size)
+function pad(num, size = 2)
 {
   return ("000000000" + num).substr(-size);
 }

@@ -76,7 +76,7 @@ Dashboard.prototype.start = function ()
  */
 Dashboard.prototype.onResize = function ()
 {
-  log("onResize");
+  // log("onResize");
   $('#vp').attr('content', 'width=device-width; initial-scale=1.0');
   if (this.canvas)
   {
@@ -85,7 +85,7 @@ Dashboard.prototype.onResize = function ()
     this.portrait = (this.canvas.height > this.canvas.width);
     if ((this.portrait && this.mode === Dashboard.MODE_BOTH) || (!this.portrait && this.mode === Dashboard.MODE_CURR_VALUES))
       this.mode = Dashboard.MODE_CHART;
-    log("portrait: " + this.portrait + ", mode: " + this.mode);
+    // log("portrait: " + this.portrait + ", mode: " + this.mode);
     this.redraw();
   }
 };
