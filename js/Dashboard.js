@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.18";
+  this.version = "4.20";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -141,7 +141,7 @@ Dashboard.prototype.redraw = function ()
     };
 
   if (this.dataLoader.currentRow && this.mode !== Dashboard.MODE_CHART)
-    this.currentValuesPanel.draw(ctx, currValPanelRect, this.dataLoader.currentRow.sensorsData);
+    this.currentValuesPanel.draw(ctx, currValPanelRect, this.dataLoader.currentRow.sensorsData, this.dataLoader.data);
 
   if (this.mode !== Dashboard.MODE_CURR_VALUES)
     this.chartPanel.draw(ctx, chartPanelRect, this.dataLoader.dataHeaders, this.dataLoader.data, this.dataLoader.currentRow);

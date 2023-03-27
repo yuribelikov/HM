@@ -37,53 +37,100 @@ CurrentValuesPanel.prototype.init = function ()
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} rect
  * @param {Object} currentData
+ * @param {Object} data
  */
-CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData)
+CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
 {
-  ctx.beginPath();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "red";
-  var s = Dashboard.SCALE;
-  for (var i = 0; i < this.sensors.length; i++)
+  let s = Dashboard.SCALE;
+  for (let i = 0; i < this.sensors.length; i++)
   {
-    var sensor = this.sensors[i];
-    var w = sensor.w * rect.w;
-    var h = sensor.h * rect.h;
-    var m = h < w ? h : w;
-    var x = rect.x + sensor.x * rect.w;
-    var y = rect.y + sensor.y * rect.h;
+    const sensor = this.sensors[i];
+    const w = sensor.w * rect.w;
+    const h = sensor.h * rect.h;
+    const m = h < w ? h : w;
+    const x = rect.x + sensor.x * rect.w;
+    const y = rect.y + sensor.y * rect.h;
+
+    ctx.beginPath();
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
-    var offset = Dashboard.AMAZON * 5 * s;
-    var fontSize = Dashboard.AMAZON * m / 8
+    const offset = Dashboard.AMAZON * 5 * s;
+    let fontSize = Dashboard.AMAZON * m / 8
     ctx.font = fontSize + "pt Calibri";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
     fontSize = Dashboard.AMAZON * m / 1.6;
     ctx.font = fontSize + "pt Calibri";
-    var value = currentData[sensor.name];
+    let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
     {
       if (sensor.name === "outside.t")
         value = Math.round(value);
 
-      var vf = Math.trunc(value);
-      var vd = Math.round(10 * (value - vf));
+      let vf = Math.trunc(value);
+      let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      var dx = vd > 0 ? fontSize / 4 : 0;
+      let dx = vd > 0 ? fontSize / 4 : 0;
       ctx.fillText(vf, x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
       if (vd > 0)
       {
         ctx.font = fontSize / 2 + "pt Calibri";
         ctx.fillText('.' + vd, x + w / 2 + ctx.measureText(vf).width - dx * 1.2, dy);
       }
+
     }
     else
       ctx.fillText("?", x + w / 2 - 20, dy);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "red";
     ctx.rect(x, y, w, h);
+    ctx.stroke();
+    ctx.closePath();
+
+    let sumV = 0;
+    let period = 30;
+    if (data.length < period)
+      period = data.length;
+    for (let j = 1; j <= period; j++)
+      sumV += data[data.length - j].sensorsData[sensor.name];
+
+    const change = value ? (value - (sumV / period)) : 0;
+    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, change);
+  }
+};
+
+CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0)
+{
+  change = Math.round(10 * change) / 10;
+  let abs = Math.abs(change);
+  if (abs < 0.1)
+    return;
+
+  ctx.beginPath();
+  ctx.strokeStyle = change > 0 ? "red" : "blue";
+  ctx.lineWidth = cell.h / 50;
+  let x = cell.x + 0.88 * cell.w;
+  let y = cell.y + cell.h / 15;
+  let dx = cell.w / 15;
+  let dy = cell.h / 20;
+  if (change < 0)
+  {
+    dy *= -1;
+    y -= dy;
+  }
+
+  const max = Math.round(10 * abs);
+  for (let i = 1; i <= max; i++)
+  {
+    ctx.moveTo(x - dx / 25, y);
+    ctx.lineTo(x + dx, y + dy);
+    ctx.moveTo(x + dx / 25, y);
+    ctx.lineTo(x - dx, y + dy);
+    y += cell.h / 25;
   }
 
   ctx.stroke();
   ctx.closePath();
-};
+}

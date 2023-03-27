@@ -56,7 +56,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
     {
       tt = new Date();
       tt.setTime(tt.getTime() - (rows.length - 1) * 60000);
-      log("tt: " + tt);
+      log("test time: " + tt);
     }
 
     for (let i = 1; i < rows.length; i++)
@@ -153,7 +153,7 @@ DataLoader.prototype.currentDataReceived = function (map)
     const now = new Date();
     dataTime = this.timeToStr(now);
     saveTime = dataTime;
-    log("dataTime: " + dataTime);
+    // log("dataTime: " + dataTime);
   }
 
   sensorsData[DataLoader.WARM_DIFF_SENSOR] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];
