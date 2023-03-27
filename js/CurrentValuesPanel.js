@@ -96,8 +96,9 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     for (let j = 1; j <= period; j++)
       sumV += data[data.length - j].sensorsData[sensor.name];
 
-    const change = value ? (value - (sumV / period)) : 0;
-    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, change);
+    const diff = value ? (value - (sumV / period)) : 0;
+    const k = sensor.name === "outside.t" ? 10 : 1;
+    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, diff / k);
   }
 };
 
@@ -122,7 +123,7 @@ CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0)
   }
 
   const max = Math.round(10 * abs);
-  for (let i = 1; i <= max; i++)
+  for (let i = 1; i <= (max > 10 ? 10 : max); i++)
   {
     ctx.moveTo(x - dx / 25, y);
     ctx.lineTo(x + dx, y + dy);
