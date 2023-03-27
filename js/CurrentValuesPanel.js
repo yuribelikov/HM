@@ -18,7 +18,7 @@ CurrentValuesPanel.prototype.init = function ()
 {
   this.sensors.push({x: 0, y: 0, w: 0.6, h: 0.34, name: "outside.t", label: "Улица"});
   this.sensors.push({x: 0.6, y: 0, w: 0.4, h: 0.17, name: "winterGarden.t", label: "Зим. сад"});
-  this.sensors.push({x: 0.6, y: 0.17, w: 0.4, h: 0.17, name: "underFloor.t", label: "Подпол"});
+  this.sensors.push({x: 0.6, y: 0.17, w: 0.4, h: 0.17, name: "cellar.t", label: "Погреб"});
 
   this.sensors.push({x: 0, y: 0.35, w: 0.5, h: 0.22, name: "inside.t", label: "1й этаж"});
   this.sensors.push({x: 0.5, y: 0.35, w: 0.5, h: 0.22, name: "secondFloor.t", label: "2й этаж"});

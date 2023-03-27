@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.21";
+  this.version = "4.22";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
