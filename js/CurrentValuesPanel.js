@@ -102,7 +102,11 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     if (data.length < period)
       period = data.length;
     for (let j = 1; j <= period; j++)
-      sumV += data[data.length - j].sensorsData[sensor.name];
+    {
+      let value = data[data.length - j].sensorsData[sensor.name];
+      if (!isNaN(value) && value > -50 && value < 200)
+        sumV += value;
+    }
 
     const diff = value ? (value - (sumV / period)) : 0;
     // const k = sensor.name === "outside.t" ? 10 : 1;
