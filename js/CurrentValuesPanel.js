@@ -16,20 +16,28 @@ function CurrentValuesPanel()
  */
 CurrentValuesPanel.prototype.init = function ()
 {
-  this.sensors.push({x: 0, y: 0, w: 0.6, h: 0.34, name: "outside.t", label: "Улица"});
-  this.sensors.push({x: 0.6, y: 0, w: 0.4, h: 0.17, name: "winterGarden.t", label: "Зим. сад"});
-  this.sensors.push({x: 0.6, y: 0.17, w: 0.4, h: 0.17, name: "cellar.t", label: "Погреб"});
+  this.sensors.push({x: 0, y: 0, w: 0.6, h: 0.34, name: "outside.t", label: "Улица", period: 1});
+  this.sensors.push({x: 0.6, y: 0, w: 0.4, h: 0.17, name: "winterGarden.t", label: "Зим. сад", period: 2});
+  this.sensors.push({x: 0.6, y: 0.17, w: 0.4, h: 0.17, name: "cellar.t", label: "Погреб", period: 24});
 
-  this.sensors.push({x: 0, y: 0.35, w: 0.5, h: 0.22, name: "inside.t", label: "1й этаж"});
-  this.sensors.push({x: 0.5, y: 0.35, w: 0.5, h: 0.22, name: "secondFloor.t", label: "2й этаж"});
+  this.sensors.push({x: 0, y: 0.35, w: 0.5, h: 0.22, name: "inside.t", label: "1й этаж", period: 4});
+  this.sensors.push({x: 0.5, y: 0.35, w: 0.5, h: 0.22, name: "secondFloor.t", label: "2й этаж", period: 4});
 
-  this.sensors.push({x: 0, y: 0.58, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня"});
-  this.sensors.push({x: 0.5, y: 0.58, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет"});
+  this.sensors.push({x: 0, y: 0.58, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня", period: 4});
+  this.sensors.push({x: 0.5, y: 0.58, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет", period: 4});
 
-  this.sensors.push({x: 0, y: 0.77, w: 0.3, h: 0.1, name: "warmIn.t", label: "Котёл: вход"});
-  this.sensors.push({x: 0.3, y: 0.82, w: 0.2, h: 0.1, name: DataLoader.WARM_DIFF_SENSOR, label: "Нагрев на"});
-  this.sensors.push({x: 0, y: 0.87, w: 0.3, h: 0.1, name: "warmOut.t", label: "Выход"});
-  this.sensors.push({x: 0.5, y: 0.77, w: 0.5, h: 0.2, name: "warmFloor.t", label: "Тёплый пол"});
+  this.sensors.push({x: 0, y: 0.77, w: 0.3, h: 0.1, name: "warmIn.t", label: "Котёл: вход", period: 0.2});
+  this.sensors.push({
+    x: 0.3,
+    y: 0.82,
+    w: 0.2,
+    h: 0.1,
+    name: DataLoader.WARM_DIFF_SENSOR,
+    label: "Нагрев на",
+    period: 0.1
+  });
+  this.sensors.push({x: 0, y: 0.87, w: 0.3, h: 0.1, name: "warmOut.t", label: "Выход", period: 0.2});
+  this.sensors.push({x: 0.5, y: 0.77, w: 0.5, h: 0.2, name: "warmFloor.t", label: "Тёплый пол", period: 0.2});
 };
 
 /**
@@ -47,7 +55,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     const sensor = this.sensors[i];
     const w = sensor.w * rect.w;
     const h = sensor.h * rect.h;
-    const m = h < w ? h : w;
+    const m = (w + h) / 2;
     const x = rect.x + sensor.x * rect.w;
     const y = rect.y + sensor.y * rect.h;
 
@@ -55,11 +63,11 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
     const offset = Dashboard.AMAZON * 5 * s;
-    let fontSize = Dashboard.AMAZON * m / 8
+    let fontSize = Dashboard.AMAZON * m / 10
     ctx.font = fontSize + "pt Calibri";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = Dashboard.AMAZON * m / 1.6;
+    fontSize = Dashboard.AMAZON * m / (sensor.name === "outside.t" ? 1.8 : 2.2);
     ctx.font = fontSize + "pt Calibri";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
@@ -71,12 +79,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      let dx = vd > 0 ? fontSize / 4 : 0;
-      ctx.fillText(vf, x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
+      let dx = vd > 0 ? fontSize / 2.5 : 30;
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
       if (vd > 0)
       {
-        ctx.font = fontSize / 2 + "pt Calibri";
-        ctx.fillText('.' + vd, x + w / 2 + ctx.measureText(vf).width - dx * 1.2, dy);
+        ctx.font = fontSize / 4 + "pt Calibri";
+        ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
       }
 
     }
@@ -90,15 +98,15 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.closePath();
 
     let sumV = 0;
-    let period = 30;
+    let period = 60 * sensor.period;
     if (data.length < period)
       period = data.length;
     for (let j = 1; j <= period; j++)
       sumV += data[data.length - j].sensorsData[sensor.name];
 
     const diff = value ? (value - (sumV / period)) : 0;
-    const k = sensor.name === "outside.t" ? 10 : 1;
-    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, diff / k);
+    // const k = sensor.name === "outside.t" ? 10 : 1;
+    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, diff);
   }
 };
 
