@@ -28,7 +28,7 @@ CurrentValuesPanel.prototype.init = function ()
 
   const wds = DataLoader.WARM_DIFF_SENSOR;
   this.sensors.push({x: 0, y: 0.77, w: 0.33, h: 0.1, name: "warmIn.t", label: "Котёл: вход", period: 0.2});
-  this.sensors.push({x: 0.33, y: 0.82, w: 0.2, h: 0.1, name: wds, label: "Нагрев на", period: 0.1});
+  this.sensors.push({x: 0.33, y: 0.82, w: 0.2, h: 0.1, name: wds, label: "Нагрев", period: 0.1});
   this.sensors.push({x: 0, y: 0.87, w: 0.33, h: 0.1, name: "warmOut.t", label: "Выход", period: 0.2});
   this.sensors.push({x: 0.53, y: 0.77, w: 0.47, h: 0.2, name: "warmFloor.t", label: "Тёплый пол", period: 0.2});
 };
