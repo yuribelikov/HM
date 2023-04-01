@@ -54,12 +54,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.beginPath();
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
-    const offset = 5 * s;
-    let fontSize = h / 10
+    const offset = 3 * s;
+    let fontSize = h / 8
     ctx.font = fontSize + "pt Arial";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = h / 1.6;
+    fontSize = h / 1.5;
     ctx.font = fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
@@ -68,8 +68,8 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 20 * Dashboard.SCALE, dy);
-      ctx.font = 16 * Dashboard.SCALE + "pt Arial";
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 20 * s, dy);
+      ctx.font = 16 * s + "pt Arial";
       ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
     }
     else
@@ -101,12 +101,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
 
 CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, period)
 {
-  ctx.font = (10 + 4 * Dashboard.SCALE) + "pt Arial";
+  ctx.font = (8 + 6 * Dashboard.SCALE) + "pt Arial";
   ctx.fillStyle = "#00FF00";
   let x = cell.x + cell.w;
   let y = cell.y + 18 + 3 * Dashboard.SCALE;
   const text = period >= 60 ? (Math.round(period / 60) + 'ч') : (Math.round(period) + 'м');
-  ctx.fillText(text, x - ctx.measureText(text).width - 3 * Dashboard.SCALE, y);
+  ctx.fillText(text, x - ctx.measureText(text).width - 2 - Dashboard.SCALE, y);
 
   change = Math.round(10 * change) / 10;
   let abs = Math.abs(change);
@@ -115,11 +115,11 @@ CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, perio
 
   ctx.beginPath();
   ctx.strokeStyle = change > 0 ? "red" : "blue";
-  ctx.lineWidth = cell.h / 50;
-  x = cell.x + 0.88 * cell.w;
+  ctx.lineWidth = cell.h / 80;
+  x = cell.x + 0.92 * cell.w;
   y = cell.y + 30 + 5 * Dashboard.SCALE;
-  let dx = cell.w / 15;
-  let dy = cell.h / 20;
+  let dx = cell.w / 20;
+  let dy = cell.h / 30;
 
   if (change < 0)
   {
