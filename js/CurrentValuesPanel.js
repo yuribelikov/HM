@@ -78,7 +78,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      ctx.fillText(Math.round(value), x + 10 * Dashboard.SCALE, dy);
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 16 * Dashboard.SCALE, dy);
       if (vd > 0)
       {
         ctx.font = 12 * Dashboard.SCALE + "pt Arial";
@@ -115,20 +115,19 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
 
 CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, period)
 {
-  change = Math.round(10 * change) / 10;
-  let abs = Math.abs(change);
-  if (abs < 0.1)
-    return;
-
-  ctx.beginPath();
-
-  ctx.font = "18pt Arial";
+  ctx.font = (12 + 2 * Dashboard.SCALE) + "pt Arial";
   ctx.fillStyle = "#00FF00";
   let x = cell.x + cell.w;
   let y = cell.y + 18 + 3 * Dashboard.SCALE;
   const text = period >= 60 ? (Math.round(period / 60) + 'ч') : (Math.round(period) + 'м');
   ctx.fillText(text, x - ctx.measureText(text).width - 3 * Dashboard.SCALE, y);
 
+  change = Math.round(10 * change) / 10;
+  let abs = Math.abs(change);
+  if (abs < 0.1)
+    return;
+
+  ctx.beginPath();
   ctx.strokeStyle = change > 0 ? "red" : "blue";
   ctx.lineWidth = cell.h / 50;
   x = cell.x + 0.88 * cell.w;
