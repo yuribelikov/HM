@@ -55,7 +55,6 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     const sensor = this.sensors[i];
     const w = sensor.w * rect.w;
     const h = sensor.h * rect.h;
-    const m = (w + h) / 2;
     const x = rect.x + sensor.x * rect.w;
     const y = rect.y + sensor.y * rect.h;
 
@@ -63,12 +62,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
     const offset = Dashboard.AMAZON * 5 * s;
-    let fontSize = Dashboard.AMAZON * m / 10
-    ctx.font = fontSize + "pt Calibri";
+    let fontSize = Dashboard.AMAZON * h / 10
+    ctx.font = fontSize + "pt Arial";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = Dashboard.AMAZON * m / (sensor.name === "outside.t" ? 1.8 : 2.2);
-    ctx.font = fontSize + "pt Calibri";
+    fontSize = Dashboard.AMAZON * h / (sensor.name === "outside.t" ? 1.8 : 2);
+    ctx.font = fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
@@ -83,7 +82,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
       if (vd > 0)
       {
-        ctx.font = fontSize / 4 + "pt Calibri";
+        ctx.font = fontSize / 4 + "pt Arial";
         ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
       }
 
@@ -108,13 +107,14 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
         sumV += value;
     }
 
+    value = currentData[sensor.name];
     const diff = value ? (value - (sumV / period)) : 0;
-    // const k = sensor.name === "outside.t" ? 10 : 1;
-    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, diff);
+    const k = sensor.name === "outside.t" ? 3 : 1;
+    this.drawChange(ctx, {x: x, y: y, w: w, h: h}, diff / k, period);
   }
 };
 
-CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0)
+CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, period)
 {
   change = Math.round(10 * change) / 10;
   let abs = Math.abs(change);
@@ -122,12 +122,21 @@ CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0)
     return;
 
   ctx.beginPath();
+
+  ctx.font = "18pt Arial";
+  ctx.fillStyle = "#00FF00";
+  let x = cell.x + cell.w;
+  let y = cell.y + 18 + 3 * Dashboard.SCALE;
+  const text = period >= 60 ? Math.round(period / 60) + 'ч' : Math.round(period) + 'м';
+  ctx.fillText(text, x - ctx.measureText(text).width - 3 * Dashboard.SCALE, y);
+
   ctx.strokeStyle = change > 0 ? "red" : "blue";
   ctx.lineWidth = cell.h / 50;
-  let x = cell.x + 0.88 * cell.w;
-  let y = cell.y + cell.h / 15;
+  x = cell.x + 0.88 * cell.w;
+  y = cell.y + 30 + 5 * Dashboard.SCALE;
   let dx = cell.w / 15;
   let dy = cell.h / 20;
+
   if (change < 0)
   {
     dy *= -1;
