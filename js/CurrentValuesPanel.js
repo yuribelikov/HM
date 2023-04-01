@@ -127,7 +127,7 @@ CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, perio
   ctx.fillStyle = "#00FF00";
   let x = cell.x + cell.w;
   let y = cell.y + 18 + 3 * Dashboard.SCALE;
-  const text = period >= 60 ? Math.round(period / 60) + 'ч' : Math.round(period) + 'м';
+  const text = period >= 60 ? (Math.round(period / 60) + 'ч') : (Math.round(period) + 'м');
   ctx.fillText(text, x - ctx.measureText(text).width - 3 * Dashboard.SCALE, y);
 
   ctx.strokeStyle = change > 0 ? "red" : "blue";
