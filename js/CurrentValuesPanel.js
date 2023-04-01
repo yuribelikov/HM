@@ -26,18 +26,11 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push({x: 0, y: 0.58, w: 0.5, h: 0.18, name: "bedroom.t", label: "Спальня", period: 4});
   this.sensors.push({x: 0.5, y: 0.58, w: 0.5, h: 0.18, name: "room.t", label: "Кабинет", period: 4});
 
-  this.sensors.push({x: 0, y: 0.77, w: 0.3, h: 0.1, name: "warmIn.t", label: "Котёл: вход", period: 0.2});
-  this.sensors.push({
-    x: 0.3,
-    y: 0.82,
-    w: 0.2,
-    h: 0.1,
-    name: DataLoader.WARM_DIFF_SENSOR,
-    label: "Нагрев на",
-    period: 0.1
-  });
-  this.sensors.push({x: 0, y: 0.87, w: 0.3, h: 0.1, name: "warmOut.t", label: "Выход", period: 0.2});
-  this.sensors.push({x: 0.5, y: 0.77, w: 0.5, h: 0.2, name: "warmFloor.t", label: "Тёплый пол", period: 0.2});
+  const wds = DataLoader.WARM_DIFF_SENSOR;
+  this.sensors.push({x: 0, y: 0.77, w: 0.33, h: 0.1, name: "warmIn.t", label: "Котёл: вход", period: 0.2});
+  this.sensors.push({x: 0.33, y: 0.82, w: 0.2, h: 0.1, name: wds, label: "Нагрев на", period: 0.1});
+  this.sensors.push({x: 0, y: 0.87, w: 0.33, h: 0.1, name: "warmOut.t", label: "Выход", period: 0.2});
+  this.sensors.push({x: 0.53, y: 0.77, w: 0.47, h: 0.2, name: "warmFloor.t", label: "Тёплый пол", period: 0.2});
 };
 
 /**
@@ -66,7 +59,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.font = fontSize + "pt Arial";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = h / 1.8;
+    fontSize = h / 1.6;
     ctx.font = fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
@@ -75,8 +68,8 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 16 * Dashboard.SCALE, dy);
-      ctx.font = 12 * Dashboard.SCALE + "pt Arial";
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 20 * Dashboard.SCALE, dy);
+      ctx.font = 16 * Dashboard.SCALE + "pt Arial";
       ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
     }
     else
@@ -108,7 +101,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
 
 CurrentValuesPanel.prototype.drawChange = function (ctx, cell, change = 0, period)
 {
-  ctx.font = (12 + 2 * Dashboard.SCALE) + "pt Arial";
+  ctx.font = (10 + 4 * Dashboard.SCALE) + "pt Arial";
   ctx.fillStyle = "#00FF00";
   let x = cell.x + cell.w;
   let y = cell.y + 18 + 3 * Dashboard.SCALE;
