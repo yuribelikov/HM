@@ -72,19 +72,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
     {
-      if (sensor.name === "outside.t")
-        value = Math.round(value);
-
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
       ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 16 * Dashboard.SCALE, dy);
-      if (vd > 0)
-      {
-        ctx.font = 12 * Dashboard.SCALE + "pt Arial";
-        ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
-      }
-
+      ctx.font = 12 * Dashboard.SCALE + "pt Arial";
+      ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
     }
     else
       ctx.fillText("?", x + w / 2 - 20, dy);
