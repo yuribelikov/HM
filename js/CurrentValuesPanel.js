@@ -61,12 +61,12 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.beginPath();
     ctx.fillStyle = "#000025";
     ctx.fillRect(x, y, w, h);
-    const offset = Dashboard.AMAZON * 5 * s;
-    let fontSize = Dashboard.AMAZON * h / 10
+    const offset = 5 * s;
+    let fontSize = h / 10
     ctx.font = fontSize + "pt Arial";
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
-    fontSize = Dashboard.AMAZON * h / (sensor.name === "outside.t" ? 1.8 : 2);
+    fontSize = h / 1.8;
     ctx.font = fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
@@ -78,11 +78,10 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      let dx = vd > 0 ? fontSize / 2.5 : 30;
-      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - dx, dy);
+      ctx.fillText(Math.round(value), x + 10 * Dashboard.SCALE, dy);
       if (vd > 0)
       {
-        ctx.font = fontSize / 4 + "pt Arial";
+        ctx.font = 12 * Dashboard.SCALE + "pt Arial";
         ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
       }
 
