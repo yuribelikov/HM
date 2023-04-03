@@ -42,7 +42,8 @@ CurrentValuesPanel.prototype.init = function ()
  */
 CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
 {
-  let s = Dashboard.SCALE;
+  const s = Dashboard.SCALE;
+  const narrowK = (window.visualViewport.width / window.visualViewport.height) < 0.6 ? 0.9 : 1;
   for (let i = 0; i < this.sensors.length; i++)
   {
     const sensor = this.sensors[i];
@@ -60,7 +61,7 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.fillStyle = "#00FF00";
     ctx.fillText(sensor.label, x + offset, y + fontSize + offset);
     fontSize = h / 1.5;
-    ctx.font = fontSize + "pt Arial";
+    ctx.font = narrowK * fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
     if (!isNaN(value))
@@ -68,8 +69,8 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
       let vf = Math.trunc(value);
       let vd = Math.round(10 * (value - vf));
       ctx.fillStyle = tempColorFromValue(value);
-      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 20 * s, dy);
-      ctx.font = 16 * s + "pt Arial";
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 24 * s, dy);
+      ctx.font = narrowK * 16 * s + "pt Arial";
       ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
     }
     else

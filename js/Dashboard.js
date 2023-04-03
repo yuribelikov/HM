@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.38";
+  this.version = "4.39";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -122,7 +122,7 @@ Dashboard.prototype.redraw = function ()
 
   this.drawHeader();
 
-  var minCurrPW = this.canvas.width / 4;
+  var minCurrPW = this.canvas.width / 3.5;
   var currValPanelRect =
     {
       x: this.mode === Dashboard.MODE_BOTH ? this.canvas.width - minCurrPW : 0,
