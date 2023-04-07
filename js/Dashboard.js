@@ -5,7 +5,7 @@
  */
 function Dashboard()
 {
-  this.version = "4.39";
+  this.version = "4.40";
 
   /** @type {DataLoader} */
   this.dataLoader = new DataLoader();
@@ -179,7 +179,7 @@ Dashboard.prototype.drawHeader = function ()
   ctx.fillText(this.soundsEnabled ? "))o" : "X", 3, dy);
 
   var text = "ver: " + this.version + "   scr: " + window.visualViewport.width.toFixed() + "x" + window.visualViewport.height.toFixed() +
-    " (" + window.visualViewport.scale.toFixed(3) + ") - " + Dashboard.SCALE.toFixed(3);
+    " (" + window.visualViewport.scale.toFixed(1) + ")";
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 10, dy);
   ctx.closePath();
 };

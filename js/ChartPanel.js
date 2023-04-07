@@ -32,7 +32,7 @@ function ChartPanel()
 }
 
 ChartPanel.MIN_T = -30;
-ChartPanel.MAX_T = 110;
+ChartPanel.MAX_T = 60;
 ChartPanel.SENSOR_STATE_DISABLED = 1;
 ChartPanel.SENSOR_STATE_ENABLED = 2;
 ChartPanel.SENSOR_STATE_SELECTED = 3;
@@ -84,7 +84,7 @@ ChartPanel.prototype.draw = function (ctx, rect, dataHeaders, data, currentRow)
   var step = cr.h / (ChartPanel.MAX_T - ChartPanel.MIN_T);
   ctx.beginPath();
   ctx.fillStyle = "#250000";
-  ctx.fillRect(cr.x, cr.y, cr.w, (ChartPanel.MAX_T - 100) * step);
+  ctx.fillRect(cr.x, cr.y, cr.w, 10 * step);
   ctx.fillStyle = "#000025";
   var h = 0 - ChartPanel.MIN_T * step;
   ctx.fillRect(cr.x, cr.ey - h, cr.w, h);
