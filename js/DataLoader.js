@@ -77,7 +77,7 @@ DataLoader.prototype.recentDataReceived = function (csv)
         dataRow.sensorsData[dataHeaders[j]] = parseNumber(cells[j]);
 
       // log(dataRow.timeKey, dataRow.time);
-      dataRow.sensorsData[DataLoader.WARM_DIFF_SENSOR] = dataRow.sensorsData["warmOut.t"] - dataRow.sensorsData["warmIn.t"];
+      dataRow.sensorsData[DataLoader.WARM_DIFF_SENSOR] = parseNumber(dataRow.sensorsData["warmOut.t"] - dataRow.sensorsData["warmIn.t"]);
       this.data.push(dataRow);
       if (this.data.length >= DataLoader.DATA_SIZE)
         this.data.shift();
@@ -156,7 +156,7 @@ DataLoader.prototype.currentDataReceived = function (map)
     // log("dataTime: " + dataTime);
   }
 
-  sensorsData[DataLoader.WARM_DIFF_SENSOR] = sensorsData["warmOut.t"] - sensorsData["warmIn.t"];
+  sensorsData[DataLoader.WARM_DIFF_SENSOR] = parseNumber(sensorsData["warmOut.t"] - sensorsData["warmIn.t"]);
 
   this.currentSaved = parseDateTime(saveTime);
 

@@ -64,12 +64,13 @@ CurrentValuesPanel.prototype.draw = function (ctx, rect, currentData, data)
     ctx.font = narrowK * fontSize + "pt Arial";
     let value = currentData[sensor.name];
     let dy = y + h - offset - fontSize / 20;
+    // log("sensor: " + sensor.label + " = " + value);
     if (!isNaN(value))
     {
       let vf = Math.trunc(value);
-      let vd = Math.round(10 * (value - vf));
+      let vd = Math.abs(Math.round(10 * (value - vf)));
       ctx.fillStyle = tempColorFromValue(value);
-      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(vf).width / 2 - 24 * s, dy);
+      ctx.fillText(Math.round(value), x + w / 2 - ctx.measureText(Math.round(value)).width / 2 - 24 * s, dy);
       ctx.font = narrowK * 16 * s + "pt Arial";
       ctx.fillText(vf + '.' + vd, x + w - ctx.measureText(vf + '.' + vd).width - 10, dy);
     }
