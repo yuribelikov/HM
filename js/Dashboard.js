@@ -44,6 +44,8 @@ Dashboard.HEADER_H = 17;
 Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
 Dashboard.MODE_BOTH = 2;
+Dashboard.NARROW = (window.visualViewport.width / window.visualViewport.height) < 0.6;
+
 
 /**
  * @this {Dashboard}
