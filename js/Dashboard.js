@@ -181,7 +181,7 @@ Dashboard.prototype.drawHeader = function ()
   ctx.fillText(this.soundsEnabled ? "))o" : "X", 3, dy);
 
   var text = "ver: " + this.version + "   scr: " + window.visualViewport.width.toFixed() + "x" + window.visualViewport.height.toFixed() +
-    " (" + window.visualViewport.scale.toFixed(1) + ")";
+    " (" + Dashboard.SCALE + ")";
   ctx.fillText(text, this.canvas.width - ctx.measureText(text).width - 10, dy);
   ctx.closePath();
 };
