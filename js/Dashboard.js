@@ -117,7 +117,7 @@ Dashboard.prototype.redraw = function ()
     return;
 
   Dashboard.SCALE = 1 / window.visualViewport.scale;
-  Dashboard.SYS_FONT_SIZE = 12 * Dashboard.SCALE;
+  Dashboard.SYS_FONT_SIZE = Math.round(12 * Dashboard.SCALE);
   Dashboard.HEADER_H = 20 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
