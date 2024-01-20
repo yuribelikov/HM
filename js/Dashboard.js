@@ -45,6 +45,7 @@ Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
 Dashboard.MODE_BOTH = 2;
 Dashboard.NARROW = (window.visualViewport.width / window.visualViewport.height) < 0.6;
+Dashboard.SYS_FONT = "10pt Arial";    // recalced in redraw()
 
 
 /**
@@ -163,7 +164,8 @@ Dashboard.prototype.drawHeader = function ()
   ctx.rect(1, 1, this.canvas.width - 2, Dashboard.HEADER_H - 2);
   ctx.stroke();
 
-  ctx.font = 10 * s + "pt Arial";
+  Dashboard.SYS_FONT = 10 * Dashboard.SCALE + "pt Arial";
+  ctx.font = Dashboard.SYS_FONT;
   var dy = Dashboard.HEADER_H - 2 - 4 * s;
   ctx.fillStyle = "white";
   ctx.fillText(formatTime(this.dataLoader.dataUpdated), this.canvas.width - 55 * s, dy);
