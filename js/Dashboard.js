@@ -45,7 +45,7 @@ Dashboard.MODE_CURR_VALUES = 0;
 Dashboard.MODE_CHART = 1;
 Dashboard.MODE_BOTH = 2;
 Dashboard.NARROW = (window.visualViewport.width / window.visualViewport.height) < 0.6;
-Dashboard.SYS_FONT = "12px Arial";    // recalced in redraw()
+Dashboard.SYS_FONT = "13px Arial";    // recalced in redraw()
 
 
 /**
@@ -117,7 +117,7 @@ Dashboard.prototype.redraw = function ()
     return;
 
   Dashboard.SCALE = 1 / window.visualViewport.scale;
-  Dashboard.SYS_FONT = Math.round(12 * Dashboard.SCALE) + "px Arial";
+  Dashboard.SYS_FONT = Math.round(13 * Dashboard.SCALE) + "px Arial";
   Dashboard.HEADER_H = 20 * Dashboard.SCALE;
   var ctx = this.canvas.getContext("2d");
   ctx.beginPath();
