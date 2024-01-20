@@ -1,7 +1,7 @@
 /**
  * @constructor
  */
-function TextBox(x, y, w, h, text, color, alignment, fontSize)
+function TextBox(x, y, w, h, text, color, alignment, sysFont)
 {
   /** @type {String} */
   this.text = text;
@@ -18,7 +18,7 @@ function TextBox(x, y, w, h, text, color, alignment, fontSize)
   /** @type {String} */
   this.alignment = alignment;
   /** @type {Number} */
-  this.fontSize = fontSize;
+  this.sysFont = sysFont;
 }
 
 
@@ -39,7 +39,9 @@ TextBox.prototype.draw = function (ctx, sensorRect)
   const fontName = "px Arial";
   let textWidth = 0;
   let textHeight = 0;
-  if (!this.fontSize)
+  if (this.sysFont)
+    ctx.font = Dashboard.SYS_FONT;
+  else
   {
     let fontSize = 1;
     while (textWidth < w && textHeight < h)
@@ -54,8 +56,6 @@ TextBox.prototype.draw = function (ctx, sensorRect)
     fontSize--;
     ctx.font = fontSize + fontName;
   }
-  else
-    ctx.font = this.fontSize + fontName;
   
   const metrics = ctx.measureText(this.text);
   textWidth = metrics.width;
