@@ -27,9 +27,9 @@ CurrentValuesPanel.prototype.init = function ()
   this.sensors.push(new Sensor(0.5, 0.58, 0.5, 0.18, "room.t", "Кабинет", 4));
 
   this.sensors.push(new Sensor(0, 0.77, 0.33, 0.1, "warmIn.t", "Котёл: вход", 0.2));
-  this.sensors.push(new Sensor(0.33, 0.82, 0.2, 0.1, DataLoader.WARM_DIFF_SENSOR, "Нагрев", 0.1));
+  this.sensors.push(new Sensor(0.33, 0.82, 0.3, 0.1, DataLoader.WARM_DIFF_SENSOR, "Нагрев", 0.1));
   this.sensors.push(new Sensor(0, 0.87, 0.33, 0.1, "warmOut.t", "Выход", 0.2));
-  this.sensors.push(new Sensor(0.53, 0.77, 0.47, 0.2, "warmFloor.t", "Тёплый пол", 0.2));
+  this.sensors.push(new Sensor(0.63, 0.77, 0.37, 0.2, "warmFloor.t", "Тёплый пол", 0.2));
 };
 
 /**
