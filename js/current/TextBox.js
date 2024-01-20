@@ -52,9 +52,11 @@ TextBox.prototype.draw = function (ctx, sensorRect)
     }
 
     this.fontSize--;
+    ctx.font = this.fontSize + fontName;
   }
-
-  ctx.font = this.fontSize + fontName;
+  else
+    ctx.font = this.fontSize;
+  
   const metrics = ctx.measureText(this.text);
   textWidth = metrics.width;
   textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
