@@ -24,7 +24,7 @@ function Sensor(x, y, w, h, name, label, period)
   /** @type {TextBox} */
   this.largeValueBox = new TextBox(0, 0.3, 0.85, 0.6, "?", "#FFFFFF", "center");
   /** @type {TextBox} */
-  this.valueBox = new TextBox(0.82, 0.86, 0.17, 0.1, "?", "#FFFFFF", "right", ((Dashboard.NARROW || Dashboard.SCALE < 1) ? 28 : 11));
+  this.valueBox = new TextBox(0.82, 0.86, 0.17, 0.1, "?", "#FFFFFF", "right", ((Dashboard.NARROW || Dashboard.SCALE > 1) ? 28 : 11));
 }
 
 
