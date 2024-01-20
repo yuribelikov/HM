@@ -41,21 +41,21 @@ TextBox.prototype.draw = function (ctx, sensorRect)
   let textHeight = 0;
   if (!this.fontSize)
   {
-    this.fontSize = 1;
+    let fontSize = 1;
     while (textWidth < w && textHeight < h)
     {
-      this.fontSize++;
-      ctx.font = this.fontSize + fontName;
+      fontSize++;
+      ctx.font = fontSize + fontName;
       const metrics = ctx.measureText(this.text);
       textWidth = metrics.width;
       textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     }
 
-    this.fontSize--;
-    ctx.font = this.fontSize + fontName;
+    fontSize--;
+    ctx.font = fontSize + fontName;
   }
   else
-    ctx.font = this.fontSize;
+    ctx.font = this.fontSize + fontName;
   
   const metrics = ctx.measureText(this.text);
   textWidth = metrics.width;
