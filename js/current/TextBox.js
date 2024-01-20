@@ -36,7 +36,7 @@ TextBox.prototype.draw = function (ctx, sensorRect)
 
   ctx.beginPath();
 
-  const fontName = "pt Arial";
+  const fontName = "px Arial";
   let textWidth = 0;
   let textHeight = 0;
   if (!this.fontSize)
