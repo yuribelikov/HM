@@ -32,7 +32,7 @@ function ChartPanel()
 }
 
 ChartPanel.MIN_T = -30;
-ChartPanel.MAX_T = 60;
+ChartPanel.MAX_T = 80;
 ChartPanel.SENSOR_STATE_DISABLED = 1;
 ChartPanel.SENSOR_STATE_ENABLED = 2;
 ChartPanel.SENSOR_STATE_SELECTED = 3;
