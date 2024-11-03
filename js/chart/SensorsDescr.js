@@ -10,6 +10,7 @@ function SensorsDescr()
   this.styles.push({sensor: "winterGarden.t", label: "Зим. сад", color: "#88FF88"});
   this.styles.push({sensor: "underFloor.t", label: "Подпол", color: "#4444FF"});
   this.styles.push({sensor: "cellar.t", label: "Погреб", color: "#6644FF"});
+  this.styles.push({sensor: "cellar.h", label: "Погреб вл.", color: "#BBBBBB"});
   this.styles.push({sensor: "well.t", label: "Шахта", color: "#669999"});
   this.styles.push({sensor: "waterIn.t", label: "Насос", color: "#009999"});
   this.styles.push({sensor: "faucet.t", label: "Кран", color: "#00DDDD"});
