@@ -105,6 +105,7 @@ public class SensorReader
     if (!killed)
       readLines(br, result);
 
+    lgr.debug("result: " + result);
     if (result.size() > 0 || killed)
       return result;
 
@@ -113,7 +114,7 @@ public class SensorReader
     readLines(br, result);
     result.add("p.exitValue: " + p.exitValue());
 
-    lgr.debug("result: " + result);
+    lgr.debug("err result: " + result);
     return result;
   }
 

@@ -14,7 +14,7 @@ public class SensorData
 
   boolean hasData()
   {
-    return !t.isNaN();
+    return !t.isNaN() && t != 0.0f;
   }
 
   @Override
