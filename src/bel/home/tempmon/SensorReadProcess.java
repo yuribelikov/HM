@@ -26,13 +26,19 @@ public class SensorReadProcess extends Thread
       for (Sensor sensor : sensors)
       {
         readFromSensor(sensor);
-        Utils.sleep(Utils.parse(TempMon.properties.getProperty("read.delay.ms"), 10));
+
+        int delay = Utils.parse(TempMon.properties.getProperty("read.delay.ms"), 1000);
+        if (sensor.isdht22())
+          delay *= 10;
+
+        Utils.sleep(delay);
         if (sensorsUpdated)
         {
           sensorsUpdated = false;
           break;
         }
       }
+
       Utils.sleep(10);
     }
 
