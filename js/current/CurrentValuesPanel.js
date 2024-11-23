@@ -18,13 +18,13 @@ CurrentValuesPanel.prototype.init = function ()
 {
   this.sensors.push(new Sensor(0, 0, 0.6, 0.34, "outside.t", "Улица", 1));
   this.sensors.push(new Sensor(0.6, 0, 0.4, 0.17, "winterGarden.t", "Зим. сад", 2));
-  this.sensors.push(new Sensor(0.6, 0.17, 0.4, 0.17, "cellar.t", "Погреб", 24));
+  this.sensors.push(new Sensor(0.6, 0.17, 0.4, 0.17, "well.t", "Шахта", 24));
 
   this.sensors.push(new Sensor(0, 0.35, 0.5, 0.22, "inside.t", "1й этаж", 4));
   this.sensors.push(new Sensor(0.5, 0.35, 0.5, 0.22, "secondFloor.t", "2й этаж", 4));
 
   this.sensors.push(new Sensor(0, 0.58, 0.5, 0.18, "bedroom.t", "Спальня", 4));
-  this.sensors.push(new Sensor(0.5, 0.58, 0.5, 0.18, "room.t", "Кабинет", 4));
+  this.sensors.push(new Sensor(0.5, 0.58, 0.5, 0.18, "underFloor.t", "Подпол", 4));
 
   this.sensors.push(new Sensor(0, 0.77, 0.33, 0.1, "warmIn.t", "Котёл: вход", 0.2));
   this.sensors.push(new Sensor(0.33, 0.82, 0.3, 0.1, DataLoader.WARM_DIFF_SENSOR, "Нагрев", 0.1));
