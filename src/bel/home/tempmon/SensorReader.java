@@ -181,6 +181,9 @@ public class SensorReader
       else if (line.contains("t="))          // 8 01 4b 46 1f ff 0c 10 fa t=23500
       {
         String[] sa = line.split("=");
+        if (sa[1].equals("0"))        // result: [00 00 00 00 00 00 00 00 00 : crc=00 YES, 00 00 00 00 00 00 00 00 00 t=0]
+          lgr.warn("bad result: " + line);
+
         sensorData.t = Float.parseFloat(sa[1]) / 1000;
         break;
       }
