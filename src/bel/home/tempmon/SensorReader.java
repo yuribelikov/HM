@@ -117,7 +117,7 @@ public class SensorReader
     readLines(br, result);
     result.add("p.exitValue: " + p.exitValue());
 
-    lgr.debug("err result: " + result);
+    lgr.warn("err result: " + result);
     return result;
   }
 
