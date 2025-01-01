@@ -20,6 +20,6 @@ public class SensorData
   @Override
   public String toString()
   {
-    return sensor.uid + ": t=" + t + ", h=" + h;
+    return sensor.uid + ": t=" + t + (sensor.isdht22() ? (", h=" + h) : "");
   }
 }
